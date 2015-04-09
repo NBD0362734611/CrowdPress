@@ -13,6 +13,7 @@ class pages extends controller {
     function newrelease()
     {
         $data = array();
+        $usar_data = array();
         // error_reporting(E_ALL ^ E_NOTICE);
         $user = $this->loadModel( "user" );
         $release = $this->loadModel( "release" );
@@ -34,6 +35,33 @@ class pages extends controller {
         $data = array( "user_data" => $user_data, "release_data" => $release_data, "release_comment_data" => $release_comment_data);
         $this->loadView( "pages/newrelease", $data );
     }
+
+    function release_sort_by_cname( $cname )
+    {
+        $data = array();
+        $user_data = array();
+        // error_reporting(E_ALL ^ E_NOTICE);
+        $user = $this->loadModel( "user" );
+        $release = $this->loadModel( "release" );
+
+        // get the release data from database
+        $user_data = $user->find_by_id( $_SESSION["user"] );
+        $release_data = $release->find_release_by_cname( $cname );
+
+        if (isset($_SESSION["user"])) {
+            foreach ($release_data as $release) {
+            $row = $user->release_comment_select($release["rid"], $_SESSION["user"]);
+            $release_comment_data[$release["rid"]] = $row;
+            }
+        }
+
+        // $release_comment_data = $user->release_comment_select($rid, $_SESSION["user"]);
+
+        // load profile view
+        $data = array( "user_data" => $user_data, "release_data" => $release_data, "release_comment_data" => $release_comment_data, "cname" => $cname);
+        $this->loadView( "pages/newrelease", $data );
+    }
+
 
     function scrap()
     {
@@ -65,6 +93,39 @@ class pages extends controller {
 
         // load profile view
         $data = array( "user_data" => $user_data, "release_data" => $release_data, "release_comment_data" => $release_comment_data);
+        $this->loadView( "pages/scrap", $data );
+    }
+
+    function scrap_sort_by_cname( $cname )
+    {
+        $data = array();
+        $user = $this->loadModel( "user" );
+        $release = $this->loadModel( "release" );
+
+        //ログインしていない場合
+        if (!isset($_SESSION["user"])){
+            $this->redirect( "users/login" );
+        }
+
+        // get the release data from database
+
+        // error_reporting(0);
+
+        $user_data = $user->find_by_id( $_SESSION["user"] );
+        $release_data = $release->find_scrap_by_cname( $_SESSION["user"], $cname );
+        $release_comment_data = array();
+
+        if (isset($release_data)){
+            foreach ($release_data as $release) {
+            $row = $user->release_comment_select($release["rid"], $_SESSION["user"]);
+            $release_comment_data[$release["rid"]] = $row;
+            }
+        } else {   // １件もない場合のエラー対策
+            $release_data = array();
+        }
+
+        // load profile view
+        $data = array( "user_data" => $user_data, "release_data" => $release_data, "release_comment_data" => $release_comment_data, "cname" => $cname);
         $this->loadView( "pages/scrap", $data );
     }
 
@@ -123,9 +184,52 @@ class pages extends controller {
         if( count( $_POST ) ){
             $user_id = $_SESSION["user"];
             $rid     = $_POST["rid"];
-
-            echo json_encode( $release->scrap_insert($user_id, $rid) );
         }
+        echo json_encode( $release->scrap_insert($user_id, $rid) );
+    }
+
+    function paper_clap_insert()
+    {
+        $data = array();
+
+        // load user model
+        $user = $this->loadModel( "user" );
+        $release = $this->loadModel( "release" );
+
+        if (!isset($_SESSION["user"])){
+            echo "この機能はログインしていないと使えません";
+            return false;
+        }
+
+        // registration form submitted?
+        if( count( $_POST ) ){
+            $user_id = $_SESSION["user"];
+            $pid     = $_POST["pid"];
+        }
+        echo json_encode( $release->paper_clap_insert($user_id, $pid) );
+    }
+
+    function paper_scrap_insert()
+    {
+        $data = array();
+
+        // load user model
+        $user = $this->loadModel( "user" );
+        $release = $this->loadModel( "release" );
+
+        if (!isset($_SESSION["user"])){
+            echo "この機能はログインしていないと使えません";
+            return false;
+        }
+
+        // registration form submitted?
+        if( count( $_POST ) ){
+            $user_id = $_SESSION["user"];
+            $pid     = $_POST["pid"];
+        }
+
+        echo json_encode( $release->paper_scrap_insert($user_id, $pid) );
+        $user->paper_scrap_number_update($user_id);
     }
 
     function scrap_paper_comment()
@@ -142,9 +246,8 @@ class pages extends controller {
             $rid       = $_POST["rid"];
             $headline  = $_POST["headline"];
             $comment   = $_POST["comment"];
-
-            $release->scrap_paper_comment($user_id, $rid, $headline, $comment);
         }
+        $release->scrap_paper_comment($user_id, $rid, $headline, $comment);
         echo "OK";
     }
 

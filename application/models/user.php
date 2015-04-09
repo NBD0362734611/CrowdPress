@@ -100,6 +100,15 @@ class user extends model {
 	}
 
 	return $users;
+	}
 
-}
+	function paper_scrap_number_update($user_id){
+		$sql = "SELECT count(`user_id`) AS `scrap` FROM `p_scrap` WHERE `user_id` = '$user_id'";
+        $result = mysql_query_excute($sql);
+        $count = mysql_fetch_array($result);
+        $sql = "UPDATE `users` SET `scrap` = $count[0] WHERE `id` = '$user_id'";
+        mysql_query_excute($sql);
+        return $count;
+	}
+
 }

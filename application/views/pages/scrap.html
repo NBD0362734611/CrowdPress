@@ -31,7 +31,7 @@ else{
                         <div id="checked-number">0個選択中</div>
                         <button id="publish" class="button transparent" disabled="disabled">PUBLISH</button>
                     </form>
-                    <h2 class="newrelease">スクラップしたリリース</h2>
+                    <h2 class="newrelease">スクラップしたリリース <?php if ( isset($cname)) { echo "$cname"; } ?></h2>
                     <!-- 繰り返しスタート(scrapが空じゃない場合) -->
                     <?php $scrap_number = 0; ?>
                     <?php foreach ($release_data as $release) { ?>
@@ -73,7 +73,7 @@ else{
                                 </ul>
                             </div>
                             <div class="column half right last">
-                                <h5 class="meta-post"><a class="company-name" href="#"><?php echo $release["cname"]; ?></a> - <time datetime><?php echo $release["time"]; ?></time></h5>
+                                <h5 class="meta-post"><a class="company-name" href="?route=pages/scrap_sort_by_cname/<?php echo $release["cname"]; ?>"><?php echo $release["cname"]; ?></a> - <time datetime><?php echo $release["time"]; ?></time></h5>
                             </div>
                             <div class="clear"></div>
                             <!-- 自分のコメントここから -->

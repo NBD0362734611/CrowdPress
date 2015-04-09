@@ -9,6 +9,15 @@ class release extends model {
 		return $release_data;
 	}
 
+    function find_release_by_cname( $cname ){
+        $sql = "SELECT * FROM `release` WHERE `cname` LIKE '%$cname%' ORDER BY `rid` DESC LIMIT 50";
+        $result = mysql_query_excute($sql);
+        while ($row = mysql_fetch_assoc($result)) {
+            $release_data[] = $row;
+        }
+        return $release_data;
+    }
+
     function get_release_detail ($rid){
         $sql = "SELECT * FROM `release` where `rid` = $rid LIMIT 1";
         $result = mysql_query_excute($sql);
@@ -23,6 +32,19 @@ class release extends model {
         //     $publish_data[$rid] = $row;
         // }
         $sql = "SELECT `release`.`title`, `release`.`rid`,`release`.`cname`, `release`.`img1`, `release`.`img2`, `release`.`img3`, `release`.`clap`, `release`.`scrap`, `release`.`time`, `headline`, `comment` FROM `release` INNER JOIN `r_scrap` ON `release`.`rid` = `r_scrap`.`rid` LEFT JOIN `publish` ON `release`.`rid` = `publish`.`rid`  WHERE `r_scrap`.`user_id` = $user_id ORDER BY `release`.`rid` DESC LIMIT 50";
+        $result = mysql_query_excute($sql);
+        while ($row = mysql_fetch_assoc($result)) {
+            $scrap_data[] = $row;
+        }
+        if ( isset($scrap_data) ) {
+            return $scrap_data;
+        } else {
+            return array();
+        }
+    }
+
+    function find_scrap_by_cname ($user_id, $cname){
+        $sql = "SELECT `release`.`title`, `release`.`rid`,`release`.`cname`, `release`.`img1`, `release`.`img2`, `release`.`img3`, `release`.`clap`, `release`.`scrap`, `release`.`time`, `headline`, `comment` FROM `release` INNER JOIN `r_scrap` ON `release`.`rid` = `r_scrap`.`rid` LEFT JOIN `publish` ON `release`.`rid` = `publish`.`rid`  WHERE `r_scrap`.`user_id` = $user_id AND `release`.`cname` LIKE '%$cname%' ORDER BY `release`.`rid` DESC LIMIT 50";
         $result = mysql_query_excute($sql);
         while ($row = mysql_fetch_assoc($result)) {
             $scrap_data[] = $row;
@@ -77,6 +99,51 @@ class release extends model {
         mysql_query_excute($sql);
         return $count;
     }
+
+    function paper_clap_insert ($user_id, $pid){
+        $exsist = mysql_query("SELECT * FROM `p_clap` WHERE `user_id` = $user_id AND `paper_id` = $pid");
+        $row = mysql_num_rows($exsist);
+        if ($row){
+            $deleate = "DELETE FROM `p_clap` WHERE `user_id` = $user_id and `paper_id` = $pid";
+            mysql_query_excute($deleate);
+            // $sql = "UPDATE `release` SET `clap` = `clap` - 1 WHERE `rid` = $rid";
+            // mysql_query_excute($sql);
+        } else {
+            $insert = "INSERT INTO `p_clap`(`user_id`, `paper_id`) VALUES ($user_id, $pid)";
+            mysql_query_excute($insert);
+            // $sql = "UPDATE `release` SET `clap` = `clap` + 1 WHERE `rid` = $rid";
+            // mysql_query_excute($sql);
+        }
+        $sql = "SELECT count(*) AS `clap` FROM `p_clap` where `paper_id` = $pid";
+        $result = mysql_query_excute($sql);
+        $count = mysql_fetch_array($result);
+        $sql = "UPDATE `paper` SET `clap` = $count[0] WHERE `id` = $pid";
+        mysql_query_excute($sql);
+        return $count;
+    }
+
+    function paper_scrap_insert ($user_id, $pid){
+        $exsist = mysql_query("SELECT * FROM `p_scrap` WHERE `user_id` = $user_id AND `paper_id` = $pid");
+        $row = mysql_num_rows($exsist);
+        if ($row){
+            $deleate = "DELETE FROM `p_scrap` WHERE `user_id` = $user_id and `paper_id` = $pid";
+            mysql_query_excute($deleate);
+            // $sql = "UPDATE `release` SET `scrap` = `scrap` - 1 WHERE `rid` = $rid";
+            // mysql_query_excute($sql);
+        } else {
+            $insert = "INSERT INTO `p_scrap`(`user_id`, `paper_id`) VALUES ($user_id, $pid)";
+            mysql_query_excute($insert);
+            // $sql = "UPDATE `release` SET `scrap` = `scrap` + 1 WHERE `rid` = $rid";
+            // mysql_query_excute($sql);
+        }
+        $sql = "SELECT count(`paper_id`) AS `scrap` FROM `p_scrap` where `paper_id` = $pid";
+        $result = mysql_query_excute($sql);
+        $count = mysql_fetch_array($result);
+        $sql = "UPDATE `paper` SET `scrap` = $count[0] WHERE `id` = $pid";
+        mysql_query_excute($sql);
+        return $count;
+    }
+
 
     function scrap_paper_comment($user_id, $rid, $headline, $comment){
         $sql = "REPLACE INTO `publish`(`user_id`, `rid`, `headline`, `comment`) VALUES ('$user_id', '$rid', '$headline', '$comment')";
@@ -159,38 +226,47 @@ class release extends model {
     }
 
     function find_publish_by_user_id( $user_id ){
+        $publish_info_data = array();
         $sql = "SELECT `id`, `publish_id_1`, `count`, `clap`, `scrap`, `created_at` FROM `paper` WHERE `user_id` = '$user_id' ORDER BY `id` DESC";
         $result = mysql_query_excute($sql);
         while ( $row = mysql_fetch_assoc($result) ) {
             $paper_info_data[] = $row;
         }
 
-        foreach ($paper_info_data as $paper_info) {
+        if ( isset($paper_info_data) ) {
+            foreach ($paper_info_data as $paper_info) {
             $publish_id_1 = $paper_info["publish_id_1"];
             $sql = "SELECT `headline`, `comment`, `release`.`rid`, `title`, `img1` FROM `publish` INNER JOIN `release` ON `publish`.`rid` = `release`.`rid` WHERE `id` = '$publish_id_1' LIMIT 1";
             $result = mysql_query_excute($sql);
             $row = mysql_fetch_assoc($result);
             $publish_info_data[] = array_merge($row, $paper_info);
+            }
         }
 
         return $publish_info_data;
     }
 
     function find_publish_by_follow(){
+        $paper_info_data = array();
+        $publish_info_data = array();
+
         $sql = "SELECT `paper`.`id`, `paper`.`user_id`, `publish_id_1`, `count`, `clap`, `paper`.`scrap`, `upapername`, `display_name`, `photo_url`, `paper`.`created_at` FROM `paper` INNER JOIN `users` ON `paper`.`user_id` = `users`.`id` ORDER BY `paper`.`id` DESC";
         $result = mysql_query_excute($sql);
         while ( $row = mysql_fetch_assoc($result) ) {
             $paper_info_data[] = $row;
         }
 
-        foreach ($paper_info_data as $paper_info) {
+        if ( isset ($paper_info_data) ) {
+            foreach ($paper_info_data as $paper_info) {
             $publish_id_1 = $paper_info["publish_id_1"];
             $sql = "SELECT `headline`, `comment`, `release`.`rid`, `title`, `img1` FROM `publish` INNER JOIN `release` ON `publish`.`rid` = `release`.`rid` WHERE `id` = '$publish_id_1' LIMIT 1";
             $result = mysql_query_excute($sql);
             $row = mysql_fetch_assoc($result);
             $publish_info_data[] = array_merge($row, $paper_info);
+            }
         }
 
         return $publish_info_data;
     }
+
 }

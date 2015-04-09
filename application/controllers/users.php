@@ -154,6 +154,8 @@ class users extends controller {
 	function profile()
 	{
 		$data = array();
+		$release_comment_data = array();
+
 		// user connected?
 		if( ! isset( $_SESSION["user"] ) ){
 			$this->redirect( "users/login" );
@@ -190,6 +192,8 @@ class users extends controller {
 	function profile_user($user_id)
 	{
 		$data = array();
+		$release_comment_data = array();
+
 		// load user and authentication models
 		$user = $this->loadModel( "user" );
 		$authentication = $this->loadModel( "authentication" );
@@ -214,15 +218,23 @@ class users extends controller {
 
 	function myfeed()
 	{
+		$paper_data = array();
+		$release_comment_data = array();
 		$user = $this->loadModel( "user" );
 		$release = $this->loadModel( "release" );
 
 		$paper_data = $release->find_publish_by_follow();
 
-		foreach ($paper_data as $paper) {
+		if ( isset($paper_data) ) {
+			foreach ($paper_data as $paper) {
             $row = $user->paper_comment_select($paper["id"]);
             $release_comment_data[$paper["id"]] = $row;
          }
+		}
+
+		if( ! isset( $_SESSION["user"] ) ){
+			$this->redirect( "users/login" );
+		}
 
 		$data = array( "paper_data" => $paper_data, "release_comment_data" => $release_comment_data);
 		$this->loadView( "users/myfeed", $data );

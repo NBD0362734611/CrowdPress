@@ -103,8 +103,8 @@ else{
                             <div class="widget meta-social column half">
                                 <ul class="inline">
                                     <li><a class="paper-comment-toggle border-box"><i class="fa fa-comment-o fa-lg"></i></a></li>
-                                    <li><a class="clap border-box" paper_id="<?php echo $paper["id"]; ?>"><i class="fa fa-heart-o fa-lg"></i></a><span class="arrow_box"><?php echo $paper["clap"]; ?></span></li>
-                                    <li><a class="scrap border-box" paper_id="<?php echo $paper["id"]; ?>"><i class="fa fa-paperclip fa-lg"></i></a><span class="arrow_box"><?php echo $paper["scrap"]; ?></span></li>
+                                    <li><a class="clap border-box" pid="<?php echo $paper["id"]; ?>"><i class="fa fa-heart-o fa-lg"></i></a><span class="arrow_box"><?php echo $paper["clap"]; ?></span></li>
+                                    <li><a class="scrap border-box" pid="<?php echo $paper["id"]; ?>"><i class="fa fa-paperclip fa-lg"></i></a><span class="arrow_box"><?php echo $paper["scrap"]; ?></span></li>
                                 </ul>
                             </div>
                             <!-- 自分のコメントここから -->
@@ -213,7 +213,7 @@ $('.paper-comment input').blur(function(){
 
     var button = $(this);
     var data = {
-        'user_id' : 7,
+        'user_id' : 0,
         'first_name': jQuery("#first_name").text(),
         'last_name': jQuery("#last_name").text(),
         'upapername': jQuery("#paper_name").text(),
@@ -237,6 +237,69 @@ $('.paper-comment input').blur(function(){
         },
         error: function() {         // HTTPエラー時
             alert("Server Error. Pleasy try again later.");
+        },
+        complete: function() {      // 成功・失敗に関わらず通信が終了した際の処理
+        }
+    });
+});
+
+$('.clap').on('click', function() {
+    var pid = $(this).attr("pid");
+    var clap = $(this).next();
+    var data = {
+        'user_id' : 0,
+        'pid': pid
+    };
+
+    jQuery.ajax({
+        type:"POST",
+        url: "?route=pages/paper_clap_insert",
+        dataType: "json",
+        data: data,
+        success: function(data, dataType) {   // OK時
+            // JSON Arrayの先頭が成功フラグ、失敗の場合2番目がエラーメッセージ
+            // if (!json_data[0]) {    // サーバが失敗を返した場合
+            //     console.log(json_data);
+            //     alert("Transaction error. " + json_data[1]);
+            //     return;
+            // }
+            // 成功時処理
+            clap.html(data[0]);
+        },
+        error: function() {         // HTTPエラー時
+            alert("ログインしてください！");
+        },
+        complete: function() {      // 成功・失敗に関わらず通信が終了した際の処理
+        }
+    });
+});
+
+$('.scrap').on('click', function() {
+    var pid = $(this).attr("pid");
+    var scrap = $(this).next();
+    var data = {
+        'user_id' : 0,
+        'pid': pid
+    };
+
+    jQuery.ajax({
+        type:"POST",
+        url: "?route=pages/paper_scrap_insert",
+        dataType: "json",
+        data: data,
+        success: function(data, dataType) {   // OK時
+            // JSON Arrayの先頭が成功フラグ、失敗の場合2番目がエラーメッセージ
+            // if (!json_data[0]) {    // サーバが失敗を返した場合
+            //     console.log(json_data);
+            //     alert("Transaction error. " + json_data[1]);
+            //     return;
+            // }
+            // 成功時処理
+            // alert(data);
+            scrap.html(data[0]);
+        },
+        error: function() {         // HTTPエラー時
+            alert("ログインしてください！");
         },
         complete: function() {      // 成功・失敗に関わらず通信が終了した際の処理
         }

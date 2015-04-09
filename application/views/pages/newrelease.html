@@ -28,7 +28,7 @@ else{
             <div id="main" class="row">
                 <div class="row-content buffer">
 
-                    <h2 class="newrelease">新着リリース</h2>
+                    <h2 class="newrelease">新着リリース <?php if ( isset($cname)) { echo "$cname"; } ?></h2>
                     <!-- 繰り返しスタート -->
                     <?php foreach ($release_data as $release) { ?>
                         <div class="post-area clear-after">
@@ -65,7 +65,7 @@ else{
                                 </ul>
                             </div>
                             <div class="column half right last">
-                                <h5 class="meta-post"><a class="company-name" href="#"><?php echo $release["cname"]; ?></a> - <time datetime><?php echo $release["time"]; ?></time></h5>
+                                <h5 class="meta-post"><a class="company-name" href="?route=pages/release_sort_by_cname/<?php echo $release["cname"]; ?>"><?php echo $release["cname"]; ?></a> - <time datetime><?php echo $release["time"]; ?></time></h5>
                             </div>
                             <div class="clear"></div>
                             <!-- 自分のコメントここから -->
