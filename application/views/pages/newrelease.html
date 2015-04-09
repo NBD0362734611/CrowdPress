@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="description" content="CrowdPressとは">
+<style type="text/css">@-ms-viewport{width: device-width;}</style>
+<link rel="stylesheet" href="application/public/css/style.css" media="screen">
+<link rel="stylesheet" href="application/public/css/layers.min.css" media="screen">
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700|Open+Sans:400italic,700italic,400,700' rel='stylesheet' type='text/css'>
+<link rel="icon" href="application/public/img/favicon.ico">
+<title>NewRelease - CrowdPress</title>
+</head>
+
+<body class="single single-post">
+<?php if( isset( $error_message ) ) echo $error_message;?>
+
+<?php if( isset( $_SESSION["user"]  ) ){
+  include("application/views/common/header.html");
+}
+else{
+  include("application/views/common/header_before_login.html");
+} ?>
+
+        <main role="main">
+
+            <div id="main" class="row">
+                <div class="row-content buffer">
+
+                    <h2 class="newrelease">新着リリース</h2>
+                    <!-- 繰り返しスタート -->
+                    <?php foreach ($release_data as $release) { ?>
+                        <div class="post-area clear-after">
+                            <section role="main" class="release1">
+                                <h3 class="release-title">
+                                <a href="?route=pages/release_detail/<?php echo $release["rid"]; ?>">
+                                    <?php echo $release["title"]; ?>
+                                </a></h3>
+                                    <div class="portfolio-section preload">
+                                        <?php
+                                            if( !empty($release["img1"]) ) {
+                                                echo '<span class="item column fourth"><figure><img src=';
+                                                print $release["img1"];
+                                                echo '></figure></span>';
+                                            }
+                                            if( !empty($release["img2"]) ) {
+                                                echo '<span class="item column fourth"><figure><img src=';
+                                                print $release["img2"];
+                                                echo '></figure></span>';
+                                            }
+                                             if( !empty($release["img3"]) ) {
+                                                echo '<span class="item column fourth"><figure><img src=';
+                                                print $release["img3"];
+                                                echo '></figure></span>';
+                                            }
+                                        ?>
+                                    </div>
+                            </section>
+                            <div class="widget meta-social column half">
+                                <ul class="inline">
+                                    <li><a class="release-comment-toggle border-box"><i class="fa fa-comment-o fa-lg"></i></a></li>
+                                    <li><a class="clap border-box" rid="<?php echo $release["rid"]; ?>"><i class="fa fa-heart-o fa-lg"></i></a><span class="arrow_box"><?php echo $release["clap"]; ?></span></li>
+                                    <li><a class="scrap border-box" rid="<?php echo $release["rid"]; ?>"><i class="fa fa-paperclip fa-lg"></i></a><span class="arrow_box"><?php echo $release["scrap"]; ?></span></li>
+                                </ul>
+                            </div>
+                            <div class="column half right last">
+                                <h5 class="meta-post"><a class="company-name" href="#"><?php echo $release["cname"]; ?></a> - <time datetime><?php echo $release["time"]; ?></time></h5>
+                            </div>
+                            <div class="clear"></div>
+                            <!-- 自分のコメントここから -->
+                            <form class="release-comment" style="display: none" action="?route=pages/release_comment_insert" method="post">
+                                <input type="hidden" name="rid" value="<?php echo $release["rid"]; ?>" />
+                                <input type="hidden" name="user_id" value="<?php echo $_SESSION["user"]; ?>" />
+                                <input type="text" name="comment" value="リリースにコメントする" />
+                            </form>
+                            <?php if(is_array($release_comment_data[$release["rid"]])){ ; ?>
+                            <?php foreach ($release_comment_data[$release["rid"]] as $release_comment) { ?>
+                            <section class="line_wrapper">
+                                <div class="question_Box inline">
+                                    <div class="question_image column inline-block"><img src="<?php echo $release_comment["photo_url"]; ?>" alt="ユーザーの写真"/></div>
+                                    <p class="arrow_question column ten reset inline-block">
+                                    <?php echo $release_comment["comment"] ; ?>
+                                    </p><!-- /.arrow_question -->
+                                </div><!-- /.question_Box -->
+                                <div class="clear"></div>
+                            </section><!-- /.line_wrappaer -->
+                            <?php } ?>
+                            <?php } ?>
+                            <!-- 自分のコメントここまで -->
+
+                        </div><!-- post-area -->
+
+                     <?php } ?><!-- 繰り返し終わり -->
+
+                </div><!-- row-content -->
+            </div><!-- row -->
+        </main><!-- main -->
+<?php include("application/views/common/footer.html");?>
+
+<script src="https://code.jquery.com/jquery.js"></script>
+<script src="application/public/js/plugins.js"></script>
+<script src="application/public/js/beetle.js"></script>
+<script src="application/public/js/analyticstracking.js"></script>
+<script>
+
+//コメント表示切り替え
+$('.release-comment-toggle').click(function(){
+    $(this).parent().parent().parent().nextAll('.release-comment').toggle(300);
+});
+var long = '90%';
+var short = '50%';
+//フォーカス時にアニメーションエフェクトでサイズを広げる
+$('.release-comment input').focus(function(){
+    if($(this).val()==='リリースにコメントする'){
+        $(this).val('');
+    }
+    //animate the box
+    $(this).animate({
+        width: long},400);
+});
+//外れたときはサイズを縮める
+$('.release-comment input').blur(function(){
+    if($(this).val()===''){
+        $(this).val('リリースにコメントする');
+    }
+    $(this).animate({
+        width: short},500);
+});
+
+$('.clap').on('click', function() {
+    var rid = $(this).attr("rid");
+    var clap = $(this).next();
+    var data = {
+        'user_id' : 0,
+        'rid': rid
+    };
+
+    jQuery.ajax({
+        type:"POST",
+        url: "?route=pages/clap_insert",
+        dataType: "json",
+        data: data,
+        success: function(data, dataType) {   // OK時
+            // JSON Arrayの先頭が成功フラグ、失敗の場合2番目がエラーメッセージ
+            // if (!json_data[0]) {    // サーバが失敗を返した場合
+            //     console.log(json_data);
+            //     alert("Transaction error. " + json_data[1]);
+            //     return;
+            // }
+            // 成功時処理
+            clap.html(data[0]);
+        },
+        error: function() {         // HTTPエラー時
+            alert("ログインしてください！");
+        },
+        complete: function() {      // 成功・失敗に関わらず通信が終了した際の処理
+        }
+    });
+});
+
+$('.scrap').on('click', function() {
+    var rid = $(this).attr("rid");
+    var scrap = $(this).next();
+    var data = {
+        'user_id' : 0,
+        'rid': rid
+    };
+
+    jQuery.ajax({
+        type:"POST",
+        url: "?route=pages/scrap_insert",
+        dataType: "json",
+        data: data,
+        success: function(data, dataType) {   // OK時
+            // JSON Arrayの先頭が成功フラグ、失敗の場合2番目がエラーメッセージ
+            // if (!json_data[0]) {    // サーバが失敗を返した場合
+            //     console.log(json_data);
+            //     alert("Transaction error. " + json_data[1]);
+            //     return;
+            // }
+            // 成功時処理
+            // alert(data);
+            scrap.html(data[0]);
+        },
+        error: function() {         // HTTPエラー時
+            alert("ログインしてください！");
+        },
+        complete: function() {      // 成功・失敗に関わらず通信が終了した際の処理
+        }
+    });
+});
+
+</script>
+</body>
+</html>
+

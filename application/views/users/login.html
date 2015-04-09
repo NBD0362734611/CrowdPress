@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="description" content="CrowdPressとは">
+<style type="text/css">@-ms-viewport{width: device-width;}</style>
+<link rel="stylesheet" href="application/public/css.css" type="text/css">
+<link rel="stylesheet" href="application/public/css/style.css" media="screen">
+<link rel="stylesheet" href="application/public/css/layers.min.css" media="screen">
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700|Open+Sans:400italic,700italic,400,700' rel='stylesheet' type='text/css'>
+<link rel="icon" href="application/public/img/favicon.ico">
+<title>CrowdPress</title>
+</head>
+<body class="page">
+<?php if( isset( $error_message ) ) echo $error_message; ?>
+
+<?php if( isset( $_SESSION["user"]  ) ){
+  include("application/views/common/header.html");
+}
+else{
+  include("application/views/common/header_before_login.html");
+} ?>
+
+<main role="main">
+            <div id="intro-wrap">
+                <div id="intro" class="preload darken" data-autoplay="5000" data-navigation="true" data-pagination="true" data-transition="fadeUp">
+                    <div class="intro-item" style="background-image: url();">
+                        <div class="caption">
+                            <h2>あなただけの新聞を発行しよう</h2>
+                            <a href="?route=authentications/authenticatewith/facebook" class="button white transparent login-btn before-login-element">Facebookではじめる（無料）</a>
+                        </div>
+                    </div>
+                </div><!-- intro -->
+            </div><!-- intro-wrap -->
+
+            <div id="main">
+
+                <section class="row section">
+                    <div class="row-content buffer even clear-after">
+                        <div class="column six push-six last-special">
+                            <h2>あなたの新聞で世界が動く</h2>
+                            <p>3つのステップで簡単に新聞を発行可能</p>
+                        </div>
+                        <div class="side-mockup left-mockup animation">
+                            <div class="slider desktop-slider" data-autoplay="false">
+                                <figure>
+                                    <div><img src="http://placehold.it/1148x630/ddd/fff&text=Beetle%20image" alt=""></div>
+                                    <div><img src="" alt=""></div>
+                                </figure>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div><!-- id-main -->
+</main><!-- main -->
+
+<?php include("application/views/common/footer.html");?>
+
+<script src="https://code.jquery.com/jquery.js"></script>
+<script src="application/public/js/plugins.js"></script>
+<script src="application/public/js/beetle.js"></script>
+<script src="application/public/js/analyticstracking.js"></script>
+</body>
+</html>

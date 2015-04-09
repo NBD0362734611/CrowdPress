@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="description" content="CrowdPressとは">
+<style type="text/css">@-ms-viewport{width: device-width;}</style>
+<link rel="stylesheet" href="application/public/css/style.css" media="screen">
+<link rel="stylesheet" href="application/public/css/layers.min.css" media="screen">
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700|Open+Sans:400italic,700italic,400,700' rel='stylesheet' type='text/css'>
+<link rel="icon" href="application/public/img/favicon.ico">
+<title>MyPage - CrowdPress</title>
+</head>
+
+<body class="blog masonry-style">
+<?php if( isset( $error_message ) ) echo $error_message; ?>
+
+<?php if( isset( $_SESSION["user"]  ) ){
+  include("application/views/common/header.html");
+}
+else{
+  include("application/views/common/header_before_login.html");
+} ?>
+
+			<div id="intro-wrap">
+				<div id="intro" class="preload darken" data-autoplay="5000" data-navigation="true" data-pagination="true" data-transition="fadeUp">
+					<div class="intro-item" style="background-image: url(<?php echo $user_data["cover_url"]; ?>);">
+						<div class="caption">
+                            <div class="user-thumb">
+							<img src="<?php echo $user_data["photo_url"]; ?>">
+                            </div>
+							<h2 id="paper_name"><?php echo $user_data["upapername"]; ?></h2>
+                            <h5 class="user_name">
+                                <?php echo $user_data["display_name"]; ?>
+                            </h5>
+							<p id="paper_explain"><?php echo $user_data["paper_explain"]; ?></p>
+                            <?php if( $_SESSION["user"] == $user_data["id"] ){
+                                //自分見た時
+                                echo "<button id=\"user_info_change_top\" class=\"button white transparent\">編集する</button>";
+                            }
+                            else{
+                                //他人が見た時→更に状態によって購読解除になるようにする
+                                echo "<button id=\"user_follow\" class=\"button white transparent\">購読する</button>";
+                            } ?>
+							<div class="widget meta-social text-light">
+								<ul class="inline">
+									<li><a href="<?php echo $user_data["facebook_url"]; ?>" class="facebook-share border-box"><i class="fa fa-facebook fa-lg"></i></a></li>
+									<li><a href="<?php echo $user_data["twitter_url"]; ?>" class="twitter-share border-box"><i class="fa fa-twitter fa-lg"></i></a></li>
+									<li><a href="<?php echo $user_data["website_url"]; ?>" class="flickr-share border-box"><i class="fa fa-home fa-lg"></i></a></li>
+									<li><a href="mailto:<?php echo $user_data["email"]; ?>?subject=CrowdPressから送信" class="gplus-share border-box"><i class="fa fa-envelope-o fa-lg"></i></a></li>
+								</ul>
+							</div>
+
+							<div class="column fourth">
+									<div class="count"><?php echo $user_data["publish_paper"]; ?></div>
+									<div class="txt">新聞発行数</div>
+							</div>
+							<div class="column fourth">
+									<div class="count"><?php echo $user_data["scrap"]; ?></div>
+									<div class="txt">スクラップ</div>
+							</div>
+							<div class="column fourth">
+									<div class="count"><?php echo $user_data["follow"]; ?></div>
+									<div class="txt">購読数</div>
+							</div>
+							<div class="column fourth last">
+									<div class="count"><?php echo $user_data["follower"]; ?></div>
+									<div class="txt">購読者数</div>
+							</div>
+
+						</div><!-- caption -->
+					</div>
+				</div><!-- intro -->
+			</div><!-- intro-wrap -->
+
+			<div id="main" class="row">
+                <div class="row-content buffer clear-after">
+                    <!-- 繰り返しスタート-->
+                    <?php foreach ($paper_data as $paper) { ?>
+                    <div class="myfeed-wrapper">
+                        <article role="main">
+                            <div class="question_image column inline-block"><img src="<?php echo $user_data["photo_url"]; ?>" alt="ユーザー設定画像"/></div>
+                            <div class="colmn inline-block">
+                                <h5 class="meta-post"><a href="?route=users/profile/<?php echo $user_data["id"]; ?>"><?php echo $user_data["upapername"]; ?>第<?php echo $paper["count"]; ?>号</a> - <time datetime="<?php echo $paper["created_at"]; ?>"><?php echo $paper["created_at"]; ?></time></h5>
+                            </div>
+                            <section class="myfeed" class="row section">
+                                <h2 class="paper-subtitle"><?php echo $paper["headline"]; ?></h2>
+                                <div class="release-article">
+                                    <p class="release">
+                                    <?php echo $paper["comment"]; ?>
+                                    …<a class="full-paper" href="http://localhost/crowdpress/index.php?route=pages/display_paper/<?php echo $paper["id"]; ?>">この新聞を読む</a>
+                                    </p>
+                                    <figure class="column half">
+                                        <img src="<?php echo $paper["img1"]; ?>">
+                                        <figcaption><a href="http://localhost/crowdpress/index.php?route=pages/release_detail/<?php echo $paper["rid"]; ?>"><?php echo $paper["title"]; ?></a></figcaption>
+                                    </figure>
+                                    <figure class="column half">
+                                        <img src="">
+                                        <figcaption>ユーザー設定画像</figcaption>
+                                    </figure>
+                                </div>
+                            <div class="widget meta-social column half">
+                                <ul class="inline">
+                                    <li><a class="paper-comment-toggle border-box"><i class="fa fa-comment-o fa-lg"></i></a></li>
+                                    <li><a class="clap border-box" paper_id="<?php echo $paper["id"]; ?>"><i class="fa fa-heart-o fa-lg"></i></a><span class="arrow_box"><?php echo $paper["clap"]; ?></span></li>
+                                    <li><a class="scrap border-box" paper_id="<?php echo $paper["id"]; ?>"><i class="fa fa-paperclip fa-lg"></i></a><span class="arrow_box"><?php echo $paper["scrap"]; ?></span></li>
+                                </ul>
+                            </div>
+                            <!-- 自分のコメントここから -->
+                            <form class="paper-comment" style="display:none" action="?route=pages/paper_comment_insert" method="post">
+                                <input type="hidden" name="paper_id" value="<?php echo $paper["id"]; ?>" />
+                                <input type="hidden" name="user_id" value="<?php echo $_SESSION["user"]; ?>" />
+                                <input type="text" name="comment" value="新聞にコメントする" />
+                            </form>
+                            <!-- コメント表示 -->
+                            <?php if(is_array($release_comment_data[$paper["id"]])){ ; ?>
+                            <?php foreach ($release_comment_data[$paper["id"]] as $release_comment) { ?>
+                            <section class="line_wrapper">
+                                <div class="question_Box inline">
+                                    <div class="question_image column inline-block"><img src="<?php echo $release_comment["photo_url"]; ?>" alt="ユーザーの写真"/></div>
+                                    <p class="arrow_question column ten reset inline-block">
+                                    <?php echo $release_comment["comment"] ; ?>
+                                    </p><!-- /.arrow_question -->
+                                </div><!-- /.question_Box -->
+                                <div class="clear"></div>
+                            </section><!-- /.line_wrappaer -->
+                            <?php } ?>
+                            <?php } ?>
+                            <!-- コメント表示ここまで -->
+                            </section>
+                        </article>
+                    </div><!-- post-area -->
+                    <?php } ?><!-- 繰り返し終わり -->
+
+                        <div id="pagination">
+                        <ul class="clear-after reset plain">
+                            <li id="older" class="pagination-nav"><a href="#" class="button transparent aqua"><i class="fa fa-chevron-left"></i><span class="label">戻る</span></a></li>
+                            <li id="newer" class="pagination-nav"><a href="#" class="button transparent aqua"><span class="label">次へ</span><i class="fa fa-chevron-right"></i></a></li>
+                        </ul>
+                    </div>
+                </div><!-- row-content -->
+            </div><!-- row -->
+        </main><!-- main -->
+
+<?php include("application/views/common/footer.html");?>
+
+<script src="https://code.jquery.com/jquery.js"></script>
+<script src="application/public/js/plugins.js"></script>
+<script src="application/public/js/beetle.js"></script>
+<script src="application/public/js/analyticstracking.js"></script>
+<script src="application/public/js/jquery.editable.min.js"></script>
+
+<script>
+$('.paper-comment-toggle').click(function(){
+    $(this).parent().parent().parent().nextAll('.paper-comment').toggle(300);
+});
+var long = '90%';
+var short = '50%';
+//フォーカス時にアニメーションエフェクトでサイズを広げる
+$('.paper-comment input').focus(function(){
+    if($(this).val()==='新聞にコメントする'){
+        $(this).val('');
+    }
+    //animate the box
+    $(this).animate({
+        width: long},400);
+});
+//外れたときはサイズを縮める
+$('.paper-comment input').blur(function(){
+    if($(this).val()===''){
+        $(this).val('新聞にコメントする');
+    }
+    $(this).animate({
+        width: short},500);
+});
+
+    $(function(){
+        var option1 = {trigger : $("#user_info_change_top"), action : "click"};
+        var option2 = {trigger : $("#user_info_change_top"), action : "click"};
+        var option3 = {trigger : $("#user_info_change_top"), action : "click"};
+        var option4 = {trigger : $("#user_info_change_top"), action : "click"};
+        $("#first_name").editable(option1, function(e){
+          if(e.value===''){
+            $("#first_name").html(e.old_value);
+            alert("名前を入力してください");
+          }
+        });
+
+        $("#last_name").editable(option2, function(e){
+          if(e.value===''){
+            $("#last_name").html(e.old_value);
+            alert("名前を入力してください");
+          }
+        });
+
+        $("#paper_name").editable(option3, function(e){
+          if(e.value===''){
+            $("#paper_name").html(e.old_value);
+            alert("新聞名を入力してください");
+          }
+        });
+
+        $("#paper_explain").editable(option4, function(e){
+          if(e.value===''){
+            $("#paper_explain").html(e.old_value);
+            alert("新聞の説明を値を入力してください");
+          }
+        });
+      });
+
+    jQuery("button#user_info_change_top_determine").click(function() {
+
+    var button = $(this);
+    var data = {
+        'user_id' : 7,
+        'first_name': jQuery("#first_name").text(),
+        'last_name': jQuery("#last_name").text(),
+        'upapername': jQuery("#paper_name").text(),
+        'paper_explain': jQuery("#paper_explain").text()
+    };
+
+    jQuery.ajax({
+        type:"POST",
+        url: "?route=users/update_mypage",
+        data: data,
+        success: function(data, dataType) {   // OK時
+            // JSON Arrayの先頭が成功フラグ、失敗の場合2番目がエラーメッセージ
+            // if (!json_data[0]) {    // サーバが失敗を返した場合
+            //     console.log(json_data);
+            //     alert("Transaction error. " + json_data[1]);
+            //     return;
+            // }
+            // 成功時処理
+            alert(data);
+            location.reload();
+        },
+        error: function() {         // HTTPエラー時
+            alert("Server Error. Pleasy try again later.");
+        },
+        complete: function() {      // 成功・失敗に関わらず通信が終了した際の処理
+        }
+    });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="description" content="CrowdPressとは">
+<style type="text/css">@-ms-viewport{width: device-width;}</style>
+<link rel="stylesheet" href="application/public/css/style.css" media="screen">
+<link rel="stylesheet" href="application/public/css/layers.min.css" media="screen">
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700|Open+Sans:400italic,700italic,400,700' rel='stylesheet' type='text/css'>
+<link rel="icon" href="application/public/img/favicon.ico">
+<title>Scrap - CrowdPress</title>
+</head>
+
+<body class="single single-post">
+<?php if( isset( $error_message ) ) echo $error_message; ?>
+
+<?php if( isset( $_SESSION["user"]  ) ){
+  include("application/views/common/header.html");
+}
+else{
+  include("application/views/common/header_before_login.html");
+} ?>
+
+        <main role="main">
+
+            <div id="main" class="row">
+                <div class="row-content buffer">
+                    <form id="scrap-bar" class="" method="post" action="?route=pages/make_paper">
+                        <div id="checked-number">0個選択中</div>
+                        <button id="publish" class="button transparent" disabled="disabled">PUBLISH</button>
+                    </form>
+                    <h2 class="newrelease">スクラップしたリリース</h2>
+                    <!-- 繰り返しスタート(scrapが空じゃない場合) -->
+                    <?php $scrap_number = 0; ?>
+                    <?php foreach ($release_data as $release) { ?>
+                    <?php $scrap_number = $scrap_number + 1; ?>
+                        <div class="post-area clear-after">
+                            <section role="main" class="release1">
+                                <h3 class="release-title">
+                                    <a href="?route=pages/release_detail/<?php echo $release["rid"]; ?>">
+                                        <?php echo $release["title"]; ?>
+                                    </a>
+                                </h3>
+                                <input form="scrap-bar" type="checkbox" name="checked_rid[]" value='<?php echo $release["rid"]; ?>' id="check<?php echo $release["rid"]; ?>"><label for="check<?php echo $release["rid"]; ?>"></label>
+                                    <div class="portfolio-section preload">
+                                        <?php
+                                            if( !empty($release["img1"]) ) {
+                                                echo '<span class="item column fourth"><figure><img src=';
+                                                print $release["img1"];
+                                                echo '></figure></span>';
+                                            }
+                                            if( !empty($release["img2"]) ) {
+                                                echo '<span class="item column fourth"><figure><img src=';
+                                                print $release["img2"];
+                                                echo '></figure></span>';
+                                            }
+                                             if( !empty($release["img3"]) ) {
+                                                echo '<span class="item column fourth"><figure><img src=';
+                                                print $release["img3"];
+                                                echo '></figure></span>';
+                                            }
+                                        ?>
+                                    </div>
+                            </section>
+                            <div class="widget meta-social column half">
+                                <ul class="inline">
+                                    <li><a class="release-comment-toggle border-box"><i class="fa fa-comment-o fa-lg"></i></a></li>
+                                    <li><a class="clap border-box" rid="<?php echo $release["rid"]; ?>"><i class="fa fa-heart-o fa-lg"></i></a><span class="arrow_box"><?php echo $release["clap"]; ?></span></li>
+                                    <li><a class="scrap border-box" rid="<?php echo $release["rid"]; ?>"><i class="fa fa-paperclip fa-lg"></i></a><span class="arrow_box"><?php echo $release["scrap"]; ?></span></li>
+                                    <li><a class="edit toggle-edit border-box"><i class="fa fa-pencil-square-o fa-lg"></i></a></li>
+                                </ul>
+                            </div>
+                            <div class="column half right last">
+                                <h5 class="meta-post"><a class="company-name" href="#"><?php echo $release["cname"]; ?></a> - <time datetime><?php echo $release["time"]; ?></time></h5>
+                            </div>
+                            <div class="clear"></div>
+                            <!-- 自分のコメントここから -->
+                            <form class="release-comment" style="display: none" action="?route=pages/release_comment_insert" method="post">
+                                <input type="hidden" name="rid" value="<?php echo $release["rid"]; ?>" />
+                                <input type="hidden" name="user_id" value="<?php echo $_SESSION["user"]; ?>" />
+                                <input type="text" name="comment" value="リリースにコメントする" />
+                            </form>
+                            <?php if(is_array($release_comment_data[$release["rid"]])){ ; ?>
+                            <?php foreach ($release_comment_data[$release["rid"]] as $release_comment) { ?>
+                            <section class="line_wrapper">
+                                <div class="question_Box inline">
+                                    <div class="question_image column inline-block"><img src="<?php echo $user_data["photo_url"]; ?>" alt="ユーザーの写真"/></div>
+                                    <p class="arrow_question column ten reset inline-block">
+                                    <?php echo $release_comment["comment"] ; ?>
+                                    </p><!-- /.arrow_question -->
+                                </div><!-- /.question_Box -->
+                                <div class="clear"></div>
+                            </section><!-- /.line_wrappaer -->
+                            <?php } ?>
+                            <?php } ?>
+                            <!-- 自分のコメントここまで -->
+
+                            <form class="paper_edit" id="paper_edit<?php echo $scrap_number; ?>" rid="<?php echo $release["rid"]; ?>" style="display:none">
+                                <input type="text" name="headline" id="headline<?php echo $scrap_number; ?>" class="headline inline" value="<?php echo $release["headline"]; ?>" placeholder="ヘッドライン">
+                                <textarea name="edit" id="edit<?php echo $scrap_number; ?>" class="edit inline" placeholder="論評"><?php echo $release["comment"]; ?></textarea>
+                                <span class="number_of_characters<?php echo $scrap_number; ?>">256</span>
+                                <input type="button" class="paper_comment" id="paper_comment<?php echo $scrap_number; ?>" value="確定">
+                                <input type="button" class="edit_paper_comment" id="edit_paper_comment<?php echo $scrap_number; ?>" class="btn_edit" value="編集"></input>
+                            </form>
+
+                        </div><!-- post-area -->
+
+                     <?php } ?><!-- 繰り返し終わり -->
+
+                </div><!-- row-content -->
+            </div><!-- row -->
+        </main><!-- main -->
+<?php include("application/views/common/footer.html");?>
+
+<script src="https://code.jquery.com/jquery.js"></script>
+<script src="application/public/js/plugins.js"></script>
+<script src="application/public/js/beetle.js"></script>
+<script src="application/public/js/analyticstracking.js"></script>
+<script>
+//論評の表示非表示切り替え
+$('.toggle-edit').click(function(){
+    $(this).parent().parent().parent().nextAll('.paper_edit').toggle(300);
+});
+
+//コメント表示切り替え
+$('.release-comment-toggle').click(function(){
+    console.log("test");
+    $(this).parent().parent().parent().nextAll('.release-comment').toggle(300);
+});
+var long = '90%';
+var short = '50%';
+//フォーカス時にアニメーションエフェクトでサイズを広げる
+$('.release-comment input').focus(function(){
+    if($(this).val()==='リリースにコメントする'){
+        $(this).val('');
+    }
+    //animate the box
+    $(this).animate({
+        width: long},400);
+});
+//外れたときはサイズを縮める
+$('.release-comment input').blur(function(){
+    if($(this).val()===''){
+        $(this).val('リリースにコメントする');
+    }
+    $(this).animate({
+        width: short},500);
+});
+
+$('.clap').on('click', function() {
+    var rid = $(this).attr("rid");
+    var clap = $(this).next();
+    var data = {
+        'user_id' : 0,
+        'rid': rid
+    };
+
+    jQuery.ajax({
+        type:"POST",
+        url: "?route=pages/clap_insert",
+        data: data,
+        dataType: "json",
+        success: function(data, dataType) {   // OK時
+            // JSON Arrayの先頭が成功フラグ、失敗の場合2番目がエラーメッセージ
+            // if (!json_data[0]) {    // サーバが失敗を返した場合
+            //     console.log(json_data);
+            //     alert("Transaction error. " + json_data[1]);
+            //     return;
+            // }
+            // 成功時処理
+            // alert(data);
+            clap.html(data[0]);
+        },
+        error: function() {         // HTTPエラー時
+            alert("Server Error. Pleasy try again later.");
+        },
+        complete: function() {      // 成功・失敗に関わらず通信が終了した際の処理
+        }
+    });
+});
+
+$('.scrap').on('click', function() {
+    var rid = $(this).attr("rid");
+    var scrap = $(this).next();
+    var data = {
+        'user_id' : 0,
+        'rid': rid
+    };
+
+    jQuery.ajax({
+        type:"POST",
+        url: "?route=pages/scrap_insert",
+        dataType: "json",
+        data: data,
+        success: function(data, dataType) {   // OK時
+            // JSON Arrayの先頭が成功フラグ、失敗の場合2番目がエラーメッセージ
+            // if (!json_data[0]) {    // サーバが失敗を返した場合
+            //     console.log(json_data);
+            //     alert("Transaction error. " + json_data[1]);
+            //     return;
+            // }
+            // 成功時処理
+            // alert(data);
+            scrap.html(data[0]);
+        },
+        error: function() {         // HTTPエラー時
+            alert("Server Error. Pleasy try again later.");
+        },
+        complete: function() {      // 成功・失敗に関わらず通信が終了した際の処理
+        }
+    });
+});
+
+//チェックボックスをクリックするとイベント発生
+$("input[type=checkbox]").click(function(){
+    var $count = $("input[type=checkbox]:checked").length;
+    var $not = $('input[type=checkbox]').not(':checked');
+
+$("#checked-number").html($count + "個選択中");
+    //チェックが5つ付いたら、チェックされてないチェックボックスにdisabledを加える
+    if($count >= 5) {
+        $not.attr("disabled",true);
+        }else{
+    //5つ以下ならisabledを外す
+        $not.attr("disabled",false);
+    }
+
+    if($count <= 0) {
+        $("#publish").prop("disabled", true);
+        }else{
+        $("#publish").prop("disabled", false);
+    }
+
+});
+
+//グローバル変数スクラップ数
+scrap_number = <?php echo count($release_data); ?>;
+
+//文字数カウントうまくうごかない
+// $(function(){
+//     $('.edit').bind('keyup',function() {
+//         for ( num = 1; num <= scrap_number; num++ ) {
+//         //numはスクラップの数
+//             var max = 256;
+//             var min = 0;
+//             var thisValueLength = $("#edit" + num).val().replace(/\s+/g,'').length;
+
+//             if (thisValueLength >= max + 1) {
+//                 $("#paper_comment" + num).attr("disabled", "disabled");
+//             } else {
+//                 $("#paper_comment" + num).removeAttr("disabled");
+//             }
+//             if (thisValueLength >= max + 1) {
+//                 $("#number_of_characters" + num).css("color","red");
+//             } else {
+//                 $("#number_of_characters" + num).css("color","");
+//             }
+//             $("#number_of_characters" + num).html(256 - thisValueLength);
+//         }
+//     });
+// });
+
+//ここでDBに
+
+$('.paper_comment').click(function(){
+    var rid = $(this).parent().attr("rid");
+    var headline = $(this).prevAll('.headline').val();
+    var comment = $(this).prevAll('.edit').val();
+    var data = {
+        'user_id' : 0,
+        'rid': rid,
+        'headline':headline,
+        'comment':comment
+    };
+
+    jQuery.ajax({
+        type:"POST",
+        url: "?route=pages/scrap_paper_comment",
+        data: data,
+        success: function(data, dataType) {   // OK時
+            // JSON Arrayの先頭が成功フラグ、失敗の場合2番目がエラーメッセージ
+            // if (!json_data[0]) {    // サーバが失敗を返した場合
+            //     console.log(json_data);
+            //     alert("Transaction error. " + json_data[1]);
+            //     return;
+            // }
+            // 成功時処理
+            alert(data);
+        },
+        error: function() {         // HTTPエラー時
+            alert("Server Error. Pleasy try again later.");
+        },
+        complete: function() {      // 成功・失敗に関わらず通信が終了した際の処理
+        }
+    });
+
+//ボタン無効にする
+    $(this).prevAll('.headline').prop("disabled", true);
+    $(this).prevAll('.edit').prop("disabled", true);
+});
+
+$('.edit_paper_comment').click(function(){
+    $(this).prevAll('.headline').prop("disabled", false);
+    $(this).prevAll('.edit').prop("disabled", false);
+});
+
+
+</script>
+</body>
+</html>

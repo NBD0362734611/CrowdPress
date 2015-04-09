@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="description" content="CrowdPressとは">
+<style type="text/css">@-ms-viewport{width: device-width;}</style>
+<link rel="stylesheet" href="application/public/css/style.css" media="screen">
+<link rel="stylesheet" href="application/public/css/layers.min.css" media="screen">
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700|Open+Sans:400italic,700italic,400,700' rel='stylesheet' type='text/css'>
+<link rel="icon" href="application/public/img/favicon.ico">
+<title><?php echo $user_data["upapername"]; ?> 第 <?php echo $paper_data["count"]; ?>号 - CrowdPress</title>
+</head>
+
+<body class="single single-post" style="padding-top: 60px">
+<?php if( isset( $error_message ) ) echo $error_message; ?>
+
+<?php if( isset( $_SESSION["user"]  ) ){
+  include("application/views/common/header.html");
+}
+else{
+  include("application/views/common/header_before_login.html");
+} ?>
+
+			<div id="main" class="row">
+				<div class="row-content buffer clear-after">
+
+					<div class="post-area clear-after">
+						<article role="main">
+							<h5 class="meta-post"><time datetime="<?php echo $paper_data["created_at"]; ?>"><?php echo $paper_data["created_at"]; ?></time></h5>
+							<h1 class="paper-title"><?php echo $user_data["upapername"]; ?> 第 <?php echo $paper_data["count"]; ?>号</h1>
+							<!-- 繰り返しスタート -->
+							<?php foreach ($papers as $paper) { ?>
+							<section id="first-release" class="row section">
+								<h2 class="paper-subtitle"><?php echo $paper["headline"]; ?></h2>
+								<div class="release-article">
+									<p class="release">
+									<?php echo $paper["comment"]; ?>
+									</p>
+									<figure class="column half">
+										<img src="<?php echo $paper['img1']; ?>">
+										<figcaption><?php echo $paper["title"]; ?></figcaption>
+									</figure>
+									<figure class="column half">
+										<img src="">
+										<figcaption></figcaption>
+									</figure>
+								</div>
+							</section>
+							<?php } ?><!-- 繰り返し終わり -->
+						</article>
+
+					</div><!-- post-area -->
+
+
+					<div class="meta-social">
+						<ul class="inline center">
+							<li><a href="#" class="twitter-share border-box"><i class="fa fa-twitter fa-lg"></i></a></li>
+							<li><a href="#" class="facebook-share border-box"><i class="fa fa-facebook fa-lg"></i></a></li>
+							<li><a class="scrap pinterest-share border-box"><i class="fa fa-pinterest fa-lg"></i></a></li>
+						</ul>
+					</div>
+					<!-- コメント表示 -->
+                   <div class="comment-section">
+                        <h3 id="comments"><?php echo $release_comment_number["number"]; ?> Comments</h3>
+                        <ul class="comment-list plain">
+                        <?php if (isset($release_comment_data)) { ?>
+                        <?php foreach ($release_comment_data as $release_comment) { ?>
+                            <li class="comment">
+                                <div class="single-comment">
+                                    <div class="comment-author">
+                                        <img src="<?php echo $release_comment["photo_url"]; ?>" class="avatar" alt="">
+                                        <cite><a href="#"><?php echo $release_comment["display_name"]; ?></a></cite>
+                                        <span class="says">says:</span>
+                                    </div><!-- comment-author -->
+                                    <div class="comment-meta">
+                                        <time datetime="<?php echo $release_comment["time"]; ?>"><?php echo $release_comment["time"]; ?></time> / <a href="#" class="reply">Reply</a>
+                                    </div><!-- comment-meta -->
+                                    <p><?php echo $release_comment["comment"]; ?></p>
+                                </div><!-- single-comment -->
+                            </li>
+                        <?php } ?>
+                        <?php } ?>
+                        </ul>
+                    </div><!-- comment-section -->
+                    <!-- コメント表示ここまで -->
+                    <form class="paper-comment" action="?route=pages/paper_comment_insert" method="post">
+                        <input type="hidden" name="paper_id" value="<?php echo $paper_data["id"]; ?>" />
+                        <input type="hidden" name="user_id" value="<?php echo $_SESSION["user"]; ?>" />
+                        <input type="text" name="comment" value="新聞にコメントする" />
+                    </form><!-- post-comment -->
+
+				</div><!-- row-content -->
+			</div><!-- row -->
+		</main><!-- main -->
+<?php include("application/views/common/footer.html");?>
+
+<script src="https://code.jquery.com/jquery.js"></script>
+<script src="application/public/js/plugins.js"></script>
+<script src="application/public/js/beetle.js"></script>
+<script src="application/public/js/analyticstracking.js"></script>
+<script>
+var long = '90%';
+var short = '50%';
+//フォーカス時にアニメーションエフェクトでサイズを広げる
+$('.paper-comment input').focus(function(){
+    if($(this).val()==='新聞にコメントする'){
+        $(this).val('');
+    }
+    //animate the box
+    $(this).animate({
+        width: long},400);
+});
+//外れたときはサイズを縮める
+$('.paper-comment input').blur(function(){
+    if($(this).val()===''){
+        $(this).val('新聞にコメントする');
+    }
+    $(this).animate({
+        width: short},500);
+});
+</script>
+</body>
+</html>

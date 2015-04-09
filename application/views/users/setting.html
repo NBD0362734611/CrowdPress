@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="description" content="CrowdPressとは">
+<style type="text/css">@-ms-viewport{width: device-width;}</style>
+<link rel="stylesheet" href="application/public/css/style.css" media="screen">
+<link rel="stylesheet" href="application/public/css/layers.min.css" media="screen">
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700|Open+Sans:400italic,700italic,400,700' rel='stylesheet' type='text/css'>
+<link rel="icon" href="application/public/img/favicon.ico">
+<title>アカウント設定 - CrowdPress</title>
+</head>
+
+<body class="page">
+<?php if( isset( $error_message ) ) echo $error_message; ?>
+
+<?php if( isset( $_SESSION["user"]  ) ){
+  include("application/views/common/header.html");
+}
+else{
+  include("application/views/common/header_before_login.html");
+} ?>
+		<main role="main">
+			<div id="main">
+
+				<section class="row section">
+					<div class="row-content buffer clear-after">
+                    <div class="setting-wrapper">
+						<div class="section-title">
+							<h2>アカウント設定</h2>
+						</div>
+						<form class="setting">
+                            <lavel class="setting-item">
+                                <div>
+                                    <strong>ユーザーID</strong>
+                                </div>
+                                <div id="user_id">
+                                <?php echo $user_data["id"]; ?>
+                                </div>
+                            </lavel>
+							<lavel class="setting-item">
+								<div>
+									<strong>新聞名</strong>
+									<span>
+										<a id="paper_name_change" class="change">変更</a>
+									</span>
+								</div>
+								<div id="paper_name">
+                                <?php echo $user_data["upapername"]; ?>
+								</div>
+							</lavel>
+                            <lavel class="setting-item">
+                                <div>
+                                    <strong>新聞の説明</strong>
+                                    <span>
+                                        <a id="paper_explain_change" class="change">変更</a>
+                                    </span>
+                                </div>
+                                <div id="paper_explain">
+                                <?php echo $user_data["paper_explain"]; ?>
+                                </div>
+                            </lavel>
+							<lavel class="setting-item">
+								<div>
+									<strong>ユーザー名</strong>
+								</div>
+								<div id="display_name">
+                                    <?php echo $user_data["display_name"]; ?>
+								</div>
+							</lavel>
+							<lavel class="setting-item">
+								<div>
+									<strong>メールアドレス</strong>
+								</div>
+								<div id="mail_address">
+                                <?php echo $user_data["email"]; ?>
+								</div>
+							</lavel>
+                            <lavel class="setting-item">
+                                <div>
+                                    <strong>facebook URL</strong>
+                                   <span>
+                                        <a id="facebook_url_change" class="change">変更</a>
+                                    </span>
+                                </div>
+                                <div id="facebook_url">
+                                <?php echo $user_data["facebook_url"]; ?>
+                                </div>
+                            </lavel>
+                            <lavel class="setting-item">
+                                <div>
+                                    <strong>twitter URL</strong>
+                                   <span>
+                                        <a id="twitter_url_change" class="change">変更</a>
+                                    </span>
+                                </div>
+                                <div id="twitter_url">
+                                <?php echo $user_data["twitter_url"]; ?>
+                                </div>
+                            </lavel>
+                            <lavel class="setting-item">
+                                <div>
+                                    <strong>WEBサイト URL</strong>
+                                   <span>
+                                        <a id="website_url_change" class="change">変更</a>
+                                    </span>
+                                </div>
+                                <div id="website_url">
+                                <?php echo $user_data["website_url"]; ?>
+                                </div>
+                            </lavel>
+							<lavel class="setting-item">
+								<div>
+									<strong>メール通知設定</strong>
+								</div>
+								<div>
+									<span>
+										購読された時
+									</span>
+									<span class="switch">
+										<input id="switch1" checked type="checkbox">
+										<label for="switch1"></label>
+									</span>
+								</div>
+								<div>
+									<span>
+										コメントされた時
+									</span>
+									<span class="switch">
+										<input id="switch2" checked type="checkbox">
+										<label for="switch2"></label>
+									</span>
+								</div>
+								<div>
+									<span>
+										スクラップされた時
+									</span>
+									<span class="switch">
+										<input id="switch3" checked type="checkbox">
+										<label for="switch3"></label>
+									</span>
+								</div>
+								<div>
+									<span>
+										クラップされた時
+									</span>
+									<span class="switch">
+										<input id="switch4" checked type="checkbox">
+										<label for="switch4"></label>
+									</span>
+								</div>
+								<div>
+									<span>
+										CrowdPressからのお知らせ
+									</span>
+									<span class="switch">
+										<input id="switch" checked type="checkbox">
+										<label for="switch"></label>
+									</span>
+								</div>
+							</lavel>
+							<lavel class="setting-item">
+								<div>
+									<a href="#"><strong>退会する</strong></a>
+								</div>
+							</lavel>
+							<div>
+								<button id="change_save" class="button">変更を保存</button>
+							</div>
+						</form>
+                    </div>
+					</div>
+				</section>
+
+
+			</div><!-- id-main -->
+		</main><!-- main -->
+
+<?php include("application/views/common/footer.html");?>
+
+<script src="https://code.jquery.com/jquery.js"></script>
+<script src="application/public/js/plugins.js"></script>
+<script src="application/public/js/beetle.js"></script>
+<script src="application/public/js/analyticstracking.js"></script>
+<script src="application/public/js/jquery.editable.min.js"></script>
+
+<script>
+    $(function(){
+        var option1 = {trigger : $("#paper_name_change"), action : "click"};
+        var option2 = {trigger : $("#paper_explain_change"), action : "click"};
+        var option3 = {trigger : $("#facebook_url_change"), action : "click"};
+        var option4 = {trigger : $("#twitter_url_change"), action : "click"};
+        var option5 = {trigger : $("#website_url_change"), action : "click"};
+        $("#paper_name").editable(option1, function(e){
+          if(e.value===''){
+            $("#paper_name").html(e.old_value);
+            alert("値を入力してください");
+          }
+          else{
+            var upapername = e.value;
+          }
+        });
+        $("#paper_explain").editable(option2, function(e){
+          if(e.value===''){
+            $("#paper_explain").html(e.old_value);
+            alert("値を入力してください");
+          }
+          else{
+            var upapername = e.value;
+          }
+        });
+        $("#facebook_url").editable(option3, function(e){
+          if(e.value===''){
+            $("#paper_explain").html(e.old_value);
+            alert("値を入力してください");
+          }
+          else{
+            var upapername = e.value;
+          }
+        });
+        $("#twitter_url").editable(option4, function(e){
+          if(e.value===''){
+            $("#paper_explain").html(e.old_value);
+            alert("値を入力してください");
+          }
+          else{
+            var upapername = e.value;
+          }
+        });
+        $("#website_url").editable(option5, function(e){
+          if(e.value===''){
+            $("#paper_explain").html(e.old_value);
+            alert("値を入力してください");
+          }
+          else{
+            var upapername = e.value;
+          }
+        });
+
+      });
+
+
+    jQuery("button#change_save").click(function() {
+
+    var button = $(this);
+    button.attr("disabled", true);
+    // var data = {
+    //     upapername: jQuery('#paper_name').text()
+    //     // uid: jQuery("#fb-root").attr("uid"),
+    //     // uname: jQuery("#user_name").text(),
+    //     // uemail: jQuery("#mail_address").text(),
+    // };
+    var data = {
+        'user_id' : 0,
+        'display_name': jQuery.trim(jQuery("#display_name").text()),
+        'upapername': jQuery.trim(jQuery("#paper_name").text()),
+        'paper_explain': jQuery.trim(jQuery("#paper_explain").text()),
+        'facebook_url': jQuery.trim(jQuery("#facebook_url").text()),
+        'twitter_url': jQuery.trim(jQuery("#twitter_url").text()),
+        'website_url': jQuery.trim(jQuery("#website_url").text())
+    };
+
+    jQuery.ajax({
+        type:"POST",
+        url: "?route=users/update_mypage",
+        data: data,
+        success: function(data, dataType) {   // OK時
+            // JSON Arrayの先頭が成功フラグ、失敗の場合2番目がエラーメッセージ
+            // if (!json_data[0]) {    // サーバが失敗を返した場合
+            //     console.log(json_data);
+            //     alert("Transaction error. " + json_data[1]);
+            //     return;
+            // }
+            // 成功時処理
+            alert(data);
+            location.reload();
+        },
+        error: function() {         // HTTPエラー時
+            alert("Server Error. Pleasy try again later.");
+        },
+        complete: function() {      // 成功・失敗に関わらず通信が終了した際の処理
+            button.attr("disabled", false);  // ボタンを再び enableにする
+        }
+    });
+});
+</script>
+
+	</body>
+
+</html>
