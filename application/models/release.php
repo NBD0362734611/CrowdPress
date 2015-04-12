@@ -146,7 +146,7 @@ class release extends model {
 
 
     function scrap_paper_comment($user_id, $rid, $headline, $comment){
-        $sql = "REPLACE INTO `publish`(`user_id`, `rid`, `headline`, `comment`) VALUES ('$user_id', '$rid', '$headline', '$comment')";
+        $sql = "INSERT INTO `publish`(`user_id`, `rid`, `headline`, `comment`) VALUES ('$user_id', '$rid', '$headline', '$comment')";
         $result = mysql_query_excute($sql);
         return "OK";
     }

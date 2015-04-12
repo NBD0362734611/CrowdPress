@@ -82,18 +82,18 @@ else{
                         <article role="main">
                             <div class="question_image column inline-block"><img src="<?php echo $user_data["photo_url"]; ?>" alt="ユーザー設定画像"/></div>
                             <div class="colmn inline-block">
-                                <h5 class="meta-post"><a href="?route=users/profile/<?php echo $user_data["id"]; ?>"><?php echo $user_data["upapername"]; ?>第<?php echo $paper["count"]; ?>号</a> - <time datetime="<?php echo $paper["created_at"]; ?>"><?php echo $paper["created_at"]; ?></time></h5>
+                                <h5 class="meta-post"><a href="?route=users/profile_user/<?php echo $user_data["id"]; ?>"><?php echo $user_data["upapername"]; ?>第<?php echo $paper["count"]; ?>号</a> - <time datetime="<?php echo $paper["created_at"]; ?>"><?php echo $paper["created_at"]; ?></time></h5>
                             </div>
                             <section class="myfeed" class="row section">
                                 <h2 class="paper-subtitle"><?php echo $paper["headline"]; ?></h2>
                                 <div class="release-article">
                                     <p class="release">
                                     <?php echo $paper["comment"]; ?>
-                                    …<a class="full-paper" href="http://localhost/crowdpress/index.php?route=pages/display_paper/<?php echo $paper["id"]; ?>">この新聞を読む</a>
+                                    …<a class="full-paper" href="?route=pages/display_paper/<?php echo $paper["id"]; ?>">この新聞を読む</a>
                                     </p>
                                     <figure class="column half">
                                         <img src="<?php echo $paper["img1"]; ?>">
-                                        <figcaption><a href="http://localhost/crowdpress/index.php?route=pages/release_detail/<?php echo $paper["rid"]; ?>"><?php echo $paper["title"]; ?></a></figcaption>
+                                        <figcaption><a href="?route=pages/release_detail/<?php echo $paper["rid"]; ?>"><?php echo $paper["title"]; ?></a></figcaption>
                                     </figure>
                                     <figure class="column half">
                                         <img src="">
