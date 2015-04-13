@@ -31,7 +31,7 @@ class release extends model {
         //     $rid = $row["rid"];
         //     $publish_data[$rid] = $row;
         // }
-        $sql = "SELECT `release`.`title`, `release`.`rid`,`release`.`cname`, `release`.`img1`, `release`.`img2`, `release`.`img3`, `release`.`clap`, `release`.`scrap`, `release`.`time`, `headline`, `comment` FROM `release` INNER JOIN `r_scrap` ON `release`.`rid` = `r_scrap`.`rid` LEFT JOIN `publish` ON `release`.`rid` = `publish`.`rid`  WHERE `r_scrap`.`user_id` = $user_id ORDER BY `release`.`rid` DESC LIMIT 50";
+        $sql = "SELECT `release`.`title`, `release`.`rid`,`release`.`cname`, `release`.`img1`, `release`.`img2`, `release`.`img3`, `release`.`clap`, `release`.`scrap`, `release`.`time` FROM `release` INNER JOIN `r_scrap` ON `release`.`rid` = `r_scrap`.`rid` WHERE `r_scrap`.`user_id` = $user_id ORDER BY `r_scrap`.`time` DESC LIMIT 50";
         $result = mysql_query_excute($sql);
         while ($row = mysql_fetch_assoc($result)) {
             $scrap_data[] = $row;
@@ -184,15 +184,22 @@ class release extends model {
     }
 
     function publish_id_insert_paper($user_id, $checked_rid){
+        //変数publish_id_iにpublishのid（ユニークキー）を代入
         $i=1;
         foreach ($checked_rid as $rid) {
-            $sql = "SELECT `id` FROM `publish` WHERE `user_id` = $user_id AND `rid` = $rid";
+            $sql = "SELECT `id` FROM `publish` WHERE `user_id` = $user_id AND `rid` = $rid ORDER BY `created_at` DESC LIMIT 1";
             $result = mysql_query_excute($sql);
             $id = mysql_fetch_array($result);
             ${"publish_id_".$i} = $id[0];
             $i++;
         }
 
+        // if ( !isset($publish_id_1)) {
+        //     echo "エラー！！！！論評の入力が確定されていません。";
+        //     return false;
+        // }
+
+        //SQL文を作成
         $keys =  "publish_id_1";
         $values = $publish_id_1;
         for ($i=2; $i <= sizeof($checked_rid); $i++) {
@@ -200,13 +207,20 @@ class release extends model {
             $values.= ",".${"publish_id_".$i};
         }
 
+        //ユーザーの新聞パブリッシュ数を更新
         $sql = "UPDATE `users` SET `publish_paper` = `publish_paper` + 1 WHERE `id` = '$user_id'";
         mysql_query_excute($sql);
+
+        //ユーザーの新聞パブリッシュ数を取得
         $sql = "SELECT `publish_paper` FROM `users` WHERE `id` = '$user_id'";
         $publish_paper_count = mysql_fetch_array( mysql_query_excute($sql) );
+
+
         $sql = "INSERT INTO `paper`(`user_id`, $keys, `count`) VALUES('$user_id', $values, $publish_paper_count[0])";
         mysql_query_excute($sql);
-        $sql = "SELECT `id` FROM `paper` ORDER BY `paper`.`id` DESC LIMIT 1";
+
+        //publishした新聞のID（ユニーク）を返す
+        $sql = "SELECT `id` FROM `paper` WHERE `user_id` = '$user_id' ORDER BY `paper`.`id` DESC LIMIT 1";
         $result = mysql_query_excute($sql);
         return mysql_fetch_array($result);
     }

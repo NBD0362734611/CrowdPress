@@ -138,10 +138,12 @@ abstract class BaseFacebook
    * @var array
    */
   public static $CURL_OPTS = array(
-    CURLOPT_CONNECTTIMEOUT => 10,
+    CURLOPT_CONNECTTIMEOUT => 50,
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_TIMEOUT        => 60,
     CURLOPT_USERAGENT      => 'facebook-php-3.2',
+    CURLOPT_SSL_VERIFYPEER => false,
+    CURLOPT_SSL_VERIFYHOST => false,
   );
 
   /**
@@ -225,14 +227,14 @@ abstract class BaseFacebook
    *
    * @var boolean
    */
-  protected $trustForwarded = false;
+  protected $trustForwarded = true;
 
   /**
    * Indicates if signed_request is allowed in query parameters.
    *
    * @var boolean
    */
-  protected $allowSignedRequest = true;
+  protected $allowSignedRequest = false;
 
   /**
    * Initialize a Facebook Application.

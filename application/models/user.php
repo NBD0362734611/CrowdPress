@@ -64,7 +64,7 @@ class user extends model {
 
 	function release_comment_select($rid, $user_id){
 		$release_comment_data = array();
-		$sql = "SELECT `comment`, `photo_url` FROM `r_comment` INNER JOIN `users` ON `r_comment`.`user_id` = `users`.`id` WHERE `rid` = $rid AND `user_id` = $user_id";
+		$sql = "SELECT `comment`, `photo_url` FROM `r_comment` INNER JOIN `users` ON `r_comment`.`user_id` = `users`.`id` WHERE `rid` = $rid";
 		$result = mysql_query_excute($sql);
 		while ($row = mysql_fetch_assoc($result)) {
 			$release_comment_data[] = $row;

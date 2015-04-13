@@ -13,16 +13,20 @@ class pages extends controller {
     function newrelease()
     {
         $data = array();
-        $usar_data = array();
+        $user_data = array();
+        $release_comment_data = array();
         // error_reporting(E_ALL ^ E_NOTICE);
         $user = $this->loadModel( "user" );
         $release = $this->loadModel( "release" );
 
         // get the release data from database
-        $user_data = $user->find_by_id( $_SESSION["user"] );
+        if ( isset($_SESSION["user"]) ){
+            $user_data = $user->find_by_id( $_SESSION["user"] );
+        }
+
         $release_data = $release->get_new_release();
 
-        if (isset($_SESSION["user"])) {
+        if ( isset($release_data) ) {
             foreach ($release_data as $release) {
             $row = $user->release_comment_select($release["rid"], $_SESSION["user"]);
             $release_comment_data[$release["rid"]] = $row;
@@ -48,7 +52,7 @@ class pages extends controller {
         $user_data = $user->find_by_id( $_SESSION["user"] );
         $release_data = $release->find_release_by_cname( $cname );
 
-        if (isset($_SESSION["user"])) {
+        if (isset($release_data)) {
             foreach ($release_data as $release) {
             $row = $user->release_comment_select($release["rid"], $_SESSION["user"]);
             $release_comment_data[$release["rid"]] = $row;
@@ -298,10 +302,13 @@ class pages extends controller {
         // load user model
         $release = $this->loadModel( "release" );
 
+        if ( !isset($_SESSION["user"])) {
+            $this->redirect( "users/login" );
+        }
+
         if( count( $_POST ) ){
             $user_id      = $_SESSION["user"];
             $checked_rid  = $_POST["checked_rid"];
-
             $paper_id = $release->publish_id_insert_paper($user_id, $checked_rid);
         }
         // //post元に戻る

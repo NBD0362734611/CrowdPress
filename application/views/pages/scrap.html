@@ -98,7 +98,7 @@ else{
                             <!-- 自分のコメントここまで -->
 
                             <form class="paper_edit" id="paper_edit<?php echo $scrap_number; ?>" rid="<?php echo $release["rid"]; ?>" style="display:none">
-                                <input type="text" name="headline" id="headline<?php echo $scrap_number; ?>" class="headline inline" value="" placeholder="ヘッドライン">
+                                <input type="text" name="headline" id="headline<?php echo $scrap_number; ?>" class="headline inline" value="<? echo $release["headline"]; ?>" placeholder="ヘッドライン">
                                 <textarea name="edit" id="edit<?php echo $scrap_number; ?>" class="edit inline" placeholder="論評"></textarea>
                                 <span class="number_of_characters<?php echo $scrap_number; ?>">256</span>
                                 <input type="button" class="paper_comment" id="paper_comment<?php echo $scrap_number; ?>" value="確定">
