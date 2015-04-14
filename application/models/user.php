@@ -90,6 +90,12 @@ class user extends model {
 		}
 	}
 
+	function latest_publish_comment_select($rid, $user_id){
+		$sql = "SELECT * FROM `publish` WHERE `rid` = '$rid' AND `user_id` = '$user_id' ORDER BY `publish`.`created_at` DESC LIMIT 1";
+		$result = mysql_query_excute($sql);
+		return mysql_fetch_assoc($result);
+	}
+
 	function following($userid){
 	$users = array();
 	$sql = "SELECT DISTINCT `user_id` FROM `following` WHERE `follower_id` = '$userid'";

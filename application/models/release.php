@@ -207,16 +207,17 @@ class release extends model {
             $values.= ",".${"publish_id_".$i};
         }
 
+        $sql = "INSERT INTO `paper`(`user_id`, $keys) VALUES('$user_id', $values)";
+        mysql_query_excute($sql);
+
         //ユーザーの新聞パブリッシュ数を更新
         $sql = "UPDATE `users` SET `publish_paper` = `publish_paper` + 1 WHERE `id` = '$user_id'";
         mysql_query_excute($sql);
 
-        //ユーザーの新聞パブリッシュ数を取得
+        //ユーザーの新聞パブリッシュ数を取得してそれを新聞の号にする
         $sql = "SELECT `publish_paper` FROM `users` WHERE `id` = '$user_id'";
         $publish_paper_count = mysql_fetch_array( mysql_query_excute($sql) );
-
-
-        $sql = "INSERT INTO `paper`(`user_id`, $keys, `count`) VALUES('$user_id', $values, $publish_paper_count[0])";
+        $sql = "UPDATE `paper` SET `count` = $publish_paper_count[0]";
         mysql_query_excute($sql);
 
         //publishした新聞のID（ユニーク）を返す

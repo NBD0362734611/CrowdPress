@@ -85,18 +85,21 @@ class pages extends controller {
         $user_data = $user->find_by_id( $_SESSION["user"] );
         $release_data = $release->get_user_scrap( $_SESSION["user"] );
         $release_comment_data = array();
+        $publish_comment_data = array();
 
         if (isset($release_data)){
             foreach ($release_data as $release) {
             $row = $user->release_comment_select($release["rid"], $_SESSION["user"]);
             $release_comment_data[$release["rid"]] = $row;
+            $row = $user->latest_publish_comment_select($release["rid"], $_SESSION["user"]);
+            $publish_comment_data[$release["rid"]] = $row;
             }
         } else {   // １件もない場合のエラー対策
             $release_data = array();
         }
 
         // load profile view
-        $data = array( "user_data" => $user_data, "release_data" => $release_data, "release_comment_data" => $release_comment_data);
+        $data = array( "user_data" => $user_data, "release_data" => $release_data, "release_comment_data" => $release_comment_data, "publish_comment_data" => $publish_comment_data);
         $this->loadView( "pages/scrap", $data );
     }
 
