@@ -153,7 +153,7 @@ class release extends model {
 
     function release_comment_ridselect($rid){
         $release_comment_data = array();
-        $sql = "SELECT `r_comment`.`reply`, `r_comment`.`comment`, `users`.`display_name`, `users`.`photo_url`, `r_comment`.`time` FROM `r_comment` INNER JOIN `users` ON `r_comment`.`user_id` = `users`.`id` WHERE `rid` = $rid";
+        $sql = "SELECT `r_comment`.`reply`, `r_comment`.`comment`, `users`.`id`, `users`.`display_name`, `users`.`photo_url`, `r_comment`.`time` FROM `r_comment` INNER JOIN `users` ON `r_comment`.`user_id` = `users`.`id` WHERE `rid` = $rid";
         $result = mysql_query_excute($sql);
         while ($row = mysql_fetch_assoc($result)) {
             $release_comment_data[] = $row;
@@ -163,7 +163,7 @@ class release extends model {
 
     function paper_comment_paper_id_select($paper_id){
         $release_comment_data = array();
-        $sql = "SELECT `p_comment`.`comment`, `users`.`display_name`, `users`.`photo_url`, `p_comment`.`time` FROM `p_comment` INNER JOIN `users` ON `p_comment`.`user_id` = `users`.`id` WHERE `paper_id` = $paper_id";
+        $sql = "SELECT `p_comment`.`comment`, `users`.`display_name`, `users`.`id`, `users`.`photo_url`, `p_comment`.`time` FROM `p_comment` INNER JOIN `users` ON `p_comment`.`user_id` = `users`.`id` WHERE `paper_id` = $paper_id";
         $result = mysql_query_excute($sql);
         while ($row = mysql_fetch_assoc($result)) {
             $release_comment_data[] = $row;
@@ -207,17 +207,21 @@ class release extends model {
             $values.= ",".${"publish_id_".$i};
         }
 
+        //新聞を挿入
         $sql = "INSERT INTO `paper`(`user_id`, $keys) VALUES('$user_id', $values)";
         mysql_query_excute($sql);
 
+        //新聞を発行した数を取得
+        $sql = "SELECT count(`id`) AS `paper_count` FROM `paper` WHERE `user_id` = $user_id";
+        $result = mysql_query_excute($sql);
+        $count = mysql_fetch_array($result);
+
         //ユーザーの新聞パブリッシュ数を更新
-        $sql = "UPDATE `users` SET `publish_paper` = `publish_paper` + 1 WHERE `id` = '$user_id'";
+        $sql = "UPDATE `users` SET `publish_paper` = '$count[0]' WHERE `id` = '$user_id'";
         mysql_query_excute($sql);
 
-        //ユーザーの新聞パブリッシュ数を取得してそれを新聞の号にする
-        $sql = "SELECT `publish_paper` FROM `users` WHERE `id` = '$user_id'";
-        $publish_paper_count = mysql_fetch_array( mysql_query_excute($sql) );
-        $sql = "UPDATE `paper` SET `count` = $publish_paper_count[0]";
+        //新聞の号
+        $sql = "UPDATE `paper` SET `count` = '$count[0]' WHERE `user_id` = '$user_id' ORDER BY `paper`.`id` DESC LIMIT 1";
         mysql_query_excute($sql);
 
         //publishした新聞のID（ユニーク）を返す

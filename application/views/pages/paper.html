@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="application/public/css/style.css" media="screen">
 <link rel="stylesheet" href="application/public/css/layers.min.css" media="screen">
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="application/public/css/rrssb.css">
 <link href='http://fonts.googleapis.com/css?family=Montserrat:400,700|Open+Sans:400italic,700italic,400,700' rel='stylesheet' type='text/css'>
 <link rel="icon" href="application/public/img/favicon.ico">
 <title><?php echo $user_data["upapername"]; ?> 第 <?php echo $paper_data["count"]; ?>号 - CrowdPress</title>
@@ -24,15 +25,17 @@ else{
 } ?>
 
 			<div id="main" class="row">
+
 				<div class="row-content buffer clear-after">
 
 					<div class="post-area clear-after">
 						<article role="main">
 							<h5 class="meta-post"><time datetime="<?php echo $paper_data["created_at"]; ?>"><?php echo $paper_data["created_at"]; ?></time></h5>
-							<h1 class="paper-title"><?php echo $user_data["upapername"]; ?> 第 <?php echo $paper_data["count"]; ?>号</h1>
+							<h1 class="paper-title"><a href="?route=users/profile_user/<?php echo $user_data["id"]; ?>"><?php echo $user_data["upapername"]; ?></a> 第 <?php echo $paper_data["count"]; ?>号</h1>
 							<!-- 繰り返しスタート -->
 							<?php foreach ($papers as $paper) { ?>
-							<section id="first-release" class="row section">
+                            <?php if ( empty($paper) ) { break; } ?>
+							<section class="row section">
 								<h2 class="paper-subtitle"><?php echo $paper["headline"]; ?></h2>
 								<div class="release-article">
 									<p class="release">
@@ -43,8 +46,7 @@ else{
 										<figcaption><a href="?route=pages/release_detail/<?php echo $paper["rid"] ;?>"><?php echo $paper["title"]; ?></a></figcaption>
 									</figure>
 									<figure class="column half">
-										<img src="">
-										<figcaption></figcaption>
+										<figcaption>ユーザーアップロード画像</figcaption>
 									</figure>
 								</div>
 							</section>
@@ -54,13 +56,13 @@ else{
 					</div><!-- post-area -->
 
 
-					<div class="meta-social">
-						<ul class="inline center">
-							<li><a href="#" class="twitter-share border-box"><i class="fa fa-twitter fa-lg"></i></a></li>
-							<li><a href="#" class="facebook-share border-box"><i class="fa fa-facebook fa-lg"></i></a></li>
-							<li><a class="scrap pinterest-share border-box"><i class="fa fa-pinterest fa-lg"></i></a></li>
-						</ul>
-					</div>
+                    <div class="meta-social">
+                        <ul class="inline center">
+                            <li><a class="clap border-box" pid="<?php echo $paper_data["id"]; ?>"><i class="fa fa-heart-o fa-lg"></i></a><span class="arrow_box"><?php echo $paper_data["clap"]; ?></span></li>
+                             <li><a class="scrap border-box" pid="<?php echo $paper_data["id"]; ?>"><i class="fa fa-paperclip fa-lg"></i></a><span class="arrow_box"><?php echo $paper_data["scrap"]; ?></span></li>
+                        </ul>
+                    </div>
+
 					<!-- コメント表示 -->
                    <div class="comment-section">
                         <h3 id="comments"><?php echo $release_comment_number["number"]; ?> Comments</h3>
@@ -71,7 +73,7 @@ else{
                                 <div class="single-comment">
                                     <div class="comment-author">
                                         <img src="<?php echo $release_comment["photo_url"]; ?>" class="avatar" alt="">
-                                        <cite><a href="#"><?php echo $release_comment["display_name"]; ?></a></cite>
+                                        <cite><a href="?route=users/profile_user/<?php echo $release_comment["id"]; ?>"><?php echo $release_comment["display_name"]; ?></a></cite>
                                         <span class="says">says:</span>
                                     </div><!-- comment-author -->
                                     <div class="comment-meta">
@@ -94,6 +96,7 @@ else{
 				</div><!-- row-content -->
 			</div><!-- row -->
 		</main><!-- main -->
+
 <?php include("application/views/common/footer.html");?>
 
 <script src="https://code.jquery.com/jquery.js"></script>
@@ -119,6 +122,69 @@ $('.paper-comment input').blur(function(){
     }
     $(this).animate({
         width: short},500);
+});
+
+$('.clap').on('click', function() {
+    var pid = $(this).attr("pid");
+    var clap = $(this).next();
+    var data = {
+        'user_id' : 0,
+        'pid': pid
+    };
+
+    jQuery.ajax({
+        type:"POST",
+        url: "?route=pages/paper_clap_insert",
+        dataType: "json",
+        data: data,
+        success: function(data, dataType) {   // OK時
+            // JSON Arrayの先頭が成功フラグ、失敗の場合2番目がエラーメッセージ
+            // if (!json_data[0]) {    // サーバが失敗を返した場合
+            //     console.log(json_data);
+            //     alert("Transaction error. " + json_data[1]);
+            //     return;
+            // }
+            // 成功時処理
+            clap.html(data[0]);
+        },
+        error: function() {         // HTTPエラー時
+            alert("ログインしてください！");
+        },
+        complete: function() {      // 成功・失敗に関わらず通信が終了した際の処理
+        }
+    });
+});
+
+$('.scrap').on('click', function() {
+    var pid = $(this).attr("pid");
+    var scrap = $(this).next();
+    var data = {
+        'user_id' : 0,
+        'pid': pid
+    };
+
+    jQuery.ajax({
+        type:"POST",
+        url: "?route=pages/paper_scrap_insert",
+        dataType: "json",
+        data: data,
+        success: function(data, dataType) {   // OK時
+            // JSON Arrayの先頭が成功フラグ、失敗の場合2番目がエラーメッセージ
+            // if (!json_data[0]) {    // サーバが失敗を返した場合
+            //     console.log(json_data);
+            //     alert("Transaction error. " + json_data[1]);
+            //     return;
+            // }
+            // 成功時処理
+            // alert(data);
+            scrap.html(data[0]);
+        },
+        error: function() {         // HTTPエラー時
+            alert("ログインしてください！");
+        },
+        complete: function() {      // 成功・失敗に関わらず通信が終了した際の処理
+        }
+    });
 });
 </script>
 </body>

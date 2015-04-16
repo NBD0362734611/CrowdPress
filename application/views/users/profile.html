@@ -41,7 +41,7 @@ else{
                             }
                             else{
                                 //他人が見た時→更に状態によって購読解除になるようにする
-                                echo "<button id=\"user_follow\" class=\"button white transparent\">購読する</button>";
+                                echo "<button id=\"user_follow\" class=\"button white transparent\" user_id =\"$user_data[id]\">$follow_status</button>";
                             } ?>
 							<div class="widget meta-social text-light">
 								<ul class="inline">
@@ -61,11 +61,11 @@ else{
 									<div class="txt">スクラップ</div>
 							</div>
 							<div class="column fourth">
-									<div class="count"><?php echo $user_data["follow"]; ?></div>
+									<div class="count follow"><?php echo $user_data["follow"]; ?></div>
 									<div class="txt">購読数</div>
 							</div>
 							<div class="column fourth last">
-									<div class="count"><?php echo $user_data["follower"]; ?></div>
+									<div class="count follower"><?php echo $user_data["follower"]; ?></div>
 									<div class="txt">購読者数</div>
 							</div>
 
@@ -96,7 +96,6 @@ else{
                                         <figcaption><a href="?route=pages/release_detail/<?php echo $paper["rid"]; ?>"><?php echo $paper["title"]; ?></a></figcaption>
                                     </figure>
                                     <figure class="column half">
-                                        <img src="">
                                         <figcaption>ユーザー設定画像</figcaption>
                                     </figure>
                                 </div>
@@ -118,7 +117,11 @@ else{
                             <?php foreach ($release_comment_data[$paper["id"]] as $release_comment) { ?>
                             <section class="line_wrapper">
                                 <div class="question_Box inline">
-                                    <div class="question_image column inline-block"><img src="<?php echo $release_comment["photo_url"]; ?>" alt="ユーザーの写真"/></div>
+                                    <div class="question_image column inline-block">
+                                    <a href="?route=users/profile_user/<?php echo $release_comment["id"]; ?>">
+                                        <img src="<?php echo $release_comment["photo_url"]; ?>" alt="ユーザーの写真"/>
+                                    </a>
+                                    </div>
                                     <p class="arrow_question column ten reset inline-block">
                                     <?php echo $release_comment["comment"] ; ?>
                                     </p><!-- /.arrow_question -->
@@ -173,6 +176,32 @@ $('.paper-comment input').blur(function(){
     }
     $(this).animate({
         width: short},500);
+});
+
+$('#user_follow').on('click', function() {
+    var follow_status = $('#user_follow');
+    var user_id = $(this).attr("user_id");
+    var follower = $('.follower');
+    var data = {
+        'user_id' : user_id,
+        'follower_id': 0
+    };
+
+    jQuery.ajax({
+        type:"POST",
+        url: "?route=users/following",
+        dataType: "json",
+        data: data,
+        success: function(data, dataType) {   // OK時
+            follower.html(data[0]);
+            follow_status.html(data[1]);
+        },
+        error: function() {         // HTTPエラー時
+            alert("ログインしてください！");
+        },
+        complete: function() {      // 成功・失敗に関わらず通信が終了した際の処理
+        }
+    });
 });
 
     $(function(){

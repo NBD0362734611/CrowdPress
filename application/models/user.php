@@ -64,7 +64,7 @@ class user extends model {
 
 	function release_comment_select($rid, $user_id){
 		$release_comment_data = array();
-		$sql = "SELECT `comment`, `photo_url` FROM `r_comment` INNER JOIN `users` ON `r_comment`.`user_id` = `users`.`id` WHERE `rid` = $rid";
+		$sql = "SELECT `users`.`id`, `comment`, `photo_url` FROM `r_comment` INNER JOIN `users` ON `r_comment`.`user_id` = `users`.`id` WHERE `rid` = $rid";
 		$result = mysql_query_excute($sql);
 		while ($row = mysql_fetch_assoc($result)) {
 			$release_comment_data[] = $row;
@@ -78,7 +78,7 @@ class user extends model {
 
 	function paper_comment_select($paper_id){
 		$paper_comment_data = array();
-		$sql = "SELECT `comment`, `photo_url` FROM `p_comment` INNER JOIN `users` ON `p_comment`.`user_id` = `users`.`id` WHERE `paper_id` = $paper_id";
+		$sql = "SELECT `users`.`id`, `comment`, `photo_url` FROM `p_comment` INNER JOIN `users` ON `p_comment`.`user_id` = `users`.`id` WHERE `paper_id` = $paper_id";
 		$result = mysql_query_excute($sql);
 		while ($row = mysql_fetch_assoc($result)) {
 			$paper_comment_data[] = $row;
@@ -96,17 +96,56 @@ class user extends model {
 		return mysql_fetch_assoc($result);
 	}
 
-	function following($userid){
-	$users = array();
-	$sql = "SELECT DISTINCT `user_id` FROM `following` WHERE `follower_id` = '$userid'";
-	$result = mysql_query_excute($sql);
+	// function following($userid){
+	// $users = array();
+	// $sql = "SELECT DISTINCT `user_id` FROM `following` WHERE `follower_id` = '$userid'";
+	// $result = mysql_query_excute($sql);
 
-	while($data = mysql_fetch_object($result)){
-		array_push($users, $data->user_id);
-	}
+	// while($data = mysql_fetch_object($result)){
+	// 	array_push($users, $data->user_id);
+	// }
 
-	return $users;
-	}
+	// return $users;
+	// }
+
+	function follow ($user_id, $follower_id){
+        $exsist = mysql_query("SELECT * FROM `following` WHERE `user_id` = '$user_id' AND `follower_id` = '$follower_id'");
+        $row = mysql_num_rows($exsist);
+         if ($row){
+        	$follow_status = "購読解除";
+        } else {
+        	$follow_status = "購読する";
+        }
+        return $follow_status;
+    }
+
+	function following ($user_id, $follower_id){
+        $exsist = mysql_query("SELECT * FROM `following` WHERE `user_id` = '$user_id' AND `follower_id` = '$follower_id'");
+        $row = mysql_num_rows($exsist);
+        if ($row){
+        	$follow_status = "購読する";
+            $deleate = "DELETE FROM `following` WHERE `user_id` = '$user_id' AND `follower_id` = '$follower_id'";
+            mysql_query_excute($deleate);
+        } else {
+        	$follow_status = "購読解除";
+            $insert = "INSERT INTO `following`(`user_id`, `follower_id`) VALUES ($user_id, $follower_id)";
+            mysql_query_excute($insert);
+        }
+        //followの数
+        $sql = "SELECT count(`user_id`) AS `follow` FROM `following` where `follower_id` = $follower_id";
+        $result = mysql_query_excute($sql);
+        $count = mysql_fetch_array($result);
+        $sql = "UPDATE `users` SET `follow` = $count[0] WHERE `id` = '$follower_id'";
+        mysql_query_excute($sql);
+        //followerの数
+        $sql = "SELECT count(`follower_id`) AS `follower` FROM `following` where `user_id` = $user_id";
+        $result = mysql_query_excute($sql);
+        $count = mysql_fetch_array($result);
+        $sql = "UPDATE `users` SET `follower` = $count[0] WHERE `id` = '$user_id'";
+        mysql_query_excute($sql);
+        $count[] = $follow_status;
+        return $count;
+    }
 
 	function paper_scrap_number_update($user_id){
 		$sql = "SELECT count(`user_id`) AS `scrap` FROM `p_scrap` WHERE `user_id` = '$user_id'";

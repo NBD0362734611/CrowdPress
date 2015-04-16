@@ -169,6 +169,7 @@ class users extends controller {
 		// get the user data from database
 		$user_data = $user->find_by_id( $_SESSION["user"] );
 		$paper_data = $release->find_publish_by_user_id( $_SESSION["user"] );
+		$follow_status = $user->follow ( $_SESSION["user"], $_SESSION["user"] );
 
 		// provider like twitter, linkedin, do not provide the user email
 		// in this case, we should ask them to complete their profile before continuing
@@ -185,7 +186,7 @@ class users extends controller {
          }
 
 		// load profile view
-		$data = array( "user_data" => $user_data, "user_authentication" => $user_authentication, "paper_data" => $paper_data, "release_comment_data" => $release_comment_data);
+		$data = array( "user_data" => $user_data, "user_authentication" => $user_authentication, "paper_data" => $paper_data, "release_comment_data" => $release_comment_data, "follow_status" => $follow_status);
 		$this->loadView( "users/profile", $data );
 	}
 
@@ -202,6 +203,7 @@ class users extends controller {
 		// get the user data from database
 		$user_data = $user->find_by_id( $user_id );
 		$paper_data = $release->find_publish_by_user_id( $user_id );
+		$follow_status = $user->follow ( $user_id, $_SESSION["user"] );
 
 		// get the user authentication info from db, if any
 		$user_authentication = $authentication->find_by_user_id( $user_id );
@@ -212,7 +214,7 @@ class users extends controller {
          }
 
 		// load profile view
-		$data = array( "user_data" => $user_data, "user_authentication" => $user_authentication, "paper_data" => $paper_data, "release_comment_data" => $release_comment_data);
+		$data = array( "user_data" => $user_data, "user_authentication" => $user_authentication, "paper_data" => $paper_data, "release_comment_data" => $release_comment_data, "follow_status" => $follow_status);
 		$this->loadView( "users/profile", $data );
 	}
 
@@ -267,4 +269,26 @@ class users extends controller {
 		$data = array( "user_data" => $user_data, "user_authentication" => $user_authentication );
 		$this->loadView( "users/setting", $data );
 	}
+
+	function following()
+    {
+        $data = array();
+
+        // load user model
+        $user = $this->loadModel( "user" );
+        $release = $this->loadModel( "release" );
+
+        if (!isset($_SESSION["user"])){
+            echo "この機能はログインしていないと使えません";
+            return false;
+        }
+
+        // registration form submitted?
+        if( count( $_POST ) ){
+            $user_id = $_POST["user_id"];
+            $follower_id = $_SESSION["user"];
+        }
+
+        echo json_encode( $user->following($user_id, $follower_id) );
+    }
 }

@@ -78,7 +78,10 @@ else{
                             <?php foreach ($release_comment_data[$release["rid"]] as $release_comment) { ?>
                             <section class="line_wrapper">
                                 <div class="question_Box inline">
-                                    <div class="question_image column inline-block"><img src="<?php echo $release_comment["photo_url"]; ?>" alt="ユーザーの写真"/></div>
+                                    <div class="question_image column inline-block">
+                                    <a href="?route=users/profile_user/<?php echo $release_comment["id"]; ?>">
+                                        <img src="<?php echo $release_comment["photo_url"]; ?>" alt="ユーザーの写真"/></div>
+                                    </a>
                                     <p class="arrow_question column ten reset inline-block">
                                     <?php echo $release_comment["comment"] ; ?>
                                     </p><!-- /.arrow_question -->
