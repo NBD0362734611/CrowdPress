@@ -101,9 +101,12 @@ class users extends controller {
 			$facebook_url   = $_POST["facebook_url"];
 			$twitter_url    = $_POST["twitter_url"];
 			$website_url    = $_POST["website_url"];
+			$photo_url      = $_POST["photo_url"];
+			$cover_url      = $_POST["cover_url"];
 
-			$user->update_mypage($user_id, $display_name, $upapername, $paper_explain, $facebook_url, $twitter_url, $website_url);
+			$user->update_mypage( $user_id, $display_name, $upapername, $paper_explain, $facebook_url, $twitter_url, $website_url, $photo_url, $cover_url );
 		}
+
 		echo "OK";
 	}
 
@@ -218,6 +221,100 @@ class users extends controller {
 		$this->loadView( "users/profile", $data );
 	}
 
+	function profile_user_scrap( $user_id )
+	{
+		$data = array();
+		$release_comment_data = array();
+
+		// load user and authentication models
+		$user = $this->loadModel( "user" );
+		$authentication = $this->loadModel( "authentication" );
+		$release = $this->loadModel( "release" );
+
+		// get the user data from database
+		$user_data = $user->find_by_id( $user_id );
+		$paper_data = $release->find_publish_by_scrap( $user_id );
+		$follow_status = $user->follow ( $user_id, $_SESSION["user"] );
+
+		// get the user authentication info from db, if any
+		$user_authentication = $authentication->find_by_user_id( $user_id );
+
+		foreach ($paper_data as $paper) {
+            $row = $user->paper_comment_select($paper["id"]);
+            $release_comment_data[$paper["id"]] = $row;
+         }
+
+		// load profile view
+		$data = array( "user_data" => $user_data, "user_authentication" => $user_authentication, "paper_data" => $paper_data, "release_comment_data" => $release_comment_data, "follow_status" => $follow_status);
+		$this->loadView( "users/profile", $data );
+	}
+
+	function profile_user_following( $user_id )
+	{
+		$data = array();
+		$release_comment_data = array();
+		$followorfollower = "フォロー";
+		$follow_data = array();
+
+		// load user and authentication models
+		$user = $this->loadModel( "user" );
+		$authentication = $this->loadModel( "authentication" );
+
+		// get the user data from database
+		$user_data = $user->find_by_id( $user_id );
+		$follow_status = $user->follow ( $user_id, $_SESSION["user"] );
+		$follow = $user->get_user_following ( $user_id );
+		if ( isset( $follow ) ) {
+			$follow_data = $user->find_by_ids ( $follow );
+		}
+		$i = 0;
+		foreach ($follow_data as $follow) {
+			$follow_status_user_data = $user->follow( $follow["id"], $_SESSION["user"] );
+			$follow_data[$i]["follow_status"] = $follow_status_user_data;
+			$i++;
+		}
+
+		// get the user authentication info from db, if any
+		$user_authentication = $authentication->find_by_user_id( $user_id );
+
+		// load profile view
+		$data = array( "user_data" => $user_data, "user_authentication" => $user_authentication, "follow_data" => $follow_data, "followorfollower" => $followorfollower, "follow_status" => $follow_status);
+		$this->loadView( "users/follow", $data );
+	}
+
+	function profile_user_follower( $user_id )
+	{
+		$data = array();
+		$release_comment_data = array();
+		$followorfollower = "フォロワー";
+		$follow_data = array();
+
+		// load user and authentication models
+		$user = $this->loadModel( "user" );
+		$authentication = $this->loadModel( "authentication" );
+
+		// get the user data from database
+		$user_data = $user->find_by_id( $user_id );
+		$follow_status = $user->follow ( $user_id, $_SESSION["user"] );
+		$follower = $user->get_user_follower ( $user_id );
+		if ( isset( $follower ) ) {
+			$follow_data = $user->find_by_ids ( $follower );
+		}
+		$i = 0;
+		foreach ($follow_data as $follow) {
+			$follow_status_user_data = $user->follow( $follow["id"], $_SESSION["user"] );
+			$follow_data[$i]["follow_status"] = $follow_status_user_data;
+			$i++;
+		}
+
+		// get the user authentication info from db, if any
+		$user_authentication = $authentication->find_by_user_id( $user_id );
+
+		// load profile view
+		$data = array( "user_data" => $user_data, "user_authentication" => $user_authentication, "follow_data" => $follow_data, "followorfollower" => $followorfollower, "follow_status" => $follow_status);
+		$this->loadView( "users/follow", $data );
+	}
+
 	function myfeed()
 	{
 		$paper_data = array();
@@ -225,7 +322,7 @@ class users extends controller {
 		$user = $this->loadModel( "user" );
 		$release = $this->loadModel( "release" );
 
-		$paper_data = $release->find_publish_by_follow();
+		$paper_data = $release->find_publish_by_follow( $_SESSION["user"] );
 
 		if ( isset($paper_data) ) {
 			foreach ($paper_data as $paper) {

@@ -208,7 +208,7 @@ class release extends model {
         }
 
         //新聞を挿入
-        $sql = "INSERT INTO `paper`(`user_id`, $keys) VALUES('$user_id', $values)";
+        $sql = "INSERT INTO `paper`(`user_id`, $keys, `created_at`) VALUES('$user_id', $values, NOW() )";
         mysql_query_excute($sql);
 
         //新聞を発行した数を取得
@@ -246,7 +246,7 @@ class release extends model {
 
     function find_publish_by_user_id( $user_id ){
         $publish_info_data = array();
-        $sql = "SELECT `id`, `publish_id_1`, `count`, `clap`, `scrap`, `created_at` FROM `paper` WHERE `user_id` = '$user_id' ORDER BY `id` DESC";
+        $sql = "SELECT `paper`.`id`, `paper`.`publish_id_1`, `paper`.`count`, `paper`.`clap`, `paper`.`scrap`, `users`.`upapername`, `users`.`photo_url`, `paper`.`created_at` FROM `paper` INNER JOIN `users` ON `paper`.`user_id` = `users`.`id`  WHERE `user_id` = '$user_id' ORDER BY `id` DESC";
         $result = mysql_query_excute($sql);
         while ( $row = mysql_fetch_assoc($result) ) {
             $paper_info_data[] = $row;
@@ -265,11 +265,34 @@ class release extends model {
         return $publish_info_data;
     }
 
-    function find_publish_by_follow(){
+    function find_publish_by_follow( $user_id ){
         $paper_info_data = array();
         $publish_info_data = array();
 
-        $sql = "SELECT `paper`.`id`, `paper`.`user_id`, `publish_id_1`, `count`, `clap`, `paper`.`scrap`, `upapername`, `display_name`, `photo_url`, `paper`.`created_at` FROM `paper` INNER JOIN `users` ON `paper`.`user_id` = `users`.`id` ORDER BY `paper`.`id` DESC";
+        $sql = "SELECT `paper`.`id`, `paper`.`user_id`, `publish_id_1`, `count`, `clap`, `paper`.`scrap`, `upapername`, `display_name`, `photo_url`, `paper`.`created_at` FROM `paper` INNER JOIN `users` ON `paper`.`user_id` = `users`.`id` WHERE `paper`.`user_id` IN ( SELECT `user_id` FROM `following` WHERE `follower_id` = '$user_id' ) OR `paper`.`user_id` = '$user_id' ORDER BY `paper`.`id` DESC";
+        $result = mysql_query_excute($sql);
+        while ( $row = mysql_fetch_assoc($result) ) {
+            $paper_info_data[] = $row;
+        }
+
+        if ( isset ($paper_info_data) ) {
+            foreach ($paper_info_data as $paper_info) {
+            $publish_id_1 = $paper_info["publish_id_1"];
+            $sql = "SELECT `headline`, `comment`, `release`.`rid`, `title`, `img1` FROM `publish` INNER JOIN `release` ON `publish`.`rid` = `release`.`rid` WHERE `id` = '$publish_id_1' LIMIT 1";
+            $result = mysql_query_excute($sql);
+            $row = mysql_fetch_assoc($result);
+            $publish_info_data[] = array_merge($row, $paper_info);
+            }
+        }
+
+        return $publish_info_data;
+    }
+
+    function find_publish_by_scrap( $user_id ){
+        $paper_info_data = array();
+        $publish_info_data = array();
+
+        $sql = "SELECT `paper`.`id`, `paper`.`user_id`, `publish_id_1`, `count`, `clap`, `paper`.`scrap`, `upapername`, `display_name`, `photo_url`, `paper`.`created_at` FROM `paper` INNER JOIN `users` ON `paper`.`user_id` = `users`.`id` INNER JOIN `p_scrap` ON  `paper`.`id` = `p_scrap`.`paper_id` WHERE `p_scrap`.`user_id` = $user_id ORDER BY `p_scrap`.`time` DESC";
         $result = mysql_query_excute($sql);
         while ( $row = mysql_fetch_assoc($result) ) {
             $paper_info_data[] = $row;

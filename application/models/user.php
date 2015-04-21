@@ -8,14 +8,14 @@ class user extends model {
 		return mysql_insert_id();
 	}
 
-	function update( $user_id, $email, $password, $first_name, $last_name){
+	function update( $user_id, $email, $password, $first_name, $last_name ){
 		$sql = "UPDATE users SET email = '$email', password = '$password', first_name = '$first_name', last_name = '$last_name' WHERE id = '$user_id' LIMIT 1";
 
 		return mysql_query_excute($sql);
 	}
 
-	function update_mypage( $user_id, $display_name, $upapername, $paper_explain, $facebook_url, $twitter_url, $website_url){
-		$sql = "UPDATE `users` SET `display_name` = '$display_name', `upapername` = '$upapername', `paper_explain` = '$paper_explain', `facebook_url` = '$facebook_url', `twitter_url` = '$twitter_url', `website_url` = '$website_url' WHERE id = '$user_id' LIMIT 1";
+	function update_mypage( $user_id, $display_name, $upapername, $paper_explain, $facebook_url, $twitter_url, $website_url, $photo_url, $cover_url ){
+		$sql = "UPDATE `users` SET `display_name` = '$display_name', `upapername` = '$upapername', `paper_explain` = '$paper_explain', `facebook_url` = '$facebook_url', `twitter_url` = '$twitter_url', `website_url` = '$website_url', `photo_url` = '$photo_url', `cover_url` = '$cover_url' WHERE id = '$user_id' LIMIT 1";
 
 		return mysql_query_excute($sql);
 	}
@@ -32,6 +32,16 @@ class user extends model {
 		$result = mysql_query_excute($sql);
 
 		return mysql_fetch_assoc($result);
+	}
+
+	function find_by_ids ( $ids = 0 ){
+		$user_string = implode("," , $ids );
+		$sql = "SELECT * FROM `users` WHERE `id` in ( $user_string ) ORDER BY FIELD (`id`, $user_string )";
+		$result = mysql_query_excute($sql);
+		while ($row = mysql_fetch_assoc($result)) {
+			$user_datas[] = $row;
+        }
+        return $user_datas;
 	}
 
 	function find_by_email( $email ){
@@ -64,7 +74,7 @@ class user extends model {
 
 	function release_comment_select($rid, $user_id){
 		$release_comment_data = array();
-		$sql = "SELECT `users`.`id`, `comment`, `photo_url` FROM `r_comment` INNER JOIN `users` ON `r_comment`.`user_id` = `users`.`id` WHERE `rid` = $rid";
+		$sql = "SELECT `users`.`id`, `comment`, `photo_url` FROM `r_comment` INNER JOIN `users` ON `r_comment`.`user_id` = `users`.`id` WHERE `rid` = $rid ORDER BY `time`";
 		$result = mysql_query_excute($sql);
 		while ($row = mysql_fetch_assoc($result)) {
 			$release_comment_data[] = $row;
@@ -78,7 +88,7 @@ class user extends model {
 
 	function paper_comment_select($paper_id){
 		$paper_comment_data = array();
-		$sql = "SELECT `users`.`id`, `comment`, `photo_url` FROM `p_comment` INNER JOIN `users` ON `p_comment`.`user_id` = `users`.`id` WHERE `paper_id` = $paper_id";
+		$sql = "SELECT `users`.`id`, `comment`, `photo_url` FROM `p_comment` INNER JOIN `users` ON `p_comment`.`user_id` = `users`.`id` WHERE `paper_id` = $paper_id ORDER BY `time`";
 		$result = mysql_query_excute($sql);
 		while ($row = mysql_fetch_assoc($result)) {
 			$paper_comment_data[] = $row;
@@ -115,6 +125,9 @@ class user extends model {
         	$follow_status = "購読解除";
         } else {
         	$follow_status = "購読する";
+        }
+        if ($user_id == $follower_id) {
+        	$follow_status = null;
         }
         return $follow_status;
     }
@@ -154,6 +167,26 @@ class user extends model {
         $sql = "UPDATE `users` SET `scrap` = $count[0] WHERE `id` = '$user_id'";
         mysql_query_excute($sql);
         return $count;
+	}
+
+	function get_user_following ( $user_id ){
+		$following = array();
+		$sql = "SELECT DISTINCT `user_id` FROM `following` WHERE `follower_id` = '$user_id' ORDER BY `following`.`created_at` DESC";
+		$result = mysql_query_excute($sql);
+		while ($row = mysql_fetch_object($result)) {
+			array_push($following, $row->user_id);
+        }
+        return $following;
+	}
+
+	function get_user_follower ( $user_id ){
+		$follower = array();
+		$sql = "SELECT DISTINCT `follower_id` FROM `following` WHERE `user_id` = '$user_id' ORDER BY `following`.`created_at` DESC";
+		$result = mysql_query_excute($sql);
+		while ($row = mysql_fetch_object($result)) {
+			array_push($follower, $row->follower_id);
+        }
+        return $follower;
 	}
 
 }

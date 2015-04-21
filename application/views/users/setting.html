@@ -111,6 +111,28 @@ else{
                                 <?php echo $user_data["website_url"]; ?>
                                 </div>
                             </lavel>
+                            <lavel class="setting-item">
+                                <div>
+                                    <strong>プロフィール画像(URL指定)</strong>
+                                   <span>
+                                        <a id="photo_url_change" class="change">変更</a>
+                                    </span>
+                                </div>
+                                <div id="photo_url">
+                                <?php echo $user_data["photo_url"]; ?>
+                                </div>
+                            </lavel>
+                            <lavel class="setting-item">
+                                <div>
+                                    <strong>カバー画像(URL指定)</strong>
+                                   <span>
+                                        <a id="cover_url_change" class="change">変更</a>
+                                    </span>
+                                </div>
+                                <div id="cover_url">
+                                <?php echo $user_data["cover_url"]; ?>
+                                </div>
+                            </lavel>
 							<lavel class="setting-item">
 								<div>
 									<strong>メール通知設定</strong>
@@ -193,6 +215,8 @@ else{
         var option3 = {trigger : $("#facebook_url_change"), action : "click"};
         var option4 = {trigger : $("#twitter_url_change"), action : "click"};
         var option5 = {trigger : $("#website_url_change"), action : "click"};
+        var option6 = {trigger : $("#photo_url_change"), action : "click"};
+        var option7 = {trigger : $("#cover_url_change"), action : "click"};
         $("#paper_name").editable(option1, function(e){
           if(e.value===''){
             $("#paper_name").html(e.old_value);
@@ -238,6 +262,24 @@ else{
             var upapername = e.value;
           }
         });
+        $("#photo_url").editable(option6, function(e){
+          if(e.value===''){
+            $("#paper_explain").html(e.old_value);
+            alert("値を入力してください");
+          }
+          else{
+            var upapername = e.value;
+          }
+        });
+        $("#cover_url").editable(option7, function(e){
+          if(e.value===''){
+            $("#paper_explain").html(e.old_value);
+            alert("値を入力してください");
+          }
+          else{
+            var upapername = e.value;
+          }
+        });
 
       });
 
@@ -259,7 +301,9 @@ else{
         'paper_explain': jQuery.trim(jQuery("#paper_explain").text()),
         'facebook_url': jQuery.trim(jQuery("#facebook_url").text()),
         'twitter_url': jQuery.trim(jQuery("#twitter_url").text()),
-        'website_url': jQuery.trim(jQuery("#website_url").text())
+        'website_url': jQuery.trim(jQuery("#website_url").text()),
+        'photo_url': jQuery.trim(jQuery("#photo_url").text()),
+        'cover_url': jQuery.trim(jQuery("#cover_url").text())
     };
 
     jQuery.ajax({
@@ -287,6 +331,6 @@ else{
 });
 </script>
 
-	</body>
+</body>
 
 </html>

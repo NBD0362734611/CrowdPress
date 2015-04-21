@@ -2122,6 +2122,13 @@ section.greyish {
     color: #fff;
 }
 
+.paper-title a{
+    text-decoration: none;
+}
+
+.count a{
+    text-decoration: none;
+}
 .count {
     color: #666;
     font-weight: 700;

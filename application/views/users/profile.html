@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 <link href='http://fonts.googleapis.com/css?family=Montserrat:400,700|Open+Sans:400italic,700italic,400,700' rel='stylesheet' type='text/css'>
 <link rel="icon" href="application/public/img/favicon.ico">
-<title>MyPage - CrowdPress</title>
+<title><?php echo $user_data["upapername"]; ?> - CrowdPress</title>
 </head>
 
 <body class="blog masonry-style">
@@ -37,7 +37,7 @@ else{
 							<p id="paper_explain"><?php echo $user_data["paper_explain"]; ?></p>
                             <?php if( $_SESSION["user"] == $user_data["id"] ){
                                 //自分見た時
-                                echo "<button id=\"user_info_change_top\" class=\"button white transparent\">編集する</button>";
+                                echo "<button id=\"user_info_change_top\" class=\"button white transparent\"onClick=\"location.href='?route=users/setting'\" >編集する</button>";
                             }
                             else{
                                 //他人が見た時→更に状態によって購読解除になるようにする
@@ -53,19 +53,19 @@ else{
 							</div>
 
 							<div class="column fourth">
-									<div class="count"><?php echo $user_data["publish_paper"]; ?></div>
+									<div class="count"><a href="?route=users/profile/<?php echo $user_data["id"]; ?>"><?php echo $user_data["publish_paper"]; ?></a></div>
 									<div class="txt">新聞発行数</div>
 							</div>
 							<div class="column fourth">
-									<div class="count"><?php echo $user_data["scrap"]; ?></div>
+									<div class="count"><a href="?route=users/profile_user_scrap/<?php echo $user_data["id"]; ?>"><?php echo $user_data["scrap"]; ?></a></div>
 									<div class="txt">スクラップ</div>
 							</div>
 							<div class="column fourth">
-									<div class="count follow"><?php echo $user_data["follow"]; ?></div>
+									<div class="count follow"><a href="?route=users/profile_user_following/<?php echo $user_data["id"]; ?>"><?php echo $user_data["follow"]; ?></a></div>
 									<div class="txt">購読数</div>
 							</div>
 							<div class="column fourth last">
-									<div class="count follower"><?php echo $user_data["follower"]; ?></div>
+									<div class="count follower"><a href="?route=users/profile_user_follower/<?php echo $user_data["id"]; ?>"><?php echo $user_data["follower"]; ?></a></div>
 									<div class="txt">購読者数</div>
 							</div>
 
@@ -80,9 +80,9 @@ else{
                     <?php foreach ($paper_data as $paper) { ?>
                     <div class="myfeed-wrapper">
                         <article role="main">
-                            <div class="question_image column inline-block"><img src="<?php echo $user_data["photo_url"]; ?>" alt="ユーザー設定画像"/></div>
+                            <div class="question_image column inline-block"><img src="<?php echo $paper["photo_url"]; ?>" alt="ユーザー設定画像"/></div>
                             <div class="colmn inline-block">
-                                <h5 class="meta-post"><a href="?route=users/profile_user/<?php echo $user_data["id"]; ?>"><?php echo $user_data["upapername"]; ?>第<?php echo $paper["count"]; ?>号</a> - <time datetime="<?php echo $paper["created_at"]; ?>"><?php echo $paper["created_at"]; ?></time></h5>
+                                <h5 class="meta-post"><a href="?route=users/profile_user/<?php echo $paper["id"]; ?>"><?php echo $paper["upapername"]; ?>第<?php echo $paper["count"]; ?>号</a> - <time datetime="<?php echo $paper["created_at"]; ?>"><?php echo $paper["created_at"]; ?></time></h5>
                             </div>
                             <section class="myfeed" class="row section">
                                 <h2 class="paper-subtitle"><?php echo $paper["headline"]; ?></h2>
@@ -204,39 +204,39 @@ $('#user_follow').on('click', function() {
     });
 });
 
-    $(function(){
-        var option1 = {trigger : $("#user_info_change_top"), action : "click"};
-        var option2 = {trigger : $("#user_info_change_top"), action : "click"};
-        var option3 = {trigger : $("#user_info_change_top"), action : "click"};
-        var option4 = {trigger : $("#user_info_change_top"), action : "click"};
-        $("#first_name").editable(option1, function(e){
-          if(e.value===''){
-            $("#first_name").html(e.old_value);
-            alert("名前を入力してください");
-          }
-        });
+    // $(function(){
+    //     var option1 = {trigger : $("#user_info_change_top"), action : "click"};
+    //     var option2 = {trigger : $("#user_info_change_top"), action : "click"};
+    //     var option3 = {trigger : $("#user_info_change_top"), action : "click"};
+    //     var option4 = {trigger : $("#user_info_change_top"), action : "click"};
+    //     $("#first_name").editable(option1, function(e){
+    //       if(e.value===''){
+    //         $("#first_name").html(e.old_value);
+    //         alert("名前を入力してください");
+    //       }
+    //     });
 
-        $("#last_name").editable(option2, function(e){
-          if(e.value===''){
-            $("#last_name").html(e.old_value);
-            alert("名前を入力してください");
-          }
-        });
+    //     $("#last_name").editable(option2, function(e){
+    //       if(e.value===''){
+    //         $("#last_name").html(e.old_value);
+    //         alert("名前を入力してください");
+    //       }
+    //     });
 
-        $("#paper_name").editable(option3, function(e){
-          if(e.value===''){
-            $("#paper_name").html(e.old_value);
-            alert("新聞名を入力してください");
-          }
-        });
+    //     $("#paper_name").editable(option3, function(e){
+    //       if(e.value===''){
+    //         $("#paper_name").html(e.old_value);
+    //         alert("新聞名を入力してください");
+    //       }
+    //     });
 
-        $("#paper_explain").editable(option4, function(e){
-          if(e.value===''){
-            $("#paper_explain").html(e.old_value);
-            alert("新聞の説明を値を入力してください");
-          }
-        });
-      });
+    //     $("#paper_explain").editable(option4, function(e){
+    //       if(e.value===''){
+    //         $("#paper_explain").html(e.old_value);
+    //         alert("新聞の説明を値を入力してください");
+    //       }
+    //     });
+    //   });
 
     jQuery("button#user_info_change_top_determine").click(function() {
 
