@@ -5,16 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="description" content="CrowdPressとは">
 <style type="text/css">@-ms-viewport{width: device-width;}</style>
-<link rel="stylesheet" href="application/public/css/style.css" media="screen">
 <link rel="stylesheet" href="application/public/css/layers.min.css" media="screen">
+<link rel="stylesheet" href="application/public/css/style.css" media="screen">
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 <link href='http://fonts.googleapis.com/css?family=Montserrat:400,700|Open+Sans:400italic,700italic,400,700' rel='stylesheet' type='text/css'>
 <link rel="icon" href="application/public/img/favicon.ico">
-<title>MyPage - CrowdPress</title>
+<title>MyFeed - CrowdPress</title>
 </head>
 
 <body class="blog masonry-style">
-<?php if( isset( $error_message ) ) echo $error_message; ?>
+<?php if( isset( $error_message ) ) h( $error_message ); ?>
 
 <?php if( isset( $_SESSION["user"]  ) ){
   include("application/views/common/header.html");
@@ -30,20 +30,26 @@ else{
                     <?php foreach ($paper_data as $paper) { ?>
                     <div class="myfeed-wrapper">
                         <article role="main">
-                            <div class="question_image column inline-block"><img src="<?php echo $paper["photo_url"]; ?>" alt="ユーザー設定画像"/></div>
+                            <div class="question_image column inline-block"><a href="?route=users/profile_user/<?php h( $paper["user_id"] ); ?>"><img src="<?php h( $paper["photo_url"] ); ?>" alt="プロフィール画像"/></a></div>
                             <div class="colmn inline-block">
-                                <h5 class="meta-post"><a href="?route=users/profile_user/<?php echo $paper["user_id"]; ?>"><?php echo $paper["upapername"]; ?>第<?php echo $paper["count"]; ?>号</a> - <time datetime="<?php echo $paper["created_at"]; ?>"><?php echo $paper["created_at"]; ?></time></h5>
+                                <h5 class="meta-post"><a href="?route=pages/display_paper/<?php h( $paper["id"] ); ?>"><?php h( $paper["upapername"] ); ?>第<?php h( $paper["count"] ); ?>号</a> - <time datetime="<?php h( $paper["created_at"] ); ?>"><?php h( $paper["created_at"] ); ?></time></h5>
                             </div>
                             <section class="myfeed" class="row section">
-                                <h2 class="paper-subtitle"><?php echo $paper["headline"]; ?></h2>
+                                <h2 class="paper-subtitle"><?php h( $paper["headline"] ); ?></h2>
                                 <div class="release-article">
                                     <p class="release">
-                                    <?php echo $paper["comment"]; ?>
-                                    …<a class="full-paper" href="?route=pages/display_paper/<?php echo $paper["id"]; ?>">この新聞を読む</a>
+                                    <?php h( $paper["comment"] ); ?>
+                                    …<a class="full-paper" href="?route=pages/display_paper/<?php h( $paper["id"] ); ?>">この新聞を読む</a>
                                     </p>
                                     <figure class="column half">
-                                        <img src="<?php echo $paper["img1"]; ?>">
-                                        <figcaption><a href="?route=pages/release_detail/<?php echo $paper["rid"]; ?>"><?php echo $paper["title"]; ?></a></figcaption>
+                                        <?php
+                                            if( !empty($paper['img1']) ) {
+                                                echo '<img src="';
+                                                h( $paper['img1'] );
+                                                echo '">';
+                                            }
+                                        ?>
+                                        <figcaption><a href="?route=pages/release_detail/<?php h( $paper["rid"] ); ?>"><?php h( $paper["title"] ); ?></a></figcaption>
                                     </figure>
                                     <figure class="column half">
                                         <figcaption>ユーザー設定画像</figcaption>
@@ -52,14 +58,15 @@ else{
                             <div class="widget meta-social column half">
                                 <ul class="inline">
                                     <li><a class="paper-comment-toggle border-box"><i class="fa fa-comment-o fa-lg"></i></a></li>
-                                    <li><a class="clap border-box" pid="<?php echo $paper["id"]; ?>"><i class="fa fa-heart-o fa-lg"></i></a><span class="arrow_box"><?php echo $paper["clap"]; ?></span></li>
-                                    <li><a class="scrap border-box" pid="<?php echo $paper["id"]; ?>"><i class="fa fa-paperclip fa-lg"></i></a><span class="arrow_box"><?php echo $paper["scrap"]; ?></span></li>
+                                    <li><a class="clap border-box" pid="<?php h( $paper["id"] ); ?>"><i class="fa fa-heart-o fa-lg"></i></a><span class="arrow_box"><?php h( $paper["clap"] ); ?></span></li>
+                                    <li><a class="scrap border-box" pid="<?php h( $paper["id"] ); ?>"><i class="fa fa-paperclip fa-lg"></i></a><span class="arrow_box"><?php h( $paper["scrap"] ); ?></span></li>
                                 </ul>
                             </div>
                             <!-- 自分のコメントここから -->
                             <form class="paper-comment" style="display:none" action="?route=pages/paper_comment_insert" method="post">
-                                <input type="hidden" name="paper_id" value="<?php echo $paper["id"]; ?>" />
-                                <input type="hidden" name="user_id" value="<?php echo $_SESSION["user"]; ?>" />
+                                <input type="hidden" name="paper_id" value="<?php h( $paper["id"] ); ?>" />
+                                <input type="hidden" name="user_id" value="<?php h( $_SESSION["user"] ); ?>" />
+                                <input type="hidden" name="token" value="<?php h($_SESSION['token']); ?>">
                                 <input type="text" name="comment" value="新聞にコメントする" />
                             </form>
                             <!-- コメント表示 -->
@@ -68,13 +75,14 @@ else{
                             <section class="line_wrapper">
                                 <div class="question_Box inline">
                                     <div class="question_image column inline-block">
-                                    <a href="?route=users/profile_user/<?php echo $release_comment["id"]; ?>">
-                                        <img src="<?php echo $release_comment["photo_url"]; ?>" alt="ユーザーの写真"/>
-                                    </a>
+                                        <img src="<?php h( $release_comment["photo_url"] ); ?>" alt="ユーザーの写真"/>
                                     </div>
                                     <p class="arrow_question column ten reset inline-block">
-                                    <?php echo $release_comment["comment"] ; ?>
+                                    <?php h( $release_comment["comment"] ); ?>
                                     </p><!-- /.arrow_question -->
+                                    <div>
+                                        <a href="?route=users/profile_user/<?php h( $release_comment["id"] ); ?>"><?php h( $release_comment["display_name"] ); ?></a>
+                                    </div>
                                 </div><!-- /.question_Box -->
                                 <div class="clear"></div>
                             </section><!-- /.line_wrappaer -->

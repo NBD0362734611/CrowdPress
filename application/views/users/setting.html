@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="description" content="CrowdPressとは">
 <style type="text/css">@-ms-viewport{width: device-width;}</style>
-<link rel="stylesheet" href="application/public/css/style.css" media="screen">
 <link rel="stylesheet" href="application/public/css/layers.min.css" media="screen">
+<link rel="stylesheet" href="application/public/css/style.css" media="screen">
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 <link href='http://fonts.googleapis.com/css?family=Montserrat:400,700|Open+Sans:400italic,700italic,400,700' rel='stylesheet' type='text/css'>
 <link rel="icon" href="application/public/img/favicon.ico">
@@ -14,7 +14,7 @@
 </head>
 
 <body class="page">
-<?php if( isset( $error_message ) ) echo $error_message; ?>
+<?php if( isset( $error_message ) ) h( $error_message ); ?>
 
 <?php if( isset( $_SESSION["user"]  ) ){
   include("application/views/common/header.html");
@@ -22,6 +22,7 @@
 else{
   include("application/views/common/header_before_login.html");
 } ?>
+
 		<main role="main">
 			<div id="main">
 
@@ -37,7 +38,7 @@ else{
                                     <strong>ユーザーID</strong>
                                 </div>
                                 <div id="user_id">
-                                <?php echo $user_data["id"]; ?>
+                                <?php h( $user_data["id"] ); ?>
                                 </div>
                             </lavel>
 							<lavel class="setting-item">
@@ -48,7 +49,7 @@ else{
 									</span>
 								</div>
 								<div id="paper_name">
-                                <?php echo $user_data["upapername"]; ?>
+                                <?php h( $user_data["upapername"] ); ?>
 								</div>
 							</lavel>
                             <lavel class="setting-item">
@@ -59,7 +60,7 @@ else{
                                     </span>
                                 </div>
                                 <div id="paper_explain">
-                                <?php echo $user_data["paper_explain"]; ?>
+                                <?php h( $user_data["paper_explain"] ); ?>
                                 </div>
                             </lavel>
 							<lavel class="setting-item">
@@ -67,7 +68,7 @@ else{
 									<strong>ユーザー名</strong>
 								</div>
 								<div id="display_name">
-                                    <?php echo $user_data["display_name"]; ?>
+                                    <?php h( $user_data["display_name"] ); ?>
 								</div>
 							</lavel>
 							<lavel class="setting-item">
@@ -75,7 +76,7 @@ else{
 									<strong>メールアドレス</strong>
 								</div>
 								<div id="mail_address">
-                                <?php echo $user_data["email"]; ?>
+                                <?php h( $user_data["email"] ); ?>
 								</div>
 							</lavel>
                             <lavel class="setting-item">
@@ -86,7 +87,7 @@ else{
                                     </span>
                                 </div>
                                 <div id="facebook_url">
-                                <?php echo $user_data["facebook_url"]; ?>
+                                <?php h( $user_data["facebook_url"] ); ?>
                                 </div>
                             </lavel>
                             <lavel class="setting-item">
@@ -97,7 +98,7 @@ else{
                                     </span>
                                 </div>
                                 <div id="twitter_url">
-                                <?php echo $user_data["twitter_url"]; ?>
+                                <?php h( $user_data["twitter_url"] ); ?>
                                 </div>
                             </lavel>
                             <lavel class="setting-item">
@@ -108,7 +109,7 @@ else{
                                     </span>
                                 </div>
                                 <div id="website_url">
-                                <?php echo $user_data["website_url"]; ?>
+                                <?php h( $user_data["website_url"] ); ?>
                                 </div>
                             </lavel>
                             <lavel class="setting-item">
@@ -119,7 +120,7 @@ else{
                                     </span>
                                 </div>
                                 <div id="photo_url">
-                                <?php echo $user_data["photo_url"]; ?>
+                                <?php h( $user_data["photo_url"] ); ?>
                                 </div>
                             </lavel>
                             <lavel class="setting-item">
@@ -130,7 +131,7 @@ else{
                                     </span>
                                 </div>
                                 <div id="cover_url">
-                                <?php echo $user_data["cover_url"]; ?>
+                                <?php h( $user_data["cover_url"] ); ?>
                                 </div>
                             </lavel>
 							<lavel class="setting-item">
@@ -189,7 +190,8 @@ else{
 								</div>
 							</lavel>
 							<div>
-								<button id="change_save" class="button">変更を保存</button>
+                                <input type="hidden" name="token" value="<?php h($_SESSION['token']); ?>">
+								<button id="change_save" token="<?php h($_SESSION['token']); ?>" class="button">変更を保存</button>
 							</div>
 						</form>
                     </div>
@@ -288,12 +290,7 @@ else{
 
     var button = $(this);
     button.attr("disabled", true);
-    // var data = {
-    //     upapername: jQuery('#paper_name').text()
-    //     // uid: jQuery("#fb-root").attr("uid"),
-    //     // uname: jQuery("#user_name").text(),
-    //     // uemail: jQuery("#mail_address").text(),
-    // };
+    var token = $(this).attr("token");
     var data = {
         'user_id' : 0,
         'display_name': jQuery.trim(jQuery("#display_name").text()),
@@ -303,7 +300,8 @@ else{
         'twitter_url': jQuery.trim(jQuery("#twitter_url").text()),
         'website_url': jQuery.trim(jQuery("#website_url").text()),
         'photo_url': jQuery.trim(jQuery("#photo_url").text()),
-        'cover_url': jQuery.trim(jQuery("#cover_url").text())
+        'cover_url': jQuery.trim(jQuery("#cover_url").text()),
+        'token':token
     };
 
     jQuery.ajax({

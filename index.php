@@ -6,6 +6,28 @@ ini_set( "display_errors", 1 );
 
 session_start();
 
+//32バイトのCSRFトークンを作成
+function get_csrf_token() {
+  $TOKEN_LENGTH = 16;//16*2=32バイト
+  $bytes = openssl_random_pseudo_bytes($TOKEN_LENGTH);
+  return bin2hex($bytes);
+}
+
+//トークンをセッションにセット
+function setToken(){
+    $token = get_csrf_token();
+    $_SESSION['token'] = $token;
+}
+
+//トークンをセッションから取得
+function checkToken(){
+    //セッションが空か生成したトークンと異なるトークンでPOSTされたときは不正アクセス
+    if(empty($_SESSION['token']) || ($_SESSION['token'] != $_POST['token'])){
+        echo '不正なPOSTが行われました', PHP_EOL;
+        exit;
+    }
+}
+
 $uri = array();
 
 if( isset( $_GET['route'] ) ){

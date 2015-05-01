@@ -5,16 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="description" content="CrowdPressとは">
 <style type="text/css">@-ms-viewport{width: device-width;}</style>
-<link rel="stylesheet" href="application/public/css/style.css" media="screen">
 <link rel="stylesheet" href="application/public/css/layers.min.css" media="screen">
+<link rel="stylesheet" href="application/public/css/style.css" media="screen">
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 <link href='http://fonts.googleapis.com/css?family=Montserrat:400,700|Open+Sans:400italic,700italic,400,700' rel='stylesheet' type='text/css'>
 <link rel="icon" href="application/public/img/favicon.ico">
-<title><?php echo $release_detail_data["title"]; ?> - CrowdPress</title>
+<title><?php h( $release_detail_data["title"] ) ; ?> - CrowdPress</title>
 </head>
 
 <body class="single single-portfolio">
-<?php if( isset( $error_message ) ) echo $error_message; ?>
+<?php if( isset( $error_message ) ) h( $error_message ); ?>
 
 <?php if( isset( $_SESSION["user"]  ) ){
   include("application/views/common/header.html");
@@ -28,48 +28,48 @@ else{
                 <div class="row-content buffer-left buffer-right buffer-bottom clear-after">
                     <div id="post-nav">
                         <ul class="clear-after reset plain">
-                            <li id="prev-items" class="post-nav"><a href="?route=pages/release_detail/<?php echo $release_detail_data["rid"] - 1; ?>"><i class="fa fa-chevron-left"></i><span class="label hidden-mobile">前の記事</span></a></li>
+                            <li id="prev-items" class="post-nav"><a href="?route=pages/release_detail/<?php h( $release_detail_data["rid"] - 1); ?>"><i class="fa fa-chevron-left"></i><span class="label hidden-mobile">前の記事</span></a></li>
                             <li id="all-items" class="post-nav"><a href="#comments"><i class="fa fa-arrow-down"></i></a></li>
-                            <li id="next-items" class="post-nav"><a href="?route=pages/release_detail/<?php echo $release_detail_data["rid"] + 1; ?>"><span class="label hidden-mobile">次の記事</span><i class="fa fa-chevron-right"></i></a></li>
+                            <li id="next-items" class="post-nav"><a href="?route=pages/release_detail/<?php h( $release_detail_data["rid"] + 1); ?>"><span class="label hidden-mobile">次の記事</span><i class="fa fa-chevron-right"></i></a></li>
                         </ul>
                     </div>
 
                     <div class="post-area clear-after">
                         <article role="main" class="column nine">
 <!--                             <h5 class="meta-post"><a href="#"></a></h5>  -->
-                            <a href="<?php echo $release_detail_data["url"]; ?>" target="_blank"><h1><?php echo $release_detail_data["title"]; ?></h1></a>
+                            <a href="<?php h( $release_detail_data["url"] ); ?>" target="_blank"><h1><?php h( $release_detail_data["title"] ); ?></h1></a>
                             <div class="gallery slider" data-autoplay="false" data-autoheight="true">
                                 <?php
                                             echo '<figure>';
                                             if( !empty($release_detail_data["img1"]) ) {
                                                 echo '<div><img src=';
-                                                print $release_detail_data["img1"];
+                                                h( $release_detail_data["img1"] );
                                                 echo '></div>';
                                             }
                                             if( !empty($release_detail_data["img2"]) ) {
                                                 echo '<div><img src=';
-                                                print $release_detail_data["img2"];
+                                                h( $release_detail_data["img2"] );
                                                 echo '></div>';
                                             }
                                              if( !empty($release_detail_data["img3"]) ) {
                                                 echo '<div><img src=';
-                                                print $release_detail_data["img3"];
+                                                h( $release_detail_data["img3"] );
                                                 echo '></div>';
                                             }
                                             echo '</figure>';
                                 ?>
                             </div><!-- gallery -->
-                            <p><?php echo $release_detail_data["body"]; ?></p>
+                            <p><?php htag ( $release_detail_data["body"] ) ; ?></p>
                         </article>
 
                         <aside role="complementary" class="sidebar column three last">
                             <div class="widget">
                                 <h4>会社名</h4>
-                                <p><a href="?route=pages/release_sort_by_cname/<?php echo $release_detail_data["cname"]; ?>"><?php echo $release_detail_data["cname"]; ?></a></p>
+                                <p><a href="?route=pages/release_sort_by_cname/<?php h( $release_detail_data["cname"] ); ?>"><?php h( $release_detail_data["cname"] ); ?></a></p>
                             </div>
                             <div class="widget">
                                 <h4>日時</h4>
-                                <p><?php echo $release_detail_data["time"]; ?></p>
+                                <p><?php h( $release_detail_data["time"] ); ?></p>
                             </div>
                             <div class="widget">
                                 <h4>test</h4>
@@ -86,27 +86,27 @@ else{
 
                     <div class="meta-social">
                         <ul class="inline center">
-                            <li><a class="clap border-box" rid="<?php echo $release_detail_data["rid"]; ?>"><i class="fa fa-heart-o fa-lg"></i></a><span class="arrow_box"><?php echo $release_detail_data["clap"]; ?></span></li>
-                             <li><a class="scrap border-box" rid="<?php echo $release_detail_data["rid"]; ?>"><i class="fa fa-paperclip fa-lg"></i></a><span class="arrow_box"><?php echo $release_detail_data["scrap"]; ?></span></li>
+                            <li><a class="clap border-box" rid="<?php h( $release_detail_data["rid"] ); ?>"><i class="fa fa-heart-o fa-lg"></i></a><span class="arrow_box"><?php h( $release_detail_data["clap"] ); ?></span></li>
+                             <li><a class="scrap border-box" rid="<?php h( $release_detail_data["rid"] ); ?>"><i class="fa fa-paperclip fa-lg"></i></a><span class="arrow_box"><?php h( $release_detail_data["scrap"] ); ?></span></li>
                         </ul>
                     </div>
 
                     <div class="comment-section">
-                        <h3 id="comments"><?php echo $release_comment_number["number"]; ?> Comments</h3>
+                        <h3 id="comments"><?php h( $release_comment_number["number"] ); ?> Comments</h3>
                         <ul class="comment-list plain">
                         <?php if (isset($release_comment_data)) { ?>
                         <?php foreach ($release_comment_data as $release_comment) { ?>
                             <li class="comment">
                                 <div class="single-comment">
                                     <div class="comment-author">
-                                        <img src="<?php echo $release_comment["photo_url"]; ?>" class="avatar" alt="">
-                                        <cite><a href="?route=users/profile_user/<?php echo $release_comment["id"]; ?>"><?php echo $release_comment["display_name"]; ?></a></cite>
+                                        <img src="<?php h( $release_comment["photo_url"] ); ?>" class="avatar" alt="">
+                                        <cite><a href="?route=users/profile_user/<?php h( $release_comment["id"] ); ?>"><?php h( $release_comment["display_name"] ); ?></a></cite>
                                         <span class="says">says:</span>
                                     </div><!-- comment-author -->
                                     <div class="comment-meta">
-                                        <time datetime="<?php echo $release_comment["time"]; ?>"><?php echo $release_comment["time"]; ?></time> / <a href="#" class="reply">Reply</a>
+                                        <time datetime="<?php h( $release_comment["time"] ); ?>"><?php h( $release_comment["time"] ); ?></time> / <a href="#" class="reply">Reply</a>
                                     </div><!-- comment-meta -->
-                                    <p><?php echo $release_comment["comment"]; ?></p>
+                                    <p><?php h( $release_comment["comment"] ); ?></p>
                                 </div><!-- single-comment -->
                             </li>
                         <?php } ?>
@@ -114,8 +114,9 @@ else{
                         </ul>
                     </div><!-- comment-section -->
                     <form class="release-comment" action="?route=pages/release_comment_insert" method="post">
-                        <input type="hidden" name="rid" value="<?php echo $release_detail_data["rid"]; ?>" />
-                        <input type="hidden" name="user_id" value="<?php echo $_SESSION["user"]; ?>" />
+                        <input type="hidden" name="token" value="<?php h($_SESSION['token']); ?>">
+                        <input type="hidden" name="rid" value="<?php h( $release_detail_data["rid"] ); ?>" />
+                        <input type="hidden" name="user_id" value="<?php h( $_SESSION["user"] ); ?>" />
                         <input type="text" name="comment" value="リリースにコメントする" />
                     </form><!-- post-comment -->
 

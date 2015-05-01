@@ -4,6 +4,7 @@ class authentications extends controller {
 	{
 		// set on application.config.php
 		GLOBAL $hybridauth_config;
+		setToken();
 
 		try{
 		// create an instance for Hybridauth with the configuration file path as parameter
@@ -30,7 +31,11 @@ class authentications extends controller {
 				// 2.2 - redirect to user/profile
 				// $this->redirect( "users/profile" );
 				$uri = $_SERVER['HTTP_REFERER'];
-				header("Location: ".$uri);
+				if ( preg_match( '{http\:\/\/crowdpress\.jp\/index\.php\?route\=users\/login}' , $uri ) ) {
+					$this->redirect( "users/myfeed" );
+				} else {
+					header("Location: ".$uri);
+				}
 			}
 
 		# 3 - else, here lets check if the user email we got from the provider already exists in our database ( for this example the email is UNIQUE for each user )

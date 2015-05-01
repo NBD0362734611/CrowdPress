@@ -8,7 +8,7 @@
 	$database_host = "localhost";
 	$database_user = "root";
 	$database_pass = "alue1029";
-	$database_name = "crowdpress";
+	$database_name = "CrowdPress";
 
 	$database_link = @ mysql_connect( $database_host, $database_user, $database_pass );
 
@@ -34,3 +34,52 @@
 
 		return $result;
 	}
+
+    function h($str){
+    	// 変換本体
+    	$str=htmlentities($str, ENT_QUOTES, mb_internal_encoding());
+    	// 「(」「)」を変換
+    	$str=mb_ereg_replace("\(","&#40;",$str);
+    	$str=mb_ereg_replace("\)","&#41;",$str);
+
+    	echo $str;
+    	return $str;
+    }
+
+    function hbr($str){
+    	// 変換本体
+    	$str=htmlentities($str, ENT_QUOTES, mb_internal_encoding());
+    	// 「(」「)」を変換
+    	$str=mb_ereg_replace("\(","&#40;",$str);
+    	$str=mb_ereg_replace("\)","&#41;",$str);
+
+    	echo nl2br($str);
+    	return nl2br($str);
+    }
+
+    function htag($str){
+        // 変換本体
+        $str=htmlentities($str, ENT_QUOTES, mb_internal_encoding());
+        // 「(」「)」を変換
+        $str=mb_ereg_replace("\(","&#40;",$str);
+        $str=mb_ereg_replace("\)","&#41;",$str);
+
+        //一部のタグを許可する
+        $search = array('&lt;p&gt;','&lt;/p&gt;','&lt;br&gt;','&lt;/br&gt;');
+        $replace = array('<p>','</p>','<br>','</br>');
+
+        echo str_replace($search,$replace,$str);
+        return str_replace($search,$replace,$str);
+    }
+
+    function escape( $value ){
+        // 数値以外をクオートする
+        if (!is_numeric($value)) {
+            if ( is_array ($value) ) {
+                $value = array_map("escape", $value);
+            } else {
+                $value = mysql_real_escape_string($value);
+            }
+        }
+        return $value;
+    }

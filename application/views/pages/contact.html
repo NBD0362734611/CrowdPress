@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="description" content="CrowdPressとは">
+<style type="text/css">@-ms-viewport{width: device-width;}</style>
+<link rel="stylesheet" href="application/public/css/layers.min.css" media="screen">
+<link rel="stylesheet" href="application/public/css/style.css" media="screen">
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700|Open+Sans:400italic,700italic,400,700' rel='stylesheet' type='text/css'>
+<link rel="icon" href="application/public/img/favicon.ico">
+<title>問い合わせ - CrowdPress</title>
+</head>
+
+<body class="page">
+<?php if( isset( $error_message ) ) echo $error_message;?>
+
+<?php if( isset( $_SESSION["user"]  ) ){
+  include("application/views/common/header.html");
+}
+else{
+  include("application/views/common/header_before_login.html");
+} ?>
+
+			<div id="main">
+
+				<section class="row section">
+					<div class="row-content buffer even clear-after contact-wrapper">
+						<div class="section-title"><h3>問い合わせ</h3></div>
+						<div style="text-align:center;">
+						<p>
+						なにかありましたら
+						</p>
+						</div>
+						<div style="text-align:center;">
+							<form id="contact-form" class="contact-section" method="post" action="">
+								<!-- <span class="pre-input"><i class="icon icon-user"></i></span> -->
+								<input class="name plain buffer" type="text" name="name" placeholder="お名前">
+								<!-- <span class="pre-input"><i class="icon icon-email"></i></span> -->
+								<input class="email plain buffer" type="email" name="email" placeholder="メールアドレス">
+								<textarea class="plain buffer" name="message" placeholder="本文"></textarea>
+								<input id="send" class="plain button red" type="button" value="送信">
+							</form>
+							<div id="success"></div>
+						</div>
+					</div>
+				</section>
+			</div><!-- id-main -->
+		</main><!-- main -->
+
+<?php include("application/views/common/footer.html");?>
+
+<script src="https://code.jquery.com/jquery.js"></script>
+<script src="application/public/js/plugins.js"></script>
+<script src="application/public/js/beetle.js"></script>
+<script src="application/public/js/analyticstracking.js"></script>
+<script>
+		$(document).ready(function(){
+			$('#send').click(function(){
+				$(this).val('送信中 ...');
+				$('#success p').remove();
+				$.post('../contact/contact.php', $('#contact-form').serialize(), function(response) {
+					$('#success').html(response);
+					//$('#success').hide('slow');
+					$('#send').val('送信');
+				});
+				return false;
+			});
+		});
+		</script>
+
+	</body>
+
+</html>

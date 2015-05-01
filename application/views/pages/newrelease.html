@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="description" content="CrowdPressとは">
 <style type="text/css">@-ms-viewport{width: device-width;}</style>
-<link rel="stylesheet" href="application/public/css/style.css" media="screen">
 <link rel="stylesheet" href="application/public/css/layers.min.css" media="screen">
+<link rel="stylesheet" href="application/public/css/style.css" media="screen">
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 <link href='http://fonts.googleapis.com/css?family=Montserrat:400,700|Open+Sans:400italic,700italic,400,700' rel='stylesheet' type='text/css'>
 <link rel="icon" href="application/public/img/favicon.ico">
@@ -14,7 +14,7 @@
 </head>
 
 <body class="single single-post">
-<?php if( isset( $error_message ) ) echo $error_message;?>
+<?php if( isset( $error_message ) ) h ($error_message);?>
 
 <?php if( isset( $_SESSION["user"]  ) ){
   include("application/views/common/header.html");
@@ -28,30 +28,38 @@ else{
             <div id="main" class="row">
                 <div class="row-content buffer">
 
-                    <h2 class="newrelease">新着リリース <?php if ( isset($cname)) { echo "$cname"; } ?></h2>
+                    <div class="widget widget_search">
+                        <form id="search" role="search">
+                        <!--<span class="pre-input"><i class="fa fa-search"></i></span>-->
+                        <input type="text" name="keyword" placeholder="リリース検索..." value="<?php if ( isset($title)) { h ($title); } ?>" class="plain buffer">
+                        <input type="hidden" name="token" value="<?php h($_SESSION['token']); ?>">
+                        </form>
+                    </div>
+
+                    <h2 class="newrelease">新着リリース <?php if ( isset($cname)) { h($cname); } ?></h2>
                     <!-- 繰り返しスタート -->
                     <?php foreach ($release_data as $release) { ?>
                         <div class="post-area clear-after">
                             <section role="main" class="release1">
                                 <h3 class="release-title">
-                                <a href="?route=pages/release_detail/<?php echo $release["rid"]; ?>">
-                                    <?php echo $release["title"]; ?>
+                                <a href="?route=pages/release_detail/<?php h( $release["rid"] ); ?>">
+                                    <?php h( $release["title"] ); ?>
                                 </a></h3>
                                     <div class="portfolio-section preload">
                                         <?php
                                             if( !empty($release["img1"]) ) {
                                                 echo '<span class="item column fourth"><figure><img src=';
-                                                print $release["img1"];
+                                                h( $release["img1"] );
                                                 echo '></figure></span>';
                                             }
                                             if( !empty($release["img2"]) ) {
                                                 echo '<span class="item column fourth"><figure><img src=';
-                                                print $release["img2"];
+                                                h( $release["img2"] );
                                                 echo '></figure></span>';
                                             }
                                              if( !empty($release["img3"]) ) {
                                                 echo '<span class="item column fourth"><figure><img src=';
-                                                print $release["img3"];
+                                                h( $release["img3"] );
                                                 echo '></figure></span>';
                                             }
                                         ?>
@@ -60,18 +68,19 @@ else{
                             <div class="widget meta-social column half">
                                 <ul class="inline">
                                     <li><a class="release-comment-toggle border-box"><i class="fa fa-comment-o fa-lg"></i></a></li>
-                                    <li><a class="clap border-box" rid="<?php echo $release["rid"]; ?>"><i class="fa fa-heart-o fa-lg"></i></a><span class="arrow_box"><?php echo $release["clap"]; ?></span></li>
-                                    <li><a class="scrap border-box" rid="<?php echo $release["rid"]; ?>"><i class="fa fa-paperclip fa-lg"></i></a><span class="arrow_box"><?php echo $release["scrap"]; ?></span></li>
+                                    <li><a class="clap border-box" rid="<?php h( $release["rid"] ); ?>"><i class="fa fa-heart-o fa-lg"></i></a><span class="arrow_box"><?php h( $release["clap"] ); ?></span></li>
+                                    <li><a class="scrap border-box" rid="<?php h( $release["rid"] ); ?>"><i class="fa fa-paperclip fa-lg"></i></a><span class="arrow_box"><?php h( $release["scrap"] ); ?></span></li>
                                 </ul>
                             </div>
                             <div class="column half right last">
-                                <h5 class="meta-post"><a class="company-name" href="?route=pages/release_sort_by_cname/<?php echo $release["cname"]; ?>"><?php echo $release["cname"]; ?></a> - <time datetime><?php echo $release["time"]; ?></time></h5>
+                                <h5 class="meta-post"><a class="company-name" href="?route=pages/release_sort_by_cname/<?php h( $release["cname"] ); ?>"><?php h( $release["cname"] ); ?></a> - <time datetime><?php h( $release["time"] ); ?></time></h5>
                             </div>
                             <div class="clear"></div>
                             <!-- 自分のコメントここから -->
                             <form class="release-comment" style="display: none" action="?route=pages/release_comment_insert" method="post">
-                                <input type="hidden" name="rid" value="<?php echo $release["rid"]; ?>" />
-                                <input type="hidden" name="user_id" value="<?php echo $_SESSION["user"]; ?>" />
+                                <input type="hidden" name="rid" value="<?php h( $release["rid"] ); ?>" />
+                                <input type="hidden" name="user_id" value="<?php h( $_SESSION["user"] ); ?>" />
+                                <input type="hidden" name="token" value="<?php h($_SESSION['token']); ?>">
                                 <input type="text" name="comment" value="リリースにコメントする" />
                             </form>
                             <?php if(is_array($release_comment_data[$release["rid"]])){ ; ?>
@@ -79,11 +88,11 @@ else{
                             <section class="line_wrapper">
                                 <div class="question_Box inline">
                                     <div class="question_image column inline-block">
-                                    <a href="?route=users/profile_user/<?php echo $release_comment["id"]; ?>">
-                                        <img src="<?php echo $release_comment["photo_url"]; ?>" alt="ユーザーの写真"/></div>
-                                    </a>
-                                    <p class="arrow_question column ten reset inline-block">
-                                    <?php echo $release_comment["comment"] ; ?>
+                                        <img src="<?php h( $release_comment["photo_url"] ); ?>" alt="ユーザーの写真"/>
+                                        <a href="?route=users/profile_user/<?php h( $release_comment["id"] ); ?>"><?php h( $release_comment["display_name"] ); ?></a>
+                                    </div>
+                                    <p class="arrow_question column nine reset inline-block">
+                                    <?php h( $release_comment["comment"] ) ; ?>
                                     </p><!-- /.arrow_question -->
                                 </div><!-- /.question_Box -->
                                 <div class="clear"></div>
@@ -106,6 +115,29 @@ else{
 <script src="application/public/js/beetle.js"></script>
 <script src="application/public/js/analyticstracking.js"></script>
 <script>
+
+//検索
+$('#search').submit(function(event) {
+    // ここでsubmitをキャンセル。
+    event.preventDefault();
+    var keyword = $('#search [name=keyword]').val();
+    var URI = "?route=pages/release_search_by_title/" + keyword;
+    var data = {
+        'title': keyword
+    };
+    // Ajax処理
+    $.ajax({
+      url: URI,
+      data : data,
+      success: function(data) {
+        window.location.href = URI;
+      },
+      error: function(XMLHttpRequest, textStatus, errorThrown) {
+        alert("error");
+      }
+    });
+});
+
 
 //コメント表示切り替え
 $('.release-comment-toggle').click(function(){

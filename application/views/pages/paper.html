@@ -5,17 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="description" content="CrowdPressとは">
 <style type="text/css">@-ms-viewport{width: device-width;}</style>
-<link rel="stylesheet" href="application/public/css/style.css" media="screen">
 <link rel="stylesheet" href="application/public/css/layers.min.css" media="screen">
+<link rel="stylesheet" href="application/public/css/style.css" media="screen">
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="application/public/css/rrssb.css">
 <link href='http://fonts.googleapis.com/css?family=Montserrat:400,700|Open+Sans:400italic,700italic,400,700' rel='stylesheet' type='text/css'>
 <link rel="icon" href="application/public/img/favicon.ico">
-<title><?php echo $user_data["upapername"]; ?> 第 <?php echo $paper_data["count"]; ?>号 - CrowdPress</title>
+<title><?php h( $user_data["upapername"] ) ; ?> 第 <?php h( $paper_data["count"] ); ?>号 - CrowdPress</title>
 </head>
 
 <body class="single single-post" style="padding-top: 60px">
-<?php if( isset( $error_message ) ) echo $error_message; ?>
+<?php if( isset( $error_message ) ) h( $error_message ); ?>
 
 <?php if( isset( $_SESSION["user"]  ) ){
   include("application/views/common/header.html");
@@ -30,20 +29,26 @@ else{
 
 					<div class="post-area clear-after">
 						<article role="main">
-							<h5 class="meta-post"><time datetime="<?php echo $paper_data["created_at"]; ?>"><?php echo $paper_data["created_at"]; ?></time></h5>
-							<h1 class="paper-title"><a href="?route=users/profile_user/<?php echo $user_data["id"]; ?>"><?php echo $user_data["upapername"]; ?></a> 第 <?php echo $paper_data["count"]; ?>号</h1>
+							<h5 class="meta-post"><time datetime="<?php h( $paper_data["created_at"] ); ?>"><?php h( $paper_data["created_at"] ); ?></time></h5>
+							<h1 class="paper-title"><a href="?route=users/profile_user/<?php h( $user_data["id"] ); ?>"><?php h( $user_data["upapername"] ); ?></a> 第 <?php h( $paper_data["count"] ); ?>号</h1>
 							<!-- 繰り返しスタート -->
 							<?php foreach ($papers as $paper) { ?>
                             <?php if ( empty($paper) ) { break; } ?>
 							<section class="row section">
-								<h2 class="paper-subtitle"><?php echo $paper["headline"]; ?></h2>
+								<h2 class="paper-subtitle"><?php h( $paper["headline"] ); ?></h2>
 								<div class="release-article">
 									<p class="release">
-									<?php echo $paper["comment"]; ?>
+									<?php hbr( $paper["comment"] ); ?>
 									</p>
 									<figure class="column half">
-										<img src="<?php echo $paper['img1']; ?>">
-										<figcaption><a href="?route=pages/release_detail/<?php echo $paper["rid"] ;?>"><?php echo $paper["title"]; ?></a></figcaption>
+                                        <?php
+                                            if( !empty($paper['img1']) ) {
+                                                echo '<img src="';
+                                                h ($paper['img1']);
+                                                echo '">';
+                                            }
+                                        ?>
+										<figcaption><a href="?route=pages/release_detail/<?php h( $paper["rid"] ) ;?>"><?php h( $paper["title"] ); ?></a></figcaption>
 									</figure>
 									<figure class="column half">
 										<figcaption>ユーザーアップロード画像</figcaption>
@@ -58,28 +63,28 @@ else{
 
                     <div class="meta-social">
                         <ul class="inline center">
-                            <li><a class="clap border-box" pid="<?php echo $paper_data["id"]; ?>"><i class="fa fa-heart-o fa-lg"></i></a><span class="arrow_box"><?php echo $paper_data["clap"]; ?></span></li>
-                             <li><a class="scrap border-box" pid="<?php echo $paper_data["id"]; ?>"><i class="fa fa-paperclip fa-lg"></i></a><span class="arrow_box"><?php echo $paper_data["scrap"]; ?></span></li>
+                            <li><a class="clap border-box" pid="<?php h( $paper_data["id"] ); ?>"><i class="fa fa-heart-o fa-lg"></i></a><span class="arrow_box"><?php h( $paper_data["clap"] ); ?></span></li>
+                             <li><a class="scrap border-box" pid="<?php h( $paper_data["id"] ); ?>"><i class="fa fa-paperclip fa-lg"></i></a><span class="arrow_box"><?php h( $paper_data["scrap"] ); ?></span></li>
                         </ul>
                     </div>
 
 					<!-- コメント表示 -->
                    <div class="comment-section">
-                        <h3 id="comments"><?php echo $release_comment_number["number"]; ?> Comments</h3>
+                        <h3 id="comments"><?php h( $release_comment_number["number"] ); ?> Comments</h3>
                         <ul class="comment-list plain">
                         <?php if (isset($release_comment_data)) { ?>
                         <?php foreach ($release_comment_data as $release_comment) { ?>
                             <li class="comment">
                                 <div class="single-comment">
                                     <div class="comment-author">
-                                        <img src="<?php echo $release_comment["photo_url"]; ?>" class="avatar" alt="">
-                                        <cite><a href="?route=users/profile_user/<?php echo $release_comment["id"]; ?>"><?php echo $release_comment["display_name"]; ?></a></cite>
+                                        <img src="<?php h( $release_comment["photo_url"] ); ?>" class="avatar" alt="">
+                                        <cite><a href="?route=users/profile_user/<?php h( $release_comment["id"] ); ?>"><?php h( $release_comment["display_name"] ); ?></a></cite>
                                         <span class="says">says:</span>
                                     </div><!-- comment-author -->
                                     <div class="comment-meta">
-                                        <time datetime="<?php echo $release_comment["time"]; ?>"><?php echo $release_comment["time"]; ?></time> / <a href="#" class="reply">Reply</a>
+                                        <time datetime="<?php h( $release_comment["time"] ); ?>"><?php h( $release_comment["time"] ); ?></time> / <a href="#" class="reply">Reply</a>
                                     </div><!-- comment-meta -->
-                                    <p><?php echo $release_comment["comment"]; ?></p>
+                                    <p><?php h( $release_comment["comment"] ); ?></p>
                                 </div><!-- single-comment -->
                             </li>
                         <?php } ?>
@@ -88,8 +93,9 @@ else{
                     </div><!-- comment-section -->
                     <!-- コメント表示ここまで -->
                     <form class="paper-comment" action="?route=pages/paper_comment_insert" method="post">
-                        <input type="hidden" name="paper_id" value="<?php echo $paper_data["id"]; ?>" />
-                        <input type="hidden" name="user_id" value="<?php echo $_SESSION["user"]; ?>" />
+                        <input type="hidden" name="paper_id" value="<?php h( $paper_data["id"] ); ?>" />
+                        <input type="hidden" name="user_id" value="<?php h( $_SESSION["user"] ); ?>" />
+                        <input type="hidden" name="token" value="<?php h($_SESSION['token']); ?>">
                         <input type="text" name="comment" value="新聞にコメントする" />
                     </form><!-- post-comment -->
 

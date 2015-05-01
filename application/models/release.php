@@ -6,7 +6,11 @@ class release extends model {
         while ($row = mysql_fetch_assoc($result)) {
             $release_data[] = $row;
         }
-		return $release_data;
+        if (isset($release_data)) {
+            return $release_data;
+        } else {
+            return array();
+        }
 	}
 
     function find_release_by_cname( $cname ){
@@ -15,13 +19,33 @@ class release extends model {
         while ($row = mysql_fetch_assoc($result)) {
             $release_data[] = $row;
         }
-        return $release_data;
+        if (isset($release_data)) {
+            return $release_data;
+        } else {
+            return array();
+        }    }
+
+    function find_release_by_title( $title ){
+        $sql = "SELECT * FROM `release` WHERE `title` LIKE '%$title%' ORDER BY `rid` DESC LIMIT 50";
+        $result = mysql_query_excute($sql);
+        while ($row = mysql_fetch_assoc($result)) {
+            $release_data[] = $row;
+        }
+        if (isset($release_data)) {
+            return $release_data;
+        } else {
+            return array();
+        }
     }
 
     function get_release_detail ($rid){
         $sql = "SELECT * FROM `release` where `rid` = $rid LIMIT 1";
         $result = mysql_query_excute($sql);
-        return mysql_fetch_assoc($result);
+        if (isset($result)) {
+            return mysql_fetch_assoc($result);
+        } else {
+            array();
+        }
     }
 
     function get_user_scrap ($user_id){
@@ -45,6 +69,19 @@ class release extends model {
 
     function find_scrap_by_cname ($user_id, $cname){
         $sql = "SELECT `release`.`title`, `release`.`rid`,`release`.`cname`, `release`.`img1`, `release`.`img2`, `release`.`img3`, `release`.`clap`, `release`.`scrap`, `release`.`time`, `headline`, `comment` FROM `release` INNER JOIN `r_scrap` ON `release`.`rid` = `r_scrap`.`rid` LEFT JOIN `publish` ON `release`.`rid` = `publish`.`rid`  WHERE `r_scrap`.`user_id` = $user_id AND `release`.`cname` LIKE '%$cname%' ORDER BY `release`.`rid` DESC LIMIT 50";
+        $result = mysql_query_excute($sql);
+        while ($row = mysql_fetch_assoc($result)) {
+            $scrap_data[] = $row;
+        }
+        if ( isset($scrap_data) ) {
+            return $scrap_data;
+        } else {
+            return array();
+        }
+    }
+
+    function find_scrap_by_title ($user_id, $title){
+        $sql = "SELECT `release`.`title`, `release`.`rid`,`release`.`cname`, `release`.`img1`, `release`.`img2`, `release`.`img3`, `release`.`clap`, `release`.`scrap`, `release`.`time`, `headline`, `comment` FROM `release` INNER JOIN `r_scrap` ON `release`.`rid` = `r_scrap`.`rid` LEFT JOIN `publish` ON `release`.`rid` = `publish`.`rid`  WHERE `r_scrap`.`user_id` = $user_id AND `release`.`title` LIKE '%$title%' ORDER BY `release`.`rid` DESC LIMIT 50";
         $result = mysql_query_excute($sql);
         while ($row = mysql_fetch_assoc($result)) {
             $scrap_data[] = $row;
@@ -239,14 +276,14 @@ class release extends model {
 
 //ひとつだけ
     function find_publish_by_id( $id ){
-        $sql = "SELECT `headline`, `comment`, `title`, `img1` FROM `publish` INNER JOIN `release` ON `publish`.`rid` = `release`.`rid` WHERE `id` = '$id' LIMIT 1";
+        $sql = "SELECT `headline`, `comment`, `title`, `release`.`rid`, `img1` FROM `publish` INNER JOIN `release` ON `publish`.`rid` = `release`.`rid` WHERE `id` = '$id' LIMIT 1";
         $result = mysql_query_excute($sql);
         return mysql_fetch_assoc($result);
     }
 
     function find_publish_by_user_id( $user_id ){
         $publish_info_data = array();
-        $sql = "SELECT `paper`.`id`, `paper`.`publish_id_1`, `paper`.`count`, `paper`.`clap`, `paper`.`scrap`, `users`.`upapername`, `users`.`photo_url`, `paper`.`created_at` FROM `paper` INNER JOIN `users` ON `paper`.`user_id` = `users`.`id`  WHERE `user_id` = '$user_id' ORDER BY `id` DESC";
+        $sql = "SELECT `paper`.`id`, `paper`.`user_id`, `paper`.`publish_id_1`, `paper`.`count`, `paper`.`clap`, `paper`.`scrap`, `users`.`upapername`, `users`.`photo_url`, `paper`.`created_at` FROM `paper` INNER JOIN `users` ON `paper`.`user_id` = `users`.`id`  WHERE `user_id` = '$user_id' ORDER BY `id` DESC";
         $result = mysql_query_excute($sql);
         while ( $row = mysql_fetch_assoc($result) ) {
             $paper_info_data[] = $row;

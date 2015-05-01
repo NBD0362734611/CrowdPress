@@ -20,7 +20,7 @@ class users extends controller {
 			$user = $this->loadModel( "user" );
 
 			// get the user data from database
-			$user_data = $user->find_by_email_and_password( $_POST["email"], $_POST["password"] );
+			$user_data = $user->find_by_email_and_password( escape( $_POST["email"] ), escape( $_POST["password"] ) );
 
 			// user found?
 			if( $user_data ){
@@ -54,10 +54,10 @@ class users extends controller {
 
 		// registration form submitted?
 		if( count( $_POST ) ){
-			$email      = $_POST["email"];
-			$password   = $_POST["password"];
-			$first_name = $_POST["first_name"];
-			$last_name  = $_POST["last_name"];
+			$email      = escape( $_POST["email"] );
+			$password   = escape( $_POST["password"] );
+			$first_name = escape( $_POST["first_name"] );
+			$last_name  = escape( $_POST["last_name"] );
 
 			if( ! $email || ! $password ){
 				$data["error_message"] = '<br /><b style="color:red">Your email and a password are required!</b>';
@@ -92,17 +92,20 @@ class users extends controller {
 		// load user model
 		$user = $this->loadModel( "user" );
 
+		// トークンチェック
+        checkToken();
+
 		// registration form submitted?
 		if( count( $_POST ) ){
 			$user_id        = $_SESSION["user"];
-			$display_name   = $_POST["display_name"];
-			$upapername     = $_POST["upapername"];
-			$paper_explain  = $_POST["paper_explain"];
-			$facebook_url   = $_POST["facebook_url"];
-			$twitter_url    = $_POST["twitter_url"];
-			$website_url    = $_POST["website_url"];
-			$photo_url      = $_POST["photo_url"];
-			$cover_url      = $_POST["cover_url"];
+			$display_name   = escape( $_POST["display_name"] );
+			$upapername     = escape( $_POST["upapername"] );
+			$paper_explain  = escape( $_POST["paper_explain"] );
+			$facebook_url   = escape( $_POST["facebook_url"] );
+			$twitter_url    = escape( $_POST["twitter_url"] );
+			$website_url    = escape( $_POST["website_url"] );
+			$photo_url      = escape( $_POST["photo_url"] );
+			$cover_url      = escape( $_POST["cover_url"] );
 
 			$user->update_mypage( $user_id, $display_name, $upapername, $paper_explain, $facebook_url, $twitter_url, $website_url, $photo_url, $cover_url );
 		}
@@ -120,10 +123,10 @@ class users extends controller {
 
 		// complete registration form submitted?
 		if( count( $_POST ) ){
-			$email      = $_POST["email"];
-			$password   = $_POST["password"];
-			$first_name = $_POST["first_name"];
-			$last_name  = $_POST["last_name"];
+			$email      = escape( $_POST["email"] );
+			$password   = escape( $_POST["password"] );
+			$first_name = escape( $_POST["first_name"] );
+			$last_name  = escape( $_POST["last_name"] );
 
 			if( ! $email || ! $password ){
 				$data["error_message"] = '<br /><b style="color:red">Your email and a password are really important for us!</b>';
@@ -339,7 +342,7 @@ class users extends controller {
 		$this->loadView( "users/myfeed", $data );
 	}
 
-		function setting()
+	function setting()
 	{
 		// user connected?
 		if( ! isset( $_SESSION["user"] ) ){
@@ -382,7 +385,7 @@ class users extends controller {
 
         // registration form submitted?
         if( count( $_POST ) ){
-            $user_id = $_POST["user_id"];
+            $user_id     = escape( $_POST["user_id"] );
             $follower_id = $_SESSION["user"];
         }
 

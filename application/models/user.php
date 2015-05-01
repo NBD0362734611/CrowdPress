@@ -72,9 +72,9 @@ class user extends model {
 		return mysql_query_excute($sql);
 	}
 
-	function release_comment_select($rid, $user_id){
+	function release_comment_select($rid, $user_id=0){
 		$release_comment_data = array();
-		$sql = "SELECT `users`.`id`, `comment`, `photo_url` FROM `r_comment` INNER JOIN `users` ON `r_comment`.`user_id` = `users`.`id` WHERE `rid` = $rid ORDER BY `time`";
+		$sql = "SELECT `users`.`id`, `comment`, `display_name`, `photo_url` FROM `r_comment` INNER JOIN `users` ON `r_comment`.`user_id` = `users`.`id` WHERE `rid` = $rid ORDER BY `time`";
 		$result = mysql_query_excute($sql);
 		while ($row = mysql_fetch_assoc($result)) {
 			$release_comment_data[] = $row;
@@ -88,7 +88,7 @@ class user extends model {
 
 	function paper_comment_select($paper_id){
 		$paper_comment_data = array();
-		$sql = "SELECT `users`.`id`, `comment`, `photo_url` FROM `p_comment` INNER JOIN `users` ON `p_comment`.`user_id` = `users`.`id` WHERE `paper_id` = $paper_id ORDER BY `time`";
+		$sql = "SELECT `users`.`id`, `comment`, `display_name`, `photo_url` FROM `p_comment` INNER JOIN `users` ON `p_comment`.`user_id` = `users`.`id` WHERE `paper_id` = $paper_id ORDER BY `time`";
 		$result = mysql_query_excute($sql);
 		while ($row = mysql_fetch_assoc($result)) {
 			$paper_comment_data[] = $row;
