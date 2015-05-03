@@ -177,13 +177,15 @@ class pages extends controller {
             foreach ($release_data as $release) {
             $row = $user->release_comment_select($release["rid"], $_SESSION["user"]);
             $release_comment_data[$release["rid"]] = $row;
+            $row = $user->latest_publish_comment_select($release["rid"], $_SESSION["user"]);
+            $publish_comment_data[$release["rid"]] = $row;
             }
         } else {   // １件もない場合のエラー対策
             $release_data = array();
         }
 
         // load profile view
-        $data = array( "user_data" => $user_data, "release_data" => $release_data, "release_comment_data" => $release_comment_data, "cname" => $cname);
+        $data = array( "user_data" => $user_data, "release_data" => $release_data, "release_comment_data" => $release_comment_data, "cname" => $cname, "publish_comment_data" => $publish_comment_data);
         $this->loadView( "pages/scrap", $data );
     }
 
@@ -214,13 +216,15 @@ class pages extends controller {
             foreach ($release_data as $release) {
             $row = $user->release_comment_select($release["rid"], $_SESSION["user"]);
             $release_comment_data[$release["rid"]] = $row;
+            $row = $user->latest_publish_comment_select($release["rid"], $_SESSION["user"]);
+            $publish_comment_data[$release["rid"]] = $row;
             }
         } else {   // １件もない場合のエラー対策
             $release_data = array();
         }
 
         // load profile view
-        $data = array( "user_data" => $user_data, "release_data" => $release_data, "release_comment_data" => $release_comment_data, "title" => $title);
+        $data = array( "user_data" => $user_data, "release_data" => $release_data, "release_comment_data" => $release_comment_data, "title" => $title, "publish_comment_data" => $publish_comment_data);
         $this->loadView( "pages/scrap", $data );
     }
 
