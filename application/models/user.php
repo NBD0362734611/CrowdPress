@@ -60,11 +60,17 @@ class user extends model {
 		return mysql_fetch_assoc($result);
 	}
 
-	function release_comment_insert($reply, $rid, $user_id, $comment){
+	function release_comment_insert( $reply, $rid, $user_id, $comment ){
 		$sql = "INSERT INTO `r_comment`(`reply`, `rid`, `user_id`, `comment`) VALUES ('$reply', '$rid', '$user_id', '$comment')";
 
 		return mysql_query_excute($sql);
 	}
+
+    function release_comment_remove( $commentid, $rid, $user_id ){
+        $sql = "DELETE FROM `r_comment` WHERE ( `commentid` = '$commentid' ) AND ( `user_id` = '$user_id' )";
+
+        return mysql_query_excute($sql);
+    }
 
 	function paper_comment_insert($reply, $paper_id, $user_id, $comment){
 		$sql = "INSERT INTO `p_comment`(`reply`, `paper_id`, `user_id`, `comment`) VALUES ('$reply', '$paper_id', '$user_id', '$comment')";
@@ -72,11 +78,17 @@ class user extends model {
 		return mysql_query_excute($sql);
 	}
 
+    function paper_comment_remove( $commentid, $pid, $user_id ){
+        $sql = "DELETE FROM `p_comment` WHERE ( `id` = '$commentid' ) AND ( `user_id` = '$user_id' )";
+
+        return mysql_query_excute($sql);
+    }
+
 	function release_comment_select($rid, $user_id=0){
 		$release_comment_data = array();
 		$sql = "SELECT `users`.`id`, `comment`, `display_name`, `photo_url` FROM `r_comment` INNER JOIN `users` ON `r_comment`.`user_id` = `users`.`id` WHERE `rid` = $rid ORDER BY `time`";
 		$result = mysql_query_excute($sql);
-		while ($row = mysql_fetch_assoc($result)) {
+		while ( $row = mysql_fetch_assoc($result) ) {
 			$release_comment_data[] = $row;
         }
         if( isset($release_comment_data) ){
@@ -85,6 +97,29 @@ class user extends model {
 			return array();
 		}
 	}
+
+    function paper_remove( $paper_id, $user_id ){
+        //新聞削除
+        $sql = "DELETE FROM `paper` WHERE ( `id` = '$paper_id' ) AND ( `user_id` = '$user_id' )";
+        mysql_query_excute($sql);
+        //新聞のscrapから削除した新聞のカラムを全部削除
+        $sql = "DELETE FROM `p_scrap` WHERE `paper_id` = '$paper_id'";
+        mysql_query_excute($sql);
+    }
+
+    function user_id_by_scrap_paper( $paper_id ){
+        //その新聞をスクラップしていたユーザー全員取得
+        $sql = "SELECT `user_id` FROM `p_scrap` WHERE `paper_id` = '$paper_id'";
+        $result = mysql_query_excute($sql);
+        if ( mysql_num_rows( $result ) ) {
+            while ( $row = mysql_fetch_array($result) ) {
+             $user_id_array[] = $row["user_id"];
+            }
+            return $user_id_array;
+        } else {
+            return 0;
+        }
+    }
 
 	function paper_comment_select($paper_id){
 		$paper_comment_data = array();

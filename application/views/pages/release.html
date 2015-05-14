@@ -96,12 +96,15 @@ else{
                         <ul class="comment-list plain">
                         <?php if (isset($release_comment_data)) { ?>
                         <?php foreach ($release_comment_data as $release_comment) { ?>
-                            <li class="comment">
+                            <li class="comment <?php h( $release_comment["commentid"] ) ?>">
                                 <div class="single-comment">
                                     <div class="comment-author">
                                         <img src="<?php h( $release_comment["photo_url"] ); ?>" class="avatar" alt="">
                                         <cite><a href="?route=users/profile_user/<?php h( $release_comment["id"] ); ?>"><?php h( $release_comment["display_name"] ); ?></a></cite>
                                         <span class="says">says:</span>
+                                        <?php if( $_SESSION["user"] == $release_comment["id"] ): ?>
+                                        <a class="remove" commentid="<?php h( $release_comment["commentid"] ) ?>" rid="<?php h( $release_detail_data["rid"] ); ?>" token="<?php h($_SESSION['token']); ?>"><i class="fa fa-times"></i></a>
+                                        <?php endif; ?>
                                     </div><!-- comment-author -->
                                     <div class="comment-meta">
                                         <time datetime="<?php h( $release_comment["time"] ); ?>"><?php h( $release_comment["time"] ); ?></time> / <a href="#" class="reply">Reply</a>
@@ -149,6 +152,38 @@ $('.release-comment input').blur(function(){
     }
     $(this).animate({
         width: short},500);
+});
+
+//コメント削除
+$('.remove').on('click', function() {
+    var commentid = $(this).attr("commentid");
+    var rid = $(this).attr("rid");
+    var token = $(this).attr("token");
+    var data = {
+        'user_id': 0,
+        'commentid': commentid,
+        'rid': rid,
+        'token': token
+    };
+
+    ret = confirm("削除します。よろしいですか？");
+    if (ret === true){
+    jQuery.ajax({
+        type:"POST",
+        url: "?route=pages/release_comment_remove",
+        dataType: "json",
+        data: data,
+        success: function(data, dataType) {   // OK時
+            $("." + commentid).remove();
+            $("#comments").html( data["number"] + " Comments");
+        },
+        error: function() {         // HTTPエラー時
+            alert("ログインしてください！");
+        },
+        complete: function() {      // 成功・失敗に関わらず通信が終了した際の処理
+        }
+    });
+    }
 });
 
 $('.clap').on('click', function() {

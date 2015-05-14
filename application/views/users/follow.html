@@ -83,6 +83,9 @@ else{
                 <h3 style="text-align: center"><?php h( $user_data["display_name"] ); ?> の <?php h( $followorfollower ) ;?> 一覧</h3>
                     <!-- 繰り返しスタート-->
                     <div class="column nine">
+                    <?php if ( !$follow_data ) : ?>
+                        <h2><?php h( $followorfollower ) ;?>は0人です</h2>
+                    <?php endif; ?>
                     <?php foreach ($follow_data as $follow) { ?>
                         <article class="clear-after">
                             <div class="column three">

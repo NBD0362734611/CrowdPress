@@ -25,8 +25,23 @@ class release extends model {
             return array();
         }    }
 
-    function find_release_by_title( $title ){
-        $sql = "SELECT * FROM `release` WHERE `title` LIKE '%$title%' ORDER BY `rid` DESC LIMIT 50";
+    function find_release_by_title( $words ){
+        //空白文字で検索ワードを分割
+        $word_array = preg_split("/[ ]+/",$words);
+        $select ="SELECT * FROM `release`";
+        $where = " WHERE ";
+
+        for( $i = 0; $i <count($word_array); $i++ ){
+            $where .= "(`title` LIKE '%$word_array[$i]%')";
+
+            if ($i < count($word_array) - 1){
+                $where .= " AND ";
+            }
+        }
+
+        $sql = $select.$where;
+        $sql .= " ORDER BY `rid` DESC LIMIT 50";
+
         $result = mysql_query_excute($sql);
         while ($row = mysql_fetch_assoc($result)) {
             $release_data[] = $row;
@@ -80,8 +95,23 @@ class release extends model {
         }
     }
 
-    function find_scrap_by_title ($user_id, $title){
-        $sql = "SELECT `release`.`title`, `release`.`rid`,`release`.`cname`, `release`.`img1`, `release`.`img2`, `release`.`img3`, `release`.`clap`, `release`.`scrap`, `release`.`time`, `headline`, `comment` FROM `release` INNER JOIN `r_scrap` ON `release`.`rid` = `r_scrap`.`rid` LEFT JOIN `publish` ON `release`.`rid` = `publish`.`rid`  WHERE `r_scrap`.`user_id` = $user_id AND `release`.`title` LIKE '%$title%' ORDER BY `release`.`rid` DESC LIMIT 50";
+    function find_scrap_by_title ($user_id, $words){
+        //空白文字で検索ワードを分割
+        $word_array = preg_split("/[ ]+/",$words);
+        $select ="SELECT `release`.`title`, `release`.`rid`,`release`.`cname`, `release`.`img1`, `release`.`img2`, `release`.`img3`, `release`.`clap`, `release`.`scrap`, `release`.`time`, `headline`, `comment` FROM `release` INNER JOIN `r_scrap` ON `release`.`rid` = `r_scrap`.`rid` LEFT JOIN `publish` ON `release`.`rid` = `publish`.`rid`";
+        $where = " WHERE ";
+
+        for( $i = 0; $i <count($word_array); $i++ ){
+            $where .= "(`title` LIKE '%$word_array[$i]%')";
+
+            if ($i < count($word_array) - 1){
+                $where .= " AND ";
+            }
+        }
+
+        $sql = $select.$where;
+        $sql .= " ORDER BY `rid` DESC LIMIT 50";
+        // $sql = "SELECT `release`.`title`, `release`.`rid`,`release`.`cname`, `release`.`img1`, `release`.`img2`, `release`.`img3`, `release`.`clap`, `release`.`scrap`, `release`.`time`, `headline`, `comment` FROM `release` INNER JOIN `r_scrap` ON `release`.`rid` = `r_scrap`.`rid` LEFT JOIN `publish` ON `release`.`rid` = `publish`.`rid`  WHERE `r_scrap`.`user_id` = $user_id AND `release`.`title` LIKE '%$title%' ORDER BY `release`.`rid` DESC LIMIT 50";
         $result = mysql_query_excute($sql);
         while ($row = mysql_fetch_assoc($result)) {
             $scrap_data[] = $row;
@@ -190,7 +220,7 @@ class release extends model {
 
     function release_comment_ridselect($rid){
         $release_comment_data = array();
-        $sql = "SELECT `r_comment`.`reply`, `r_comment`.`comment`, `users`.`id`, `users`.`display_name`, `users`.`photo_url`, `r_comment`.`time` FROM `r_comment` INNER JOIN `users` ON `r_comment`.`user_id` = `users`.`id` WHERE `rid` = $rid";
+        $sql = "SELECT `r_comment`.`commentid`, `r_comment`.`reply`, `r_comment`.`comment`, `users`.`id`, `users`.`display_name`, `users`.`photo_url`, `r_comment`.`time` FROM `r_comment` INNER JOIN `users` ON `r_comment`.`user_id` = `users`.`id` WHERE `rid` = $rid";
         $result = mysql_query_excute($sql);
         while ($row = mysql_fetch_assoc($result)) {
             $release_comment_data[] = $row;
@@ -200,7 +230,7 @@ class release extends model {
 
     function paper_comment_paper_id_select($paper_id){
         $release_comment_data = array();
-        $sql = "SELECT `p_comment`.`comment`, `users`.`display_name`, `users`.`id`, `users`.`photo_url`, `p_comment`.`time` FROM `p_comment` INNER JOIN `users` ON `p_comment`.`user_id` = `users`.`id` WHERE `paper_id` = $paper_id";
+        $sql = "SELECT `p_comment`.`id` AS `commentid`, `p_comment`.`comment`, `users`.`display_name`, `users`.`id`, `users`.`photo_url`, `p_comment`.`time` FROM `p_comment` INNER JOIN `users` ON `p_comment`.`user_id` = `users`.`id` WHERE `paper_id` = $paper_id";
         $result = mysql_query_excute($sql);
         while ($row = mysql_fetch_assoc($result)) {
             $release_comment_data[] = $row;
@@ -218,6 +248,19 @@ class release extends model {
         $sql = "SELECT COUNT(`comment`) AS `number` FROM `p_comment` WHERE `paper_id` = $paper_id";
         $result = mysql_query_excute($sql);
         return mysql_fetch_assoc($result);
+    }
+
+    function get_paper_publish_number( $user_id ){
+        //新聞を発行した数を取得
+        $sql = "SELECT count(`id`) AS `paper_count` FROM `paper` WHERE `user_id` = $user_id";
+        $result = mysql_query_excute($sql);
+        $count = mysql_fetch_array($result);
+
+        //ユーザーの新聞パブリッシュ数を更新
+        $sql = "UPDATE `users` SET `publish_paper` = '$count[0]' WHERE `id` = '$user_id'";
+        mysql_query_excute($sql);
+
+        return $count[0];
     }
 
     function publish_id_insert_paper($user_id, $checked_rid){
@@ -244,11 +287,15 @@ class release extends model {
             $values.= ",".${"publish_id_".$i};
         }
 
+        //新聞発行前の新聞発行数をカウント(欠番あり)
+        $sql = "SELECT `count` FROM `paper` WHERE `user_id` = '$user_id' ORDER BY `paper`.`id` DESC LIMIT 1";
+        $count_before_publish = mysql_query_excute($sql);
+
         //新聞を挿入
         $sql = "INSERT INTO `paper`(`user_id`, $keys, `created_at`) VALUES('$user_id', $values, NOW() )";
         mysql_query_excute($sql);
 
-        //新聞を発行した数を取得
+        //新聞を発行した数を取得(欠番なし)
         $sql = "SELECT count(`id`) AS `paper_count` FROM `paper` WHERE `user_id` = $user_id";
         $result = mysql_query_excute($sql);
         $count = mysql_fetch_array($result);
@@ -258,8 +305,17 @@ class release extends model {
         mysql_query_excute($sql);
 
         //新聞の号
-        $sql = "UPDATE `paper` SET `count` = '$count[0]' WHERE `user_id` = '$user_id' ORDER BY `paper`.`id` DESC LIMIT 1";
-        mysql_query_excute($sql);
+        // $sql = "UPDATE `paper` SET `count` = '$count[0]' WHERE `user_id` = '$user_id' ORDER BY `paper`.`id` DESC LIMIT 1";
+        // mysql_query_excute($sql);
+        if ( mysql_num_rows( $count_before_publish ) ) {
+            $count = mysql_fetch_array( $count_before_publish );
+            $newcount = $count[0] + 1;
+            $sql = "UPDATE `paper` SET `count` = '$newcount' WHERE `user_id` = '$user_id' ORDER BY `paper`.`id` DESC LIMIT 1";
+            mysql_query_excute($sql);
+        } else {
+            $sql = "UPDATE `paper` SET `count` = 1 WHERE `user_id` = '$user_id' ORDER BY `paper`.`id` DESC LIMIT 1";
+            mysql_query_excute($sql);
+        }
 
         //publishした新聞のID（ユニーク）を返す
         $sql = "SELECT `id` FROM `paper` WHERE `user_id` = '$user_id' ORDER BY `paper`.`id` DESC LIMIT 1";

@@ -28,7 +28,7 @@ else{
                 <div class="row-content buffer clear-after">
                     <!-- 繰り返しスタート-->
                     <?php foreach ($paper_data as $paper) { ?>
-                    <div class="myfeed-wrapper">
+                    <div class="myfeed-wrapper <?php h( $paper["id"] ); ?>">
                         <article role="main">
                             <div class="question_image column inline-block"><a href="?route=users/profile_user/<?php h( $paper["user_id"] ); ?>"><img src="<?php h( $paper["photo_url"] ); ?>" alt="プロフィール画像"/></a></div>
                             <div class="colmn inline-block">
@@ -60,6 +60,9 @@ else{
                                     <li><a class="paper-comment-toggle border-box"><i class="fa fa-comment-o fa-lg"></i></a></li>
                                     <li><a class="clap border-box" pid="<?php h( $paper["id"] ); ?>"><i class="fa fa-heart-o fa-lg"></i></a><span class="arrow_box"><?php h( $paper["clap"] ); ?></span></li>
                                     <li><a class="scrap border-box" pid="<?php h( $paper["id"] ); ?>"><i class="fa fa-paperclip fa-lg"></i></a><span class="arrow_box"><?php h( $paper["scrap"] ); ?></span></li>
+                                    <?php if( $_SESSION["user"] == $paper["user_id"] ): ?>
+                                        <li><a class="remove" pid="<?php h( $paper["id"] ); ?>" token="<?php h($_SESSION['token']); ?>"><i class="fa fa-times fa-lg"></i></a></li>
+                                    <?php endif; ?>
                                 </ul>
                             </div>
                             <!-- 自分のコメントここから -->
@@ -133,6 +136,34 @@ $('.paper-comment input').blur(function(){
     }
     $(this).animate({
         width: short},500);
+});
+
+//新聞削除
+$('.remove').on('click', function() {
+    var pid = $(this).attr("pid");
+    var token = $(this).attr("token");
+    var data = {
+        'user_id': 0,
+        'pid': pid,
+        'token': token
+    };
+    ret = confirm("削除します。よろしいですか？");
+    if (ret === true){
+    jQuery.ajax({
+        type:"POST",
+        url: "?route=pages/paper_remove",
+        dataType: "json",
+        data: data,
+        success: function(data, dataType) {   // OK時
+            $("." + pid).remove();
+        },
+        error: function() {         // HTTPエラー時
+            alert("エラー");
+        },
+        complete: function() {      // 成功・失敗に関わらず通信が終了した際の処理
+        }
+    });
+    }
 });
 
 $('.clap').on('click', function() {

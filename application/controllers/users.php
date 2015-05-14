@@ -249,7 +249,7 @@ class users extends controller {
 
 		// load profile view
 		$data = array( "user_data" => $user_data, "user_authentication" => $user_authentication, "paper_data" => $paper_data, "release_comment_data" => $release_comment_data, "follow_status" => $follow_status);
-		$this->loadView( "users/profile", $data );
+		$this->loadView( "users/pscrap", $data );
 	}
 
 	function profile_user_following( $user_id )

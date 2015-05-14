@@ -15,6 +15,16 @@ class pages extends controller {
         $this->loadView( "pages/404" );
     }
 
+    function terms()
+    {
+        $this->loadView( "pages/terms" );
+    }
+
+    function privacy()
+    {
+        $this->loadView( "pages/privacy" );
+    }
+
     function newrelease()
     {
         $data = array();
@@ -86,7 +96,12 @@ class pages extends controller {
     {
         $data = array();
         $user_data = array();
+
         $title = escape( $title );
+        $keyword = mb_convert_encoding($title,"UTF-8","UTF-8,EUC-JP,SJIS,Shift_JIS,ASCII");
+        //全角空白があったら半角空白にそろえる
+        $words = str_replace("　", " ", $keyword);
+        $words = trim($words);
 
         // error_reporting(E_ALL ^ E_NOTICE);
         $user = $this->loadModel( "user" );
@@ -97,7 +112,7 @@ class pages extends controller {
             $user_data = $user->find_by_id( $_SESSION["user"] );
         }
 
-        $release_data = $release->find_release_by_title( $title );
+        $release_data = $release->find_release_by_title( $words );
         $release_comment_data = array();
 
         if (isset($release_data)) {
@@ -108,8 +123,6 @@ class pages extends controller {
         } else {
             $release_data = array();
         }
-
-        // $release_comment_data = $user->release_comment_select($rid, $_SESSION["user"]);
 
         // load profile view
         $data = array( "user_data" => $user_data, "release_data" => $release_data, "release_comment_data" => $release_comment_data, "title" => $title);
@@ -201,15 +214,18 @@ class pages extends controller {
             $this->redirect( "users/login" );
         }
 
-        if( count( $_POST ) ){
-            $title     = escape( $_POST["title"] );
-        }
+        $title     = escape( $title );
+        $keyword   = mb_convert_encoding($title,"UTF-8","UTF-8,EUC-JP,SJIS,Shift_JIS,ASCII");
+        //全角空白があったら半角空白にそろえる
+        $words     = str_replace("　", " ", $keyword);
+        $words     = trim($words);
+
         // get the release data from database
 
         // error_reporting(0);
 
         $user_data = $user->find_by_id( $_SESSION["user"] );
-        $release_data = $release->find_scrap_by_title( $_SESSION["user"], $title );
+        $release_data = $release->find_scrap_by_title( $_SESSION["user"], $words );
         $release_comment_data = array();
 
         if (isset($release_data)){
@@ -221,6 +237,7 @@ class pages extends controller {
             }
         } else {   // １件もない場合のエラー対策
             $release_data = array();
+            $publish_comment_data = array();
         }
 
         // load profile view
@@ -382,6 +399,29 @@ class pages extends controller {
         header("Location: ".$uri);
     }
 
+    function release_comment_remove()
+    {
+        if( !isset($_SESSION["user"])){
+            echo "ログインしてください！";
+            return false;
+        }
+        // load user model
+        $user = $this->loadModel( "user" );
+        $release = $this->loadModel( "release" );
+
+        // トークンチェック
+        checkToken();
+
+        if( count( $_POST ) ){
+            $user_id   = $_SESSION["user"];
+            $commentid = escape ( $_POST["commentid"] );
+            $rid       = escape( $_POST["rid"] );
+
+            $user->release_comment_remove( $commentid, $rid, $user_id );
+        }
+        echo json_encode ( $release->get_release_comment_number( $rid ) );
+    }
+
     function paper_comment_insert()
     {
         if( !isset($_SESSION["user"])){
@@ -405,6 +445,29 @@ class pages extends controller {
         }
         //post元に戻る
         header("Location: ".$uri);
+    }
+
+    function paper_comment_remove()
+    {
+        if( !isset($_SESSION["user"])){
+            echo "ログインしてください！";
+            return false;
+        }
+        // load user model
+        $user = $this->loadModel( "user" );
+        $release = $this->loadModel( "release" );
+
+        // トークンチェック
+        checkToken();
+
+        if( count( $_POST ) ){
+            $user_id   = $_SESSION["user"];
+            $commentid = escape ( $_POST["commentid"] );
+            $pid       = escape( $_POST["pid"] );
+
+            $user->paper_comment_remove( $commentid, $pid, $user_id );
+        }
+        echo json_encode ( $release->get_paper_comment_number( $pid ) );
     }
 
     function make_paper()
@@ -447,6 +510,36 @@ class pages extends controller {
         // load profile view
         $data = array( "user_data" => $user_data, "paper_data" => $paper_data, "papers" => $papers, "release_comment_data" => $release_comment_data, "release_comment_number" => $release_comment_number);
         $this->loadView( "pages/paper", $data );
+    }
+
+    function paper_remove()
+    {
+        if( !isset($_SESSION["user"])){
+            echo "ログインしてください！";
+            return false;
+        }
+        // load user model
+        $user = $this->loadModel( "user" );
+        $release = $this->loadModel( "release" );
+
+        // トークンチェック
+        checkToken();
+
+        if( count( $_POST ) ){
+            $user_id   = $_SESSION["user"];
+            $paper_id  = escape( $_POST["pid"] );
+
+            $user_id_array = $user->user_id_by_scrap_paper( $paper_id );
+            $user->paper_remove( $paper_id, $user_id );
+
+            if ( $user_id_array ) {
+                foreach ($user_id_array as $one) {
+                    $user->paper_scrap_number_update( $one );
+                }
+            }
+        }
+
+        echo json_encode( $release->get_paper_publish_number( $user_id ) );
     }
 
         function contact()
