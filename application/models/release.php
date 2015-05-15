@@ -377,7 +377,6 @@ class release extends model {
             $publish_info_data[] = array_merge($row, $paper_info);
             }
         }
-
         return $publish_info_data;
     }
 
@@ -400,7 +399,59 @@ class release extends model {
             $publish_info_data[] = array_merge($row, $paper_info);
             }
         }
+        return $publish_info_data;
+    }
 
+    function find_publish_by_keyword( $users_id, $words, $scope ) {
+        $paper_info_data = array();
+        $publish_info_data = array();
+        $publish_ids = array();
+        $user_string = implode("," , $users_id );
+
+        //空白文字で検索ワードを分割
+        $word_array = preg_split("/[ ]+/",$words);
+        $select = "SELECT `id` FROM `publish`";
+        $where = " WHERE ";
+        for( $i = 0; $i <count($word_array); $i++ ){
+            $where .= "( (`headline` LIKE '%$word_array[$i]%') OR";
+            $where .= "(`comment` LIKE '%$word_array[$i]%') )";
+            if ($i < count($word_array) - 1){
+                $where .= " AND ";
+            }
+        }
+        $sql = $select.$where;
+        $sql .= "ORDER BY `id` DESC";
+
+        $result = mysql_query_excute($sql);
+        while ($row = mysql_fetch_object($result)) {
+            array_push($publish_ids, $row->id );
+        }
+        $ids = implode("," , $publish_ids );
+
+        if ( $ids ) {
+            if ( $scope == 1 ) {
+                $sql = "SELECT `paper`.`id`, `paper`.`user_id`, `publish_id_1`, `count`, `clap`, `paper`.`scrap`, `upapername`, `display_name`, `photo_url`, `paper`.`created_at` FROM `paper` INNER JOIN `users` ON `paper`.`user_id` = `users`.`id` WHERE `paper`.`user_id` IN ( $user_string ) AND (  ( `publish_id_1` IN ( $ids ) ) OR ( `publish_id_2` IN ( $ids ) ) OR ( `publish_id_3` IN ( $ids ) ) OR ( `publish_id_4` IN ( $ids ) ) OR ( `publish_id_5` IN ( $ids ) )  ) ORDER BY `paper`.`id` DESC";
+            }else{
+                $sql = "SELECT `paper`.`id`, `paper`.`user_id`, `publish_id_1`, `count`, `clap`, `paper`.`scrap`, `upapername`, `display_name`, `photo_url`, `paper`.`created_at` FROM `paper` INNER JOIN `users` ON `paper`.`user_id` = `users`.`id` WHERE (  ( `publish_id_1` IN ( $ids ) ) OR ( `publish_id_2` IN ( $ids ) ) OR ( `publish_id_3` IN ( $ids ) ) OR ( `publish_id_4` IN ( $ids ) ) OR ( `publish_id_5` IN ( $ids ) )  ) ORDER BY `paper`.`id` DESC";
+            }
+        $result = mysql_query_excute($sql);
+
+        while ( $row = mysql_fetch_assoc($result) ) {
+            $paper_info_data[] = $row;
+        }
+
+        if ( isset ($paper_info_data) ) {
+            foreach ($paper_info_data as $paper_info) {
+            $publish_id_1 = $paper_info["publish_id_1"];
+            $sql = "SELECT `headline`, `comment`, `release`.`rid`, `title`, `img1` FROM `publish` INNER JOIN `release` ON `publish`.`rid` = `release`.`rid` WHERE `id` = '$publish_id_1' LIMIT 1";
+            $result = mysql_query_excute($sql);
+            $row = mysql_fetch_assoc($result);
+            $publish_info_data[] = array_merge($row, $paper_info);
+            }
+        }
+        }else{
+            $publish_info_data = array();
+        }
         return $publish_info_data;
     }
 

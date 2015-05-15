@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="description" content="CrowdPressとは">
+<style type="text/css">@-ms-viewport{width: device-width;}</style>
+<link rel="stylesheet" href="application/public/css/layers.min.css" media="screen">
+<link rel="stylesheet" href="application/public/css/style.css" media="screen">
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700|Open+Sans:400italic,700italic,400,700' rel='stylesheet' type='text/css'>
+<link rel="icon" href="application/public/img/favicon.ico">
+<title>MyFeed - CrowdPress</title>
+</head>
+
+<body class="blog masonry-style">
+<?php if( isset( $error_message ) ) h( $error_message ); ?>
+
+<?php if( isset( $_SESSION["user"]  ) ){
+  include("application/views/common/header.html");
+}
+else{
+  include("application/views/common/header_before_login.html");
+} ?>
+
+        <main>
+            <div id="main" class="row">
+                <div class="row-content buffer clear-after">
+                    <h2 style="text-align: center">最近登録したユーザーの新聞を購読してみよう！</h2>
+                    <!-- 繰り返しスタート-->
+                    <div class="column nine">
+                    <?php if ( !$users_data ) : ?>
+                        <h3 style="text-align: center">最近登録したユーザーはいません。</h3>
+                    <?php endif; ?>
+                    <?php foreach ($users_data as $user) { ?>
+                        <article class="clear-after">
+                            <div class="column three">
+                                <figure><img src="<?php h( $user["photo_url"] ) ; ?>"></figure>
+                            </div><!-- column three -->
+                            <div class="column nine last">
+                                <h2><a href="?route=users/profile_user/<?php h( $user["id"] ) ; ?>"><?php h( $user["upapername"] ) ; ?></a>
+                                <?php if( $_SESSION["user"] == $user["id"] ){
+                                //自分見た時
+                                echo "";
+                                }else{
+                                //他人が見た時
+                                echo "<button class=\"user-follow\" user_id =\"$user[id]\">$user[follow_status]</button>";
+                                } ?></h2>
+                                <h5 class="meta-post">
+                                    <?php h( $user["display_name"] ) ; ?>
+                                </h5>
+                                <p><?php h( $user["paper_explain"] ) ; ?></p>
+                            </div><!-- column nine -->
+                        </article>
+                    <?php } ?><!-- 繰り返し終わり -->
+                    </div><!-- column nine -->
+
+                </div><!-- row-content -->
+            </div><!-- row -->
+        </main><!-- main -->
+
+<?php include("application/views/common/footer.html");?>
+
+<script src="https://code.jquery.com/jquery.js"></script>
+<script src="application/public/js/plugins.js"></script>
+<script src="application/public/js/beetle.js"></script>
+<script src="application/public/js/analyticstracking.js"></script>
+<script src="application/public/js/jquery.editable.min.js"></script>
+
+<script>
+$('.user-follow').on('click', function() {
+    var follow_status = $(this);
+    var user_id = $(this).attr("user_id");
+    var data = {
+        'user_id' : user_id,
+        'follower_id': 0
+    };
+
+    jQuery.ajax({
+        type:"POST",
+        url: "?route=users/following",
+        dataType: "json",
+        data: data,
+        success: function(data, dataType) {   // OK時
+            follow_status.html(data[1]);
+        },
+        error: function() {         // HTTPエラー時
+            alert("ログインしてください！");
+        },
+        complete: function() {      // 成功・失敗に関わらず通信が終了した際の処理
+        }
+    });
+});
+
+</script>
+
+</body>
+</html>

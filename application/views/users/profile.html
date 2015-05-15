@@ -83,10 +83,10 @@ else{
                     <!-- 繰り返しスタート-->
                     <?php if ( !$paper_data ): ?>
                         <?php if( $_SESSION["user"] == $user_data["id"] ): ?>
-                            <h2>まだ最初の新聞を発行していません</h2>
-                            <p><a href="?route=pages/newrelease">NewRelease</a>をScrapして新聞を発行しましょう</p>
+                            <h2 style="text-align: center">まだ最初の新聞を発行していません</h2>
+                            <p style="text-align: center"><a href="?route=pages/newrelease">NewRelease</a>をScrapして新聞を発行しましょう</p>
                         <?php else: ?>
-                            <h2>新聞を発行していません</h2>
+                            <h2 style="text-align: center">新聞を発行していません</h2>
                         <?php endif; ?>
                     <?php endif; ?>
                     <?php foreach ($paper_data as $paper) { ?>

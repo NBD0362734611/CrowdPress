@@ -265,10 +265,10 @@ class users extends controller {
 
 		// get the user data from database
 		$user_data = $user->find_by_id( $user_id );
-		$follow_status = $user->follow ( $user_id, $_SESSION["user"] );
-		$follow = $user->get_user_following ( $user_id );
+		$follow_status = $user->follow( $user_id, $_SESSION["user"] );
+		$follow = $user->get_user_following( $user_id );
 		if ( isset( $follow ) ) {
-			$follow_data = $user->find_by_ids ( $follow );
+			$follow_data = $user->find_by_ids( $follow );
 		}
 		$i = 0;
 		foreach ($follow_data as $follow) {
@@ -322,23 +322,86 @@ class users extends controller {
 	{
 		$paper_data = array();
 		$release_comment_data = array();
+		$follow_data = array();
+		$users_data = array();
+
 		$user = $this->loadModel( "user" );
 		$release = $this->loadModel( "release" );
+		$authentication = $this->loadModel( "authentication" );
 
+		$user_data = $user->find_by_id( $_SESSION["user"] );
 		$paper_data = $release->find_publish_by_follow( $_SESSION["user"] );
-
-		if ( isset($paper_data) ) {
-			foreach ($paper_data as $paper) {
-            $row = $user->paper_comment_select($paper["id"]);
-            $release_comment_data[$paper["id"]] = $row;
-         }
-		}
+		$user_authentication = $authentication->find_by_user_id( $_SESSION["user"] );
 
 		if( ! isset( $_SESSION["user"] ) ){
 			$this->redirect( "users/login" );
 		}
 
-		$data = array( "paper_data" => $paper_data, "release_comment_data" => $release_comment_data);
+		if ( $user_data["follow"] == 0 ) {
+			$users = $user->get_latest_users( $_SESSION["user"] );
+        	if ( $users ) {
+            	$users_data = $user->find_by_ids( $users );
+        	}
+        	$i = 0;
+        	foreach ($users_data as $users) {
+            	$follow_status_user_data = $user->follow( $users["id"], $_SESSION["user"] );
+            	$users_data[$i]["follow_status"] = $follow_status_user_data;
+            	$i++;
+        	}
+			$data = array( "user_data" => $user_data, "user_authentication" => $user_authentication, "users_data" => $users_data);
+			$this->loadView( "users/nofollow", $data );
+
+		} else {
+			if ( isset($paper_data) ) {
+				foreach ($paper_data as $paper) {
+            	$row = $user->paper_comment_select($paper["id"]);
+            	$release_comment_data[$paper["id"]] = $row;
+         		}
+			}
+			$data = array( "paper_data" => $paper_data, "release_comment_data" => $release_comment_data);
+			$this->loadView( "users/myfeed", $data );
+		}
+
+	}
+
+	function myfeed_search_by_keyword()
+	{
+		if( ! isset( $_SESSION["user"] ) ){
+			$this->redirect( "users/login" );
+		}
+
+		$keyword   = escape ( $_GET["keyword"] );
+		$scope     = escape ( $_GET["scope"] );
+		// $keyword   = escape( $keyword );
+        $keyword   = mb_convert_encoding($keyword,"UTF-8","UTF-8,EUC-JP,SJIS,Shift_JIS,ASCII");
+        //全角空白があったら半角空白にそろえる
+        $words     = str_replace("　", " ", $keyword);
+        $words     = trim($words);
+        if ( $scope == 1) {
+        	$checked1 = "checked";
+        	$checked2 = "";
+        }else{
+        	$checked1 = "";
+        	$checked2 = "checked";
+        }
+		$paper_data = array();
+		$release_comment_data = array();
+
+		$release = $this->loadModel( "release" );
+		$user = $this->loadModel( "user" );
+
+		$users_id = $user->get_user_following( $_SESSION["user"] );
+		array_push( $users_id, $_SESSION["user"] );
+		$paper_data = $release->find_publish_by_keyword( $users_id, $words, $scope );
+
+		if ( isset($paper_data) ) {
+			foreach ($paper_data as $paper) {
+            $row = $user->paper_comment_select($paper["id"]);
+            $release_comment_data[$paper["id"]] = $row;
+         	}
+		}
+
+		$data = array( "paper_data" => $paper_data, "release_comment_data" => $release_comment_data, "keyword" => $keyword, "checked1" => $checked1, "checked2" => $checked2);
 		$this->loadView( "users/myfeed", $data );
 	}
 

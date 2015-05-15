@@ -204,6 +204,16 @@ class user extends model {
         return $count;
 	}
 
+    function get_latest_users( $user_id ){
+        $users = array();
+        $sql = "SELECT DISTINCT `id` AS `user_id` FROM `users` WHERE `id` <> '$user_id' ORDER BY `id` DESC LIMIT 5";
+        $result = mysql_query_excute($sql);
+        while ($row = mysql_fetch_object($result)) {
+            array_push($users, $row->user_id);
+        }
+        return $users;
+    }
+
 	function get_user_following ( $user_id ){
 		$following = array();
 		$sql = "SELECT DISTINCT `user_id` FROM `following` WHERE `follower_id` = '$user_id' ORDER BY `following`.`created_at` DESC";

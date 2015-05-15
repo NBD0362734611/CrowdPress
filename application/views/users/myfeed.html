@@ -23,9 +23,20 @@ else{
   include("application/views/common/header_before_login.html");
 } ?>
 
-        <main>
+        <main role="main">
             <div id="main" class="row">
                 <div class="row-content buffer clear-after">
+                    <!-- 検索 -->
+                    <div class="widget widget_search">
+                        <form id="search" role="search">
+                        <span class="pre-input"><i class="fa fa-search"></i></span>
+                        <input type="text" name="keyword" placeholder="MyFeed検索..." value="<?php if ( isset( $keyword )) { h( $keyword ); } ?>" class="plain buffer">
+                        <input type="radio" name="scope" id="on" value="1" <?php if(isset($checked1)){ h( $checked1); }else{ echo "checked"; } ?>>
+                        <label for="on" class="switch-on">購読中</label>
+                        <input type="radio" name="scope" id="off" value="0" <?php if(isset($checked2)){ h( $checked2); }else{} ?> >
+                        <label for="off" class="switch-off">全フィード</label>
+                        </form>
+                    </div>
                     <!-- 繰り返しスタート-->
                     <?php foreach ($paper_data as $paper) { ?>
                     <div class="myfeed-wrapper <?php h( $paper["id"] ); ?>">
@@ -34,7 +45,7 @@ else{
                             <div class="colmn inline-block">
                                 <h5 class="meta-post"><a href="?route=pages/display_paper/<?php h( $paper["id"] ); ?>"><?php h( $paper["upapername"] ); ?>第<?php h( $paper["count"] ); ?>号</a> - <time datetime="<?php h( $paper["created_at"] ); ?>"><?php h( $paper["created_at"] ); ?></time></h5>
                             </div>
-                            <section class="myfeed" class="row section">
+                            <section class="myfeed row section">
                                 <h2 class="paper-subtitle"><?php h( $paper["headline"] ); ?></h2>
                                 <div class="release-article">
                                     <p class="release">
@@ -115,6 +126,30 @@ else{
 <script src="application/public/js/analyticstracking.js"></script>
 
 <script>
+//検索
+$('#search').submit(function(event) {
+    // ここでsubmitをキャンセル。
+    event.preventDefault();
+    var keyword = $('#search [name=keyword]').val();
+    var scope = $("input[name='scope']:checked").val();
+    var URI = "?route=users/myfeed_search_by_keyword/" + "&keyword=" + keyword + "&scope=" + scope;
+    var data = {
+        'keyword': keyword,
+        'scope': scope
+    };
+    // Ajax処理
+    $.ajax({
+      url: URI,
+      data : data,
+      success: function(data) {
+        window.location.href = URI;
+      },
+      error: function(XMLHttpRequest, textStatus, errorThrown) {
+        alert("error");
+      }
+    });
+});
+
 $('.paper-comment-toggle').click(function(){
     $(this).parent().parent().parent().nextAll('.paper-comment').toggle(300);
 });
