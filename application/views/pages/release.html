@@ -68,17 +68,8 @@ else{
                                 <p><a href="?route=pages/release_sort_by_cname/<?php h( $release_detail_data["cname"] ); ?>"><?php h( $release_detail_data["cname"] ); ?></a></p>
                             </div>
                             <div class="widget">
-                                <h4>日時</h4>
+                                <h4>発行日時</h4>
                                 <p><?php h( $release_detail_data["time"] ); ?></p>
-                            </div>
-                            <div class="widget">
-                                <h4>test</h4>
-                                <p>test</p>
-                            </div>
-                            <div class="widget">
-                                <h4>test</h4>
-                                <p>test</p>
-                                <a href="#" class="button transparent">test</a>
                             </div>
                         </aside>
 
@@ -102,8 +93,10 @@ else{
                                         <img src="<?php h( $release_comment["photo_url"] ); ?>" class="avatar" alt="">
                                         <cite><a href="?route=users/profile_user/<?php h( $release_comment["id"] ); ?>"><?php h( $release_comment["display_name"] ); ?></a></cite>
                                         <span class="says">says:</span>
-                                        <?php if( $_SESSION["user"] == $release_comment["id"] ): ?>
-                                        <a class="remove" commentid="<?php h( $release_comment["commentid"] ) ?>" rid="<?php h( $release_detail_data["rid"] ); ?>" token="<?php h($_SESSION['token']); ?>"><i class="fa fa-times"></i></a>
+                                        <?php if( isset ( $_SESSION["user"] ) ): ?>
+                                            <?php if( $_SESSION["user"] == $release_comment["id"] ): ?>
+                                            <a class="remove" commentid="<?php h( $release_comment["commentid"] ) ?>" rid="<?php h( $release_detail_data["rid"] ); ?>" token="<?php h($_SESSION['token']); ?>"><i class="fa fa-times"></i></a>
+                                            <?php endif; ?>
                                         <?php endif; ?>
                                     </div><!-- comment-author -->
                                     <div class="comment-meta">

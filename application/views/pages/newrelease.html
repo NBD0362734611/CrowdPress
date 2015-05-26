@@ -27,7 +27,6 @@ else{
 
             <div id="main" class="row">
                 <div class="row-content buffer">
-
                     <div class="widget widget_search">
                         <form id="search" role="search">
                         <span class="pre-input"><i class="fa fa-search"></i></span>
@@ -37,10 +36,12 @@ else{
                     </div>
 
                     <h2 class="newrelease">新着リリース <?php if ( isset($cname)) { h($cname); } ?></h2>
+
+                    <div id ="release_body">
                     <!-- 繰り返しスタート -->
                     <?php foreach ($release_data as $release) { ?>
                         <div class="post-area clear-after">
-                            <section role="main" class="release1">
+                            <section role="main" class="release">
                                 <h3 class="release-title">
                                 <a href="?route=pages/release_detail/<?php h( $release["rid"] ); ?>">
                                     <?php h( $release["title"] ); ?>
@@ -77,7 +78,7 @@ else{
                             </div>
                             <div class="clear"></div>
                             <!-- 自分のコメントここから -->
-                            <form class="release-comment" style="display: none" action="?route=pages/release_comment_insert" method="post">
+                            <form class="release-comment" style="display: none" action="?route=pages/release_comment_insert" method="post" >
                                 <input type="hidden" name="rid" value="<?php h( $release["rid"] ); ?>" />
                                 <input type="hidden" name="user_id" value="<?php h( $_SESSION["user"] ); ?>" />
                                 <input type="hidden" name="token" value="<?php h($_SESSION['token']); ?>">
@@ -89,7 +90,7 @@ else{
                                 <div class="question_Box inline">
                                     <div class="question_image column inline-block">
                                         <img src="<?php h( $release_comment["photo_url"] ); ?>" alt="ユーザーの写真"/>
-                                        <a href="?route=users/profile_user/<?php h( $release_comment["id"] ); ?>"><?php h( $release_comment["display_name"] ); ?></a>
+                                        <h5 class="username"><a href="?route=users/profile_user/<?php h( $release_comment["id"] ); ?>"><?php h( $release_comment["display_name"] ); ?></a></h5>
                                     </div>
                                     <p class="arrow_question column nine reset inline-block">
                                     <?php h( $release_comment["comment"] ) ; ?>
@@ -100,10 +101,10 @@ else{
                             <?php } ?>
                             <?php } ?>
                             <!-- 自分のコメントここまで -->
-
                         </div><!-- post-area -->
-
-                     <?php } ?><!-- 繰り返し終わり -->
+                    <?php } ?><!-- 繰り返し終わり -->
+                    </div><!-- release_body -->
+                    <div id="loading"></div>
 
                 </div><!-- row-content -->
             </div><!-- row -->
@@ -113,8 +114,43 @@ else{
 <script src="https://code.jquery.com/jquery.js"></script>
 <script src="application/public/js/plugins.js"></script>
 <script src="application/public/js/beetle.js"></script>
+<script src="application/public/js/jquery.bottom-1.0.js"></script>
 <script src="application/public/js/analyticstracking.js"></script>
 <script>
+//無限スクロール
+var count = 1;
+$(function() {
+    $(window).bottom({proximity: 0.05});
+    $(window).on('bottom', function() {
+    var obj = $(this);
+    var data = {
+        'count': count
+    };
+    if (!obj.data('loading')) {
+        obj.data('loading', true);
+        $('#loading').html('Loading…');
+        $.ajax({
+            type:"POST",
+            url: "?route=pages/loadrelease",
+            // dataType: "json",
+            data: data,
+            cache: false,
+            success: function(html){
+                if ( html ) {
+                    count++;
+                    $("#release_body").append(html);
+                    $('#loading').html('');
+                    obj.data('loading', false);
+                }else{
+                    $(window).unbind('bottom');
+                    $(window).unbind('scroll');
+                    $('#loading').html('');
+                }
+            }
+        });
+    }
+    });
+});
 
 //検索
 $('#search').submit(function(event) {
@@ -138,15 +174,14 @@ $('#search').submit(function(event) {
     });
 });
 
-
 //コメント表示切り替え
-$('.release-comment-toggle').click(function(){
+$('#release_body').on('click', '.release-comment-toggle', function(){
     $(this).parent().parent().parent().nextAll('.release-comment').toggle(300);
 });
 var long = '90%';
 var short = '50%';
 //フォーカス時にアニメーションエフェクトでサイズを広げる
-$('.release-comment input').focus(function(){
+$('#release_body').on('focus', '.release-comment input', function(){
     if($(this).val()==='リリースにコメントする'){
         $(this).val('');
     }
@@ -155,7 +190,7 @@ $('.release-comment input').focus(function(){
         width: long},400);
 });
 //外れたときはサイズを縮める
-$('.release-comment input').blur(function(){
+$('#release_body').on('blur', '.release-comment input', function(){
     if($(this).val()===''){
         $(this).val('リリースにコメントする');
     }
@@ -163,7 +198,34 @@ $('.release-comment input').blur(function(){
         width: short},500);
 });
 
-$('.clap').on('click', function() {
+// //コメント
+// jQuery('.release-comment').on('submit', function(event) {
+//     // ここでsubmitをキャンセル。
+//     event.preventDefault();
+//     // var rid = jQuery(':hidden[name="rid"]').val();
+//     // var token = jQuery(':hidden[name="token"]').val();
+//     // var comment = jQuery(':text[name="comment"]').val();
+//     var url = jQuery(this).attr("action");
+//     var data = jQuery(this).serialize();
+//     // alert(rid);
+//     // alert(token);
+//     // alert(comment);
+
+//     jQuery.ajax({
+//         type:"POST",
+//         url: url,
+//         dataType: "json",
+//         data: data,
+//         success: function(json) {
+//             alert(json);
+//         },
+//         error: function(XMLHttpRequest, textStatus, errorThrown) {
+//             alert("通信エラー");
+//       }
+//     });
+// });
+
+$('#release_body').on('click', '.clap', function() {
     var rid = $(this).attr("rid");
     var clap = $(this).next();
     var data = {
@@ -194,7 +256,7 @@ $('.clap').on('click', function() {
     });
 });
 
-$('.scrap').on('click', function() {
+$('#release_body').on('click', '.scrap', function() {
     var rid = $(this).attr("rid");
     var scrap = $(this).next();
     var data = {

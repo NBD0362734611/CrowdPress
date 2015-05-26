@@ -6,7 +6,6 @@
 
 jQuery(document).ready(function ($) {
 
-
     /* Define some vars */
 
     var win = $(window),

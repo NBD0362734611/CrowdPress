@@ -23,36 +23,41 @@ else{
 
 <main role="main">
             <div id="intro-wrap">
-                <div id="intro" class="preload darken" data-autoplay="5000" data-navigation="true" data-pagination="true" data-transition="fadeUp">
-                    <div class="intro-item" style="background-image: url();">
+                <div id="intro" class="preload darken" data-autoplay="5000" data-navigation="false" data-pagination="true" data-transition="fadeUp">
+                    <div class="intro-item" style="background-image: url(application/public/img/top/1.jpg);">
                         <div class="caption">
                             <h2>あなただけの新聞を発行しよう</h2>
-                            <a href="?route=authentications/authenticatewith/facebook" class="button white transparent login-btn before-login-element">Facebookではじめる（無料）</a>
+                            <?php if( !isset( $_SESSION["user"] ) ): ?>
+                                <a href="?route=authentications/authenticatewith/facebook" class="button white transparent login-btn before-login-element">Facebookではじめる（無料）</a>
+                            <?php endif; ?>
+                            <?php if( isset( $_SESSION["user"] ) ): ?>
+                                <a href="?route=pages/newrelease" class="button white transparent login-btn before-login-element">新着リリースを見てみよう</a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <div class="intro-item" style="background-image: url(application/public/img/top/2.jpg);">
+                        <div class="caption">
+                            <h2>誰かの色眼鏡がかかっていない一次情報を届けます</h2>
+                            <p>ニュースになる前の情報をあなたに届けます。<br>今まで見ることのなかった情報に出会えるかもしれません。</p>
+                        </div>
+                    </div>
+                    <div class="intro-item" style="background-image: url(application/public/img/top/3.jpg);">
+                        <div class="caption">
+                            <h2>あなたが新聞記者</h2>
+                            <p>タイムラインに流れてきた一次情報を元に、あなたなりの論評を加え、新聞を発行してみましょう。<br>あなたの意見が新たなアイデアを生み出すかもしれません。</p>
+                        </div>
+                    </div>
+                    <div class="intro-item" style="background-image: url(application/public/img/top/4.jpg);">
+                        <div class="caption">
+                            <h2>使い方はいろいろ</h2>
+                            <p>セルフブランディングに使ってもよし。<br>
+                            ディスカッションの場にしてもよし。<br>
+                            情報を得て、情報を整理する場にすることも可能です。<br>
+                            ブログとして使い、あなたの意見を記録するのもいいですね。</p>
                         </div>
                     </div>
                 </div><!-- intro -->
             </div><!-- intro-wrap -->
-
-            <div id="main">
-
-                <section class="row section">
-                    <div class="row-content buffer even clear-after">
-                        <div class="column six push-six last-special">
-                            <h2>あなたの新聞で世界が動く</h2>
-                            <p>3つのステップで簡単に新聞を発行可能</p>
-                        </div>
-                        <div class="side-mockup left-mockup animation">
-                            <div class="slider desktop-slider" data-autoplay="false">
-                                <figure>
-                                    <div><img src="http://placehold.it/1148x630/ddd/fff&text=Beetle%20image" alt=""></div>
-                                    <div><img src="" alt=""></div>
-                                </figure>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-            </div><!-- id-main -->
 </main><!-- main -->
 
 <?php include("application/views/common/footer.html");?>

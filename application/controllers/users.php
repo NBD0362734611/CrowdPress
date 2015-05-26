@@ -209,7 +209,11 @@ class users extends controller {
 		// get the user data from database
 		$user_data = $user->find_by_id( $user_id );
 		$paper_data = $release->find_publish_by_user_id( $user_id );
-		$follow_status = $user->follow ( $user_id, $_SESSION["user"] );
+		if ( isset( $_SESSION["user"] ) ) {
+			$follow_status = $user->follow ( $user_id, $_SESSION["user"] );
+		}else{
+			$follow_status = "購読する";
+		}
 
 		// get the user authentication info from db, if any
 		$user_authentication = $authentication->find_by_user_id( $user_id );
@@ -454,4 +458,43 @@ class users extends controller {
 
         echo json_encode( $user->following($user_id, $follower_id) );
     }
+
+    function user_search_by_keyword()
+	{
+		if( ! isset( $_SESSION["user"] ) ){
+			$this->redirect( "users/login" );
+		}
+
+		if( count( $_POST ) ){
+			$user_id   = $_SESSION["user"];
+            $keyword   = escape ( $_POST["keyword"] );
+            $token     = escape ( $_POST["token"] );
+        }
+
+        checkToken();
+
+        $users = array();
+        $users_data = array();
+
+        $keyword   = mb_convert_encoding($keyword,"UTF-8","UTF-8,EUC-JP,SJIS,Shift_JIS,ASCII");
+        //全角空白があったら半角空白にそろえる
+        $words     = str_replace("　", " ", $keyword);
+        $words     = trim($words);
+
+		$user = $this->loadModel( "user" );
+		$users = $user->find_by_keyword( $words );
+
+        if ( $users ) {
+            	$users_data = $user->find_by_ids( $users );
+        	}
+        	$i = 0;
+        	foreach ($users_data as $users) {
+            	$follow_status_user_data = $user->follow( $users["id"], $_SESSION["user"] );
+            	$users_data[$i]["follow_status"] = $follow_status_user_data;
+            	$i++;
+        	}
+
+		$data = array("users_data" => $users_data, "user_search_keyword" => $words);
+		$this->loadView( "users/find_by_keyword", $data );
+	}
 }

@@ -1,8 +1,9 @@
 <?php
 class release extends model {
-	function get_new_release (){
-		$sql = "SELECT * FROM `release` ORDER BY `rid` DESC LIMIT 50";
-		$result = mysql_query_excute($sql);
+
+    function get_new_release ( $start=0 ){
+        $sql = "SELECT * FROM `release` ORDER BY `rid` DESC LIMIT $start, 50";
+        $result = mysql_query_excute($sql);
         while ($row = mysql_fetch_assoc($result)) {
             $release_data[] = $row;
         }
@@ -11,7 +12,7 @@ class release extends model {
         } else {
             return array();
         }
-	}
+    }
 
     function find_release_by_cname( $cname ){
         $sql = "SELECT * FROM `release` WHERE `cname` LIKE '%$cname%' ORDER BY `rid` DESC LIMIT 50";
@@ -63,14 +64,8 @@ class release extends model {
         }
     }
 
-    function get_user_scrap ($user_id){
-        // $sql = "SELECT `rid`, `headline`, `comment` FROM `publish` WHERE `user_id` = '$user_id'";
-        // $result = mysql_query_excute($sql);
-        // while ($row = mysql_fetch_assoc($result)) {
-        //     $rid = $row["rid"];
-        //     $publish_data[$rid] = $row;
-        // }
-        $sql = "SELECT `release`.`title`, `release`.`rid`,`release`.`cname`, `release`.`img1`, `release`.`img2`, `release`.`img3`, `release`.`clap`, `release`.`scrap`, `release`.`time` FROM `release` INNER JOIN `r_scrap` ON `release`.`rid` = `r_scrap`.`rid` WHERE `r_scrap`.`user_id` = $user_id ORDER BY `r_scrap`.`time` DESC LIMIT 50";
+    function get_user_scrap ($user_id, $start=0){
+        $sql = "SELECT `release`.`title`, `release`.`rid`,`release`.`cname`, `release`.`img1`, `release`.`img2`, `release`.`img3`, `release`.`clap`, `release`.`scrap`, `release`.`time` FROM `release` INNER JOIN `r_scrap` ON `release`.`rid` = `r_scrap`.`rid` WHERE `r_scrap`.`user_id` = $user_id ORDER BY `r_scrap`.`time` DESC LIMIT $start, 50";
         $result = mysql_query_excute($sql);
         while ($row = mysql_fetch_assoc($result)) {
             $scrap_data[] = $row;
@@ -213,6 +208,12 @@ class release extends model {
 
 
     function scrap_paper_comment($user_id, $rid, $headline, $comment){
+        $sql = "SELECT `id` FROM `publish` WHERE `user_id` = '$user_id' AND `rid` = '$rid' ORDER BY `id` DESC LIMIT 1";
+        $result = mysql_query_excute($sql);
+        if ( mysql_num_rows($result) ) {
+            $sql = "DELETE FROM `publish` WHERE `user_id` = '$user_id' AND `rid` = '$rid' ORDER BY `id` DESC LIMIT 1";
+            $result = mysql_query_excute($sql);
+        }
         $sql = "INSERT INTO `publish`(`user_id`, `rid`, `headline`, `comment`) VALUES ('$user_id', '$rid', '$headline', '$comment')";
         $result = mysql_query_excute($sql);
         return "OK";
@@ -271,13 +272,11 @@ class release extends model {
             $result = mysql_query_excute($sql);
             $id = mysql_fetch_array($result);
             ${"publish_id_".$i} = $id[0];
+            if ( !$id[0] ) {
+                return false;
+            }
             $i++;
         }
-
-        // if ( !isset($publish_id_1)) {
-        //     echo "エラー！！！！論評の入力が確定されていません。";
-        //     return false;
-        // }
 
         //SQL文を作成
         $keys =  "publish_id_1";

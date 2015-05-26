@@ -35,6 +35,7 @@ else{
                                 <?php h( $user_data["display_name"] ); ?>
                             </h5>
 							<p id="paper_explain"><?php h( $user_data["paper_explain"] ); ?></p>
+                            <?php if( isset( $_SESSION["user"] ) ): ?>
                             <?php if( $_SESSION["user"] == $user_data["id"] ){
                                 //自分見た時
                                 echo "<button id=\"user_info_change_top\" class=\"button white transparent\"onClick=\"location.href='?route=users/setting'\" >編集する</button>";
@@ -47,6 +48,7 @@ else{
                                 h ( $follow_status );
                                 echo "</button>";
                             } ?>
+                            <?php endif; ?>
 							<div class="widget meta-social text-light">
 								<ul class="inline">
 									<li><a href="<?php h( $user_data["facebook_url"] ); ?>" class="facebook-share border-box"><i class="fa fa-facebook fa-lg"></i></a></li>
@@ -122,9 +124,12 @@ else{
                                     <li><a class="paper-comment-toggle border-box"><i class="fa fa-comment-o fa-lg"></i></a></li>
                                     <li><a class="clap border-box" pid="<?php h( $paper["id"] ); ?>"><i class="fa fa-heart-o fa-lg"></i></a><span class="arrow_box"><?php h( $paper["clap"] ); ?></span></li>
                                     <li><a class="scrap border-box" pid="<?php h( $paper["id"] ); ?>"><i class="fa fa-paperclip fa-lg"></i></a><span class="arrow_box"><?php h( $paper["scrap"] ); ?></span></li>
-                                    <?php if( $_SESSION["user"] == $paper["user_id"] ): ?>
-                                        <li><a class="remove" pid="<?php h( $paper["id"] ); ?>" token="<?php h($_SESSION['token']); ?>"><i class="fa fa-times fa-lg"></i></a></li>
+                                    <?php if( isset( $_SESSION["user"] ) ): ?>
+                                        <?php if( $_SESSION["user"] == $paper["user_id"] ): ?>
+                                            <li><a class="remove" pid="<?php h( $paper["id"] ); ?>" token="<?php h($_SESSION['token']); ?>"><i class="fa fa-times fa-lg"></i></a></li>
+                                        <?php endif; ?>
                                     <?php endif; ?>
+
                                 </ul>
                             </div>
                             <!-- 自分のコメントここから -->
@@ -146,7 +151,7 @@ else{
                                     <?php h( $release_comment["comment"] ) ; ?>
                                     </p><!-- /.arrow_question -->
                                     <div>
-                                        <a href="?route=users/profile_user/<?php h( $release_comment["id"] ); ?>"><?php h( $release_comment["display_name"] ); ?></a>
+                                        <h5 class="username"><a href="?route=users/profile_user/<?php h( $release_comment["id"] ); ?>"><?php h( $release_comment["display_name"] ); ?></a></h5>
                                     </div>
                                 </div><!-- /.question_Box -->
                                 <div class="clear"></div>

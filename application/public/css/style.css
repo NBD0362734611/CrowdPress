@@ -1738,13 +1738,32 @@ nav ul.sub-menu > li:last-child > a {
     padding-left: 4.444em;
 }
 
-.comment-list li.comment > div img.avatar {
+/*.comment-list li.comment > div img.avatar {
     position: absolute;
     top: 0;
     left: 0;
     float: left;
     width: 4.286em;
     height: 4.286em;
+    -webkit-border-radius: 25%;
+    -moz-border-radius: 25%;
+    border-radius: 25%;
+}*/
+
+.comment-list li.comment > div img.avatar {
+    border: 0px solid #aaa;
+    display:block;
+    width: 4.286em;
+    height: 4.286em;
+    overflow:hidden;
+    position:relative;
+    z-index:1;
+    margin: 0 auto;
+    text-align: center;
+    float:left;
+    position:absolute;
+    top: 0;
+    left: 0;
     -webkit-border-radius: 25%;
     -moz-border-radius: 25%;
     border-radius: 25%;

@@ -29,6 +29,15 @@
                                     <li><a href="?route=users/logout">ログアウト</a></li>
                                 </ul>
                             </li>
+                            <li class="menu-item">
+                                <div class="widget widget_search">
+                                    <form id="user_search" role="search" action="?route=users/user_search_by_keyword/" method="post">
+                                        <span class="pre-input"><i class="fa fa-search"></i></span>
+                                        <input type="text" name="keyword" placeholder="ユーザー検索..." value="<?php if ( isset($user_search_keyword)) { h ($user_search_keyword); } ?>" class="plain buffer">
+                                        <input type="hidden" name="token" value="<?php h($_SESSION['token']); ?>">
+                                    </form>
+                                </div>
+                            </li>
                         </ul>
                     </nav>
                 </div><!-- row-content -->

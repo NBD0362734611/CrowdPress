@@ -40,6 +40,7 @@ else{
                     </div>
 
                     <h2 class="newrelease">スクラップしたリリース <?php if ( isset($cname)) { h( $cname ); } ?></h2>
+                    <div id ="release_body">
                     <!-- 繰り返しスタート(scrapが空じゃない場合) -->
                     <?php $scrap_number = 0; ?>
                     <?php foreach ($release_data as $release) { ?>
@@ -97,7 +98,7 @@ else{
                                 <div class="question_Box inline">
                                     <div class="question_image column inline-block">
                                         <img src="<?php h( $release_comment["photo_url"] ); ?>" alt="ユーザーの写真"/>
-                                        <a href="?route=users/profile_user/<?php h( $release_comment["id"] ); ?>"><?php h( $release_comment["display_name"] ); ?></a>
+                                        <h5 class="username"><a href="?route=users/profile_user/<?php h( $release_comment["id"] ); ?>"><?php h( $release_comment["display_name"] ); ?></a></h5>
                                     </div>
                                     <p class="arrow_question column nine reset inline-block">
                                     <?php h( $release_comment["comment"] ) ; ?>
@@ -116,11 +117,10 @@ else{
                                 <input type="button" class="paper_comment" id="paper_comment<?php h( $scrap_number ); ?>" value="確定" token="<?php h($_SESSION['token']); ?>">
                                 <input type="button" class="edit_paper_comment" id="edit_paper_comment<?php h( $scrap_number ); ?>" class="btn_edit" value="編集"></input>
                             </form>
-
                         </div><!-- post-area -->
-
                      <?php } ?><!-- 繰り返し終わり -->
-
+                     </div><!-- release_body -->
+                     <div id="loading"></div>
                 </div><!-- row-content -->
             </div><!-- row -->
         </main><!-- main -->
@@ -129,9 +129,43 @@ else{
 <script src="https://code.jquery.com/jquery.js"></script>
 <script src="application/public/js/plugins.js"></script>
 <script src="application/public/js/beetle.js"></script>
+<script src="application/public/js/jquery.bottom-1.0.js"></script>
 <script src="application/public/js/analyticstracking.js"></script>
 <script>
-
+//無限スクロール
+var count = 1;
+$(function() {
+    $(window).bottom({proximity: 0.05});
+    $(window).on('bottom', function() {
+    var obj = $(this);
+    var data = {
+        'count': count
+    };
+    if (!obj.data('loading')) {
+        obj.data('loading', true);
+        $('#loading').html('Loading…');
+        $.ajax({
+            type:"POST",
+            url: "?route=pages/loadscrap",
+            // dataType: "json",
+            data: data,
+            cache: false,
+            success: function(html){
+                if ( html=='none' ) {
+                    count++;
+                    $("#release_body").append(html);
+                    $('#loading').html('');
+                    obj.data('loading', false);
+                }else{
+                    $(window).unbind('bottom');
+                    $(window).unbind('scroll');
+                    $('#loading').html('');
+                }
+            }
+        });
+    }
+    });
+});
 //検索
 $('#search').submit(function(event) {
     // ここでsubmitをキャンセル。
@@ -155,19 +189,18 @@ $('#search').submit(function(event) {
 });
 
 //論評の表示非表示切り替え
-$('.toggle-edit').click(function(){
+$('#release_body').on('click', '.toggle-edit', function(){
     $(this).parent().parent().parent().nextAll('.paper_edit').toggle(300);
 });
 
 //コメント表示切り替え
-$('.release-comment-toggle').click(function(){
-    console.log("test");
+$('#release_body').on('click', '.release-comment-toggle', function(){
     $(this).parent().parent().parent().nextAll('.release-comment').toggle(300);
 });
 var long = '90%';
 var short = '50%';
 //フォーカス時にアニメーションエフェクトでサイズを広げる
-$('.release-comment input').focus(function(){
+$('#release_body').on('focus', '.release-comment input', function(){
     if($(this).val()==='リリースにコメントする'){
         $(this).val('');
     }
@@ -176,7 +209,7 @@ $('.release-comment input').focus(function(){
         width: long},400);
 });
 //外れたときはサイズを縮める
-$('.release-comment input').blur(function(){
+$('#release_body').on('blur', '.release-comment input', function(){
     if($(this).val()===''){
         $(this).val('リリースにコメントする');
     }
@@ -184,7 +217,7 @@ $('.release-comment input').blur(function(){
         width: short},500);
 });
 
-$('.clap').on('click', function() {
+$('#release_body').on('click', '.clap', function() {
     var rid = $(this).attr("rid");
     var clap = $(this).next();
     var data = {
@@ -216,7 +249,7 @@ $('.clap').on('click', function() {
     });
 });
 
-$('.scrap').on('click', function() {
+$('#release_body').on('click', '.scrap', function() {
     var rid = $(this).attr("rid");
     var scrap = $(this).next();
     var data = {

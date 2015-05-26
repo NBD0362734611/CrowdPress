@@ -34,6 +34,29 @@ class user extends model {
 		return mysql_fetch_assoc($result);
 	}
 
+    function find_by_keyword ( $words ){
+        $user_ids = array();
+        //空白文字で検索ワードを分割
+        $word_array = preg_split("/[ ]+/",$words);
+        $select = "SELECT `id` FROM `users`";
+        $where = " WHERE ";
+        for( $i = 0; $i <count($word_array); $i++ ){
+            $where .= "( (`display_name` LIKE '%$word_array[$i]%') OR";
+            $where .= "(`upapername` LIKE '%$word_array[$i]%') OR";
+            $where .= "(`paper_explain` LIKE '%$word_array[$i]%') )";
+            if ($i < count($word_array) - 1){
+                $where .= " AND ";
+            }
+        }
+        $sql = $select.$where;
+        $sql .= "ORDER BY `id` DESC";
+        $result = mysql_query_excute($sql);
+        while ($row = mysql_fetch_object($result)) {
+            array_push( $user_ids, $row->id );
+        }
+        return $user_ids;
+    }
+
 	function find_by_ids ( $ids = 0 ){
 		$user_string = implode("," , $ids );
 		$sql = "SELECT * FROM `users` WHERE `id` in ( $user_string ) ORDER BY FIELD (`id`, $user_string )";
@@ -123,7 +146,7 @@ class user extends model {
 
 	function paper_comment_select($paper_id){
 		$paper_comment_data = array();
-		$sql = "SELECT `users`.`id`, `comment`, `display_name`, `photo_url` FROM `p_comment` INNER JOIN `users` ON `p_comment`.`user_id` = `users`.`id` WHERE `paper_id` = $paper_id ORDER BY `time`";
+		$sql = "SELECT `users`.`id`, `comment`, `display_name`, `photo_url` FROM `p_comment` INNER JOIN `users` ON `p_comment`.`user_id` = `users`.`id` WHERE `paper_id` = '$paper_id' ORDER BY `time`";
 		$result = mysql_query_excute($sql);
 		while ($row = mysql_fetch_assoc($result)) {
 			$paper_comment_data[] = $row;
