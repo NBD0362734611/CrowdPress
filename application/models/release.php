@@ -336,9 +336,9 @@ class release extends model {
         return mysql_fetch_assoc($result);
     }
 
-    function find_publish_by_user_id( $user_id ){
+    function find_publish_by_user_id( $user_id, $start=0 ){
         $publish_info_data = array();
-        $sql = "SELECT `paper`.`id`, `paper`.`user_id`, `paper`.`publish_id_1`, `paper`.`count`, `paper`.`clap`, `paper`.`scrap`, `users`.`upapername`, `users`.`photo_url`, `paper`.`created_at` FROM `paper` INNER JOIN `users` ON `paper`.`user_id` = `users`.`id`  WHERE `user_id` = '$user_id' ORDER BY `id` DESC";
+        $sql = "SELECT `paper`.`id`, `paper`.`user_id`, `paper`.`publish_id_1`, `paper`.`count`, `paper`.`clap`, `paper`.`scrap`, `users`.`upapername`, `users`.`photo_url`, `paper`.`created_at` FROM `paper` INNER JOIN `users` ON `paper`.`user_id` = `users`.`id`  WHERE `user_id` = '$user_id' ORDER BY `id` DESC LIMIT $start, 50";
         $result = mysql_query_excute($sql);
         while ( $row = mysql_fetch_assoc($result) ) {
             $paper_info_data[] = $row;
@@ -357,11 +357,11 @@ class release extends model {
         return $publish_info_data;
     }
 
-    function find_publish_by_follow( $user_id ){
+    function find_publish_by_follow( $user_id, $start=0 ){
         $paper_info_data = array();
         $publish_info_data = array();
 
-        $sql = "SELECT `paper`.`id`, `paper`.`user_id`, `publish_id_1`, `count`, `clap`, `paper`.`scrap`, `upapername`, `display_name`, `photo_url`, `paper`.`created_at` FROM `paper` INNER JOIN `users` ON `paper`.`user_id` = `users`.`id` WHERE `paper`.`user_id` IN ( SELECT `user_id` FROM `following` WHERE `follower_id` = '$user_id' ) OR `paper`.`user_id` = '$user_id' ORDER BY `paper`.`id` DESC";
+        $sql = "SELECT `paper`.`id`, `paper`.`user_id`, `publish_id_1`, `count`, `clap`, `paper`.`scrap`, `upapername`, `display_name`, `photo_url`, `paper`.`created_at` FROM `paper` INNER JOIN `users` ON `paper`.`user_id` = `users`.`id` WHERE `paper`.`user_id` IN ( SELECT `user_id` FROM `following` WHERE `follower_id` = '$user_id' ) OR `paper`.`user_id` = '$user_id' ORDER BY `paper`.`id` DESC LIMIT $start, 50";
         $result = mysql_query_excute($sql);
         while ( $row = mysql_fetch_assoc($result) ) {
             $paper_info_data[] = $row;

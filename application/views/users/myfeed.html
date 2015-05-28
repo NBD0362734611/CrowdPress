@@ -37,6 +37,8 @@ else{
                         <label for="off" class="switch-off">全フィード</label>
                         </form>
                     </div>
+
+                    <div id ="release_body">
                     <!-- 繰り返しスタート-->
                     <?php foreach ($paper_data as $paper) { ?>
                     <div class="myfeed-wrapper <?php h( $paper["id"] ); ?>">
@@ -107,13 +109,8 @@ else{
                         </article>
                     </div><!-- post-area -->
                     <?php } ?><!-- 繰り返し終わり -->
-
-                        <div id="pagination">
-                        <ul class="clear-after reset plain">
-                            <li id="older" class="pagination-nav"><a href="#" class="button transparent aqua"><i class="fa fa-chevron-left"></i><span class="label">戻る</span></a></li>
-                            <li id="newer" class="pagination-nav"><a href="#" class="button transparent aqua"><span class="label">次へ</span><i class="fa fa-chevron-right"></i></a></li>
-                        </ul>
-                    </div>
+                    </div><!-- release_body -->
+                    <div id="loading"></div>
                 </div><!-- row-content -->
             </div><!-- row -->
         </main><!-- main -->
@@ -124,6 +121,10 @@ else{
 <script src="application/public/js/plugins.js"></script>
 <script src="application/public/js/beetle.js"></script>
 <script src="application/public/js/analyticstracking.js"></script>
+<script src="application/public/js/jquery.bottom-1.0.js"></script>
+<?php if ( !isset($keyword) ): ?>
+    <script src="application/public/js/loadmyfeed.js"></script>
+<?php endif ?>
 
 <script>
 //検索
@@ -150,13 +151,13 @@ $('#search').submit(function(event) {
     });
 });
 
-$('.paper-comment-toggle').click(function(){
+$('#release_body').on('click', '.paper-comment-toggle', function() {
     $(this).parent().parent().parent().nextAll('.paper-comment').toggle(300);
 });
 var long = '90%';
 var short = '50%';
 //フォーカス時にアニメーションエフェクトでサイズを広げる
-$('.paper-comment input').focus(function(){
+$('#release_body').on('focus', '.paper-comment input', function(){
     if($(this).val()==='新聞にコメントする'){
         $(this).val('');
     }
@@ -165,7 +166,7 @@ $('.paper-comment input').focus(function(){
         width: long},400);
 });
 //外れたときはサイズを縮める
-$('.paper-comment input').blur(function(){
+$('#release_body').on('blur', '.paper-comment input', function(){
     if($(this).val()===''){
         $(this).val('新聞にコメントする');
     }
@@ -174,7 +175,7 @@ $('.paper-comment input').blur(function(){
 });
 
 //新聞削除
-$('.remove').on('click', function() {
+$('#release_body').on('click', '.remove', function() {
     var pid = $(this).attr("pid");
     var token = $(this).attr("token");
     var data = {
@@ -201,7 +202,7 @@ $('.remove').on('click', function() {
     }
 });
 
-$('.clap').on('click', function() {
+$('#release_body').on('click', '.clap', function() {
     var pid = $(this).attr("pid");
     var clap = $(this).next();
     var data = {
@@ -232,7 +233,7 @@ $('.clap').on('click', function() {
     });
 });
 
-$('.scrap').on('click', function() {
+$('#release_body').on('click', '.scrap', function() {
     var pid = $(this).attr("pid");
     var scrap = $(this).next();
     var data = {

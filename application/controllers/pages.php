@@ -194,7 +194,11 @@ class pages extends controller {
 
         if (isset($release_data)) {
             foreach ($release_data as $release) {
-            $row = $user->release_comment_select($release["rid"], $_SESSION["user"]);
+            if ( isset($_SESSION["user"]) ) {
+                    $row = $user->release_comment_select($release["rid"], $_SESSION["user"]);
+                }else{
+                    $row = $user->release_comment_select($release["rid"]);
+                }
             $release_comment_data[$release["rid"]] = $row;
             }
         } else {
@@ -233,7 +237,11 @@ class pages extends controller {
 
         if (isset($release_data)) {
             foreach ($release_data as $release) {
-            $row = $user->release_comment_select($release["rid"], $_SESSION["user"]);
+                if ( isset($_SESSION["user"]) ) {
+                    $row = $user->release_comment_select($release["rid"], $_SESSION["user"]);
+                }else{
+                    $row = $user->release_comment_select($release["rid"]);
+                }
             $release_comment_data[$release["rid"]] = $row;
             }
         } else {
@@ -285,10 +293,10 @@ class pages extends controller {
         $release = $this->loadModel( "release" );
 
         $user_data = $user->find_by_id( $_SESSION["user"] );
-        $release_data = $release->get_user_scrap( $_SESSION["user"] );
+        $start = escape( $_POST["count"] ) * 50;
+        $release_data = $release->get_user_scrap( $_SESSION["user"], $start );
         $release_comment_data = array();
         $publish_comment_data = array();
-        $start = escape( $_POST["count"] ) * 50;
 
         if (isset($release_data)){
             foreach ($release_data as $release) {

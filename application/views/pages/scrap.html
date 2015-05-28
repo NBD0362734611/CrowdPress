@@ -131,41 +131,13 @@ else{
 <script src="application/public/js/beetle.js"></script>
 <script src="application/public/js/jquery.bottom-1.0.js"></script>
 <script src="application/public/js/analyticstracking.js"></script>
+<?php if ( !isset($cname) and !isset($title) ): ?>
+    <script src="application/public/js/loadscrap.js"></script>
+<?php endif ?>
 <script>
 //無限スクロール
 var count = 1;
-$(function() {
-    $(window).bottom({proximity: 0.05});
-    $(window).on('bottom', function() {
-    var obj = $(this);
-    var data = {
-        'count': count
-    };
-    if (!obj.data('loading')) {
-        obj.data('loading', true);
-        $('#loading').html('Loading…');
-        $.ajax({
-            type:"POST",
-            url: "?route=pages/loadscrap",
-            // dataType: "json",
-            data: data,
-            cache: false,
-            success: function(html){
-                if ( html=='none' ) {
-                    count++;
-                    $("#release_body").append(html);
-                    $('#loading').html('');
-                    obj.data('loading', false);
-                }else{
-                    $(window).unbind('bottom');
-                    $(window).unbind('scroll');
-                    $('#loading').html('');
-                }
-            }
-        });
-    }
-    });
-});
+
 //検索
 $('#search').submit(function(event) {
     // ここでsubmitをキャンセル。

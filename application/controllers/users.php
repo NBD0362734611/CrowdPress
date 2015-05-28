@@ -228,6 +228,98 @@ class users extends controller {
 		$this->loadView( "users/profile", $data );
 	}
 
+	function loaduserprofile()
+	{
+		$data = array();
+		$release_comment_data = array();
+
+		// load user and authentication models
+		$user = $this->loadModel( "user" );
+		$release = $this->loadModel( "release" );
+		$start = escape( $_POST["count"] ) * 50;
+		$user_id = escape( $_POST["user_id"] );
+		// get the user data from database
+		$user_data = $user->find_by_id( $user_id );
+		$paper_data = $release->find_publish_by_user_id( $user_id, $start );
+
+		foreach ($paper_data as $paper) {
+            $row = $user->paper_comment_select($paper["id"]);
+            $release_comment_data[$paper["id"]] = $row;
+         }
+
+		$html = "";
+		foreach ($paper_data as $paper) {
+			$html .= "<div class='myfeed-wrapper $paper[id]'>";
+			$html .= '<article role="main">';
+			$html .= "<div class=\"question_image column inline-block\"><a href=\"?route=users/profile_user/$paper[user_id]\"><img src=\"$paper[photo_url]\" alt=\"プロフィール画像\"/></a></div>";
+			$html .= '<div class="colmn inline-block">';
+			$html .= "<h5 class=\"meta-post\"><a href=\"?route=pages/display_paper/$paper[id]\">$paper[upapername]第$paper[count]号</a> - <time datetime=\"$paper[created_at]\">$paper[created_at]</time></h5>";
+			$html .= '</div>';
+			$html .= "<section class=\"myfeed row section\"><h2 class=\"paper-subtitle\">";
+			$html .= $paper["headline"];
+			$html .= '</h2>';
+			$html .= "<div class=\"release-article\"><p class=\"release\">";
+			$html .= $paper["comment"];
+			$html .= "…<a class=\"full-paper\" href=\"?route=pages/display_paper/$paper[id]\">この新聞を読む</a>";
+			$html .="</p><figure class=\"column half\">";
+			if( !empty($paper["img1"]) ) {
+				$html .= '<img src="';
+				$html .= $paper["img1"];
+				$html .= '">';
+				$html .= "<figcaption><a href=\"?route=pages/release_detail/$paper[rid]\">$paper[title]</a></figcaption>";
+			}
+			$html .= '</figure>';
+			$html .= '</div>';
+			$html .= "<div class=\"widget meta-social column half\">";
+			$html .= "<ul class=\"inline\">";
+			$html .= "<li><a class=\"paper-comment-toggle border-box\"><i class=\"fa fa-comment-o fa-lg\"></i></a></li>";
+			$html .= "<li><a class=\"clap border-box\" pid=\"$paper[id]\"><i class=\"fa fa-heart-o fa-lg\"></i></a><span class=\"arrow_box\">$paper[clap]</span></li>";
+			$html .= "<li><a class=\"scrap border-box\" pid=\"$paper[id]\"><i class=\"fa fa-paperclip fa-lg\"></i></a><span class=\"arrow_box\">$paper[scrap]</span></li>";
+			if ( isset( $_SESSION["user"] ) ) {
+				if ( $_SESSION["user"] == $paper["user_id"]  ) {
+					$html .= "<li><a class=\"remove\" pid=\"";
+					$html .= $paper["id"];
+					$html .= "\" token=\"";
+					$html .= $_SESSION['token'];
+					$html .= "\"><i class=\"fa fa-times fa-lg\"></i></a></li>";
+				}
+			}
+			$html .= '</ul></div>';
+			$html .= "<form class=\"paper-comment\" style=\"display:none\" action=\"?route=pages/paper_comment_insert\" method=\"post\">";
+			if ( isset( $_SESSION["user"] ) ) {
+				$html .= "<input type=\"hidden\" name=\"paper_id\" value=\"$paper[id]\" />";
+				$html .= "<input type=\"hidden\" name=\"user_id\" value=\"$_SESSION[user]\" />";
+				$html .= "<input type=\"hidden\" name=\"token\" value=\"$_SESSION[token]\" />";
+				$html .= "<input type=\"text\" name=\"comment\" value=\"新聞にコメントする\" />";
+				$html .= '</form>';
+			}
+			if(is_array($release_comment_data[$paper["id"]])){
+				foreach ($release_comment_data[$paper["id"]] as $release_comment) {
+					$comment = "";
+					$comment = <<< COMMENT
+					<section class="line_wrapper">
+                        <div class="question_Box inline">
+                            <div class="question_image column inline-block">
+                                <img src="$release_comment[photo_url]" alt="ユーザーの写真"/>
+                            </div>
+                            <p class="arrow_question column ten reset inline-block">
+								$release_comment[comment]
+                            </p><!-- /.arrow_question -->
+                            <div>
+                                <h5 class="username"><a href="?route=users/profile_user/$release_comment[id]">$release_comment[display_name]</a></h5>
+                            </div>
+                        </div><!-- /.question_Box -->
+                        <div class="clear"></div>
+                    </section><!-- /.line_wrappaer -->
+COMMENT;
+                    $html = $html . $comment;
+				}
+			}
+			$html .= '</section></article></div>';
+		}
+		echo $html;
+	}
+
 	function profile_user_scrap( $user_id )
 	{
 		$data = array();
@@ -368,6 +460,94 @@ class users extends controller {
 
 	}
 
+	function loadmyfeed()
+	{
+		$paper_data = array();
+		$release_comment_data = array();
+		$follow_data = array();
+		$users_data = array();
+
+		$user = $this->loadModel( "user" );
+		$release = $this->loadModel( "release" );
+		$start = escape( $_POST["count"] ) * 50;
+		$user_data = $user->find_by_id( $_SESSION["user"] );
+		$paper_data = $release->find_publish_by_follow( $_SESSION["user"], $start );
+
+		if ( isset($paper_data) ) {
+			foreach ($paper_data as $paper) {
+        	$row = $user->paper_comment_select($paper["id"]);
+        	$release_comment_data[$paper["id"]] = $row;
+     		}
+		}
+		$html = "";
+		foreach ($paper_data as $paper) {
+			$html .= "<div class='myfeed-wrapper $paper[id]'>";
+			$html .= '<article role="main">';
+			$html .= "<div class=\"question_image column inline-block\"><a href=\"?route=users/profile_user/$paper[user_id]\"><img src=\"$paper[photo_url]\" alt=\"プロフィール画像\"/></a></div>";
+			$html .= '<div class="colmn inline-block">';
+			$html .= "<h5 class=\"meta-post\"><a href=\"?route=pages/display_paper/$paper[id]\">$paper[upapername]第$paper[count]号</a> - <time datetime=\"$paper[created_at]\">$paper[created_at]</time></h5>";
+			$html .= '</div>';
+			$html .= "<section class=\"myfeed row section\"><h2 class=\"paper-subtitle\">";
+			$html .= $paper["headline"];
+			$html .= '</h2>';
+			$html .= "<div class=\"release-article\"><p class=\"release\">";
+			$html .= $paper["comment"];
+			$html .= "…<a class=\"full-paper\" href=\"?route=pages/display_paper/$paper[id]\">この新聞を読む</a>";
+			$html .="</p><figure class=\"column half\">";
+			if( !empty($paper["img1"]) ) {
+				$html .= '<img src="';
+				$html .= $paper["img1"];
+				$html .= '">';
+				$html .= "<figcaption><a href=\"?route=pages/release_detail/$paper[rid]\">$paper[title]</a></figcaption>";
+			}
+			$html .= '</figure>';
+			$html .= '</div>';
+			$html .= "<div class=\"widget meta-social column half\">";
+			$html .= "<ul class=\"inline\">";
+			$html .= "<li><a class=\"paper-comment-toggle border-box\"><i class=\"fa fa-comment-o fa-lg\"></i></a></li>";
+			$html .= "<li><a class=\"clap border-box\" pid=\"$paper[id]\"><i class=\"fa fa-heart-o fa-lg\"></i></a><span class=\"arrow_box\">$paper[clap]</span></li>";
+			$html .= "<li><a class=\"scrap border-box\" pid=\"$paper[id]\"><i class=\"fa fa-paperclip fa-lg\"></i></a><span class=\"arrow_box\">$paper[scrap]</span></li>";
+			if ( $_SESSION["user"] == $paper["user_id"]  ) {
+				$html .= "<li><a class=\"remove\" pid=\"";
+				$html .= $paper["id"];
+				$html .= "\" token=\"";
+				$html .= $_SESSION['token'];
+				$html .= "\"><i class=\"fa fa-times fa-lg\"></i></a></li>";
+			}
+			$html .= '</ul></div>';
+			$html .= "<form class=\"paper-comment\" style=\"display:none\" action=\"?route=pages/paper_comment_insert\" method=\"post\">";
+			$html .= "<input type=\"hidden\" name=\"paper_id\" value=\"$paper[id]\" />";
+			$html .= "<input type=\"hidden\" name=\"user_id\" value=\"$_SESSION[user]\" />";
+			$html .= "<input type=\"hidden\" name=\"token\" value=\"$_SESSION[token]\" />";
+			$html .= "<input type=\"text\" name=\"comment\" value=\"新聞にコメントする\" />";
+			$html .= '</form>';
+			if(is_array($release_comment_data[$paper["id"]])){
+				foreach ($release_comment_data[$paper["id"]] as $release_comment) {
+					$comment = "";
+					$comment = <<< COMMENT
+					<section class="line_wrapper">
+                        <div class="question_Box inline">
+                            <div class="question_image column inline-block">
+                                <img src="$release_comment[photo_url]" alt="ユーザーの写真"/>
+                            </div>
+                            <p class="arrow_question column ten reset inline-block">
+								$release_comment[comment]
+                            </p><!-- /.arrow_question -->
+                            <div>
+                                <h5 class="username"><a href="?route=users/profile_user/$release_comment[id]">$release_comment[display_name]</a></h5>
+                            </div>
+                        </div><!-- /.question_Box -->
+                        <div class="clear"></div>
+                    </section><!-- /.line_wrappaer -->
+COMMENT;
+                    $html = $html . $comment;
+				}
+			}
+			$html .= '</section></article></div>';
+		}
+		echo $html;
+	}
+
 	function myfeed_search_by_keyword()
 	{
 		if( ! isset( $_SESSION["user"] ) ){
@@ -497,4 +677,5 @@ class users extends controller {
 		$data = array("users_data" => $users_data, "user_search_keyword" => $words);
 		$this->loadView( "users/find_by_keyword", $data );
 	}
+
 }

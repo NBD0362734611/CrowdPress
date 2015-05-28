@@ -82,6 +82,7 @@ else{
 
 			<div id="main" class="row">
                 <div class="row-content buffer clear-after">
+                    <div id ="release_body">
                     <!-- 繰り返しスタート-->
                     <?php if ( !$paper_data ): ?>
                         <?php if( $_SESSION["user"] == $user_data["id"] ): ?>
@@ -163,16 +164,12 @@ else{
                         </article>
                     </div><!-- post-area -->
                     <?php } ?><!-- 繰り返し終わり -->
-
-                        <div id="pagination">
-                        <ul class="clear-after reset plain">
-                            <li id="older" class="pagination-nav"><a href="#" class="button transparent aqua"><i class="fa fa-chevron-left"></i><span class="label">戻る</span></a></li>
-                            <li id="newer" class="pagination-nav"><a href="#" class="button transparent aqua"><span class="label">次へ</span><i class="fa fa-chevron-right"></i></a></li>
-                        </ul>
-                    </div>
+                    </div><!-- release_body -->
+                    <div id="loading"></div>
                 </div><!-- row-content -->
             </div><!-- row -->
         </main><!-- main -->
+    <userdata id="userdata" userid="<?php h($user_data["id"]);?>">
 
 <?php include("application/views/common/footer.html");?>
 
@@ -181,6 +178,8 @@ else{
 <script src="application/public/js/beetle.js"></script>
 <script src="application/public/js/analyticstracking.js"></script>
 <script src="application/public/js/jquery.editable.min.js"></script>
+<script src="application/public/js/jquery.bottom-1.0.js"></script>
+<script src="application/public/js/loaduserprofile.js"></script>
 
 <script>
 $('.paper-comment-toggle').click(function(){
