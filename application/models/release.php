@@ -454,4 +454,20 @@ class release extends model {
         return $publish_info_data;
     }
 
+    function unread_paper_comment(){
+        $unread_comment_paperid = array();
+        $sql = "SELECT `paper_id` FROM `p_comment` WHERE `read_flg` = 0";
+        $result = mysql_query_excute($sql);
+        while ( $row = mysql_fetch_object($result) ){
+           array_push($unread_comment_paperid, $row->paper_id );
+        }
+        return $unread_comment_paperid;
+    }
+
+    function paperidtouserid( $paper_id ){
+        $sql = "SELECT `user_id` FROM `paper` WHERE `paper_id` = '$paper_id' LIMIT 1";
+        $result = mysql_query_excute($sql);
+        return mysql_fetch_assoc($result);
+    }
+
 }
