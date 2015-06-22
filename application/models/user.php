@@ -97,9 +97,32 @@ class user extends model {
 
 	function paper_comment_insert($reply, $paper_id, $user_id, $comment){
 		$sql = "INSERT INTO `p_comment`(`reply`, `paper_id`, `user_id`, `comment`) VALUES ('$reply', '$paper_id', '$user_id', '$comment')";
-
-		return mysql_query_excute($sql);
+        mysql_query_excute($sql);
+		return mysql_insert_id();
 	}
+
+    function paperid_to_userid( $paper_id ){
+        $sql = "SELECT `user_id` FROM `paper` WHERE `id` = '$paper_id' LIMIT 1";
+        $result = mysql_query_excute($sql);
+        $user_id = mysql_fetch_assoc($result);
+        return $user_id["user_id"];
+    }
+
+    function paper_comment_notice($paper_id, $notice_user_id, $user_id, $kind, $kind_id, $flag){
+        $sql = "SELECT * FROM `notice` WHERE `kind` = '$kind' AND `kind_id` = '$kind_id'";
+        $result = mysql_query_excute($sql);
+        if ($flag) { //flag=1 insert
+            if (!mysql_num_rows($result)) {
+                $sql = "INSERT INTO `notice`(`paper_id`, `notice_user_id`, `user_id`, `kind`, `kind_id`) VALUES ('$paper_id', '$notice_user_id', '$user_id', '$kind', $kind_id)";
+                mysql_query_excute($sql);
+            }
+        }else{//flag=0 delate
+            if (mysql_num_rows($result)) {
+                $sql = "DELETE FROM `notice` WHERE `kind` = '$kind' AND `kind_id` = '$kind_id'";
+                mysql_query_excute($sql);
+            }
+        }
+    }
 
     function paper_comment_remove( $commentid, $pid, $user_id ){
         $sql = "DELETE FROM `p_comment` WHERE ( `id` = '$commentid' ) AND ( `user_id` = '$user_id' )";
@@ -256,5 +279,48 @@ class user extends model {
         }
         return $follower;
 	}
+
+    function notification ( $user_id ){
+        $notifications = array();
+        $sql = "SELECT * FROM `notice` WHERE `notice_user_id` = '$user_id' ORDER BY `time` DESC";
+        $result = mysql_query_excute($sql);
+        if ( mysql_num_rows( $result )) {
+            while ( $row = mysql_fetch_assoc($result) ) {
+                $notification = array( $this->paperid_to_papercount($row["paper_id"]), $this->userid_to_displayname($row["user_id"]), $this->kind_to_string($row["kind"]), $row["paper_id"], $row["time"] );
+                $notifications[] = $notification;
+            }
+        }
+        return $notifications;
+    }
+
+    function kind_to_string( $kind ){
+        if ($kind == 1) {
+            $string = "クラップ";
+        } elseif  ($kind == 2 ) {
+            $string = "スクラップ";
+        } else {
+            $string = "コメント";
+        }
+        return $string;
+    }
+
+    function paperid_to_papercount( $paper_id ){
+        $sql = "SELECT `count` FROM `paper` WHERE `id` = '$paper_id' LIMIT 1";
+        $result = mysql_query_excute($sql);
+        $count = mysql_fetch_assoc($result);
+        return $count["count"];
+    }
+
+    function userid_to_displayname( $user_id ){
+        $sql = "SELECT `display_name` FROM `users` WHERE `id` = '$user_id' LIMIT 1";
+        $result = mysql_query_excute($sql);
+        $display_name = mysql_fetch_assoc($result);
+        return $display_name["display_name"];
+    }
+
+    function already_read( $user_id ){
+        $sql = "DELETE FROM `notice` WHERE `notice_user_id` = '$user_id'";
+        $result = mysql_query_excute($sql);
+    }
 
 }

@@ -6,14 +6,12 @@ class home extends controller {
 		$this->redirect( "users/login" );
 	}
 
-    function header(){
-        $release = $this->loadModel( "release" );
+    public function get_header(){
         $user = $this->loadModel( "user" );
 
         if ( isset( $_SESSION["user"] ) ) {
-            $notification = array();
-            $unread_comment_paperid = $release->unread_paper_comment();
-            $data = array( "notification" => $notification);
+            $notifications = $user->notification( $_SESSION["user"] );
+            $data = array( "notifications" => $notifications);
             $this->loadView( "common/header", $data );
         } else {
             $this->loadView( "common/header_before_login" );

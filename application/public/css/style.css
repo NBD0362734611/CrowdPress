@@ -188,6 +188,40 @@ input[type=checkbox] + label:before {
 
 /* NewRelease */
 
+.tabs { padding: 8px; }
+.tabs > .tab {
+  display: inline-block;
+  background-color: gray;
+}
+.tabs > .tab.active {
+  background-color: yellow;
+}
+.panels > .panel {
+  display: none;
+}
+.panels > .panel.active {
+  display: block;
+}
+
+h3.politics{
+    margin: 0 0 1.5em;
+    padding: 0.8em;
+    border-left: 7px solid #B92A2C;
+    font-weight: bold;
+}
+h3.nikkei{
+    margin: 0 0 1.5em;
+    padding: 0.8em;
+    border-left: 7px solid #003399;
+    font-weight: bold;
+}
+h3.fashion{
+    margin: 0 0 1.5em;
+    padding: 0.8em;
+    border-left: 7px solid #000000;
+    font-weight: bold;
+}
+
 h2.newrelease {
     font-size: 18px;
 }

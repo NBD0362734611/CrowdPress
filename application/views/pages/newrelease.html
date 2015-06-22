@@ -16,12 +16,7 @@
 <body class="single single-post">
 <?php if( isset( $error_message ) ) h ($error_message);?>
 
-<?php if( isset( $_SESSION["user"]  ) ){
-  include("application/views/common/header.html");
-}
-else{
-  include("application/views/common/header_before_login.html");
-} ?>
+<?php include("application/controllers/home.php"); $home = new home; $home->get_header();?>
 
         <main role="main">
 
@@ -35,14 +30,42 @@ else{
                         </form>
                     </div>
 
-                    <h2 class="newrelease">新着リリース <?php if ( isset($cname)) { h($cname); } ?></h2>
+                    <ul class="tabs">
+                      <li id="tab1" class="tab"><a href="#cont1">カテゴリー</a></li>
+                      <li id="tab2" class="tab active"><a href="#cont2">ソート</a></li>
+                    </ul>
+                    <div class="panels">
+                        <div id="cont1" class="panel">
+                            <form id="category" role="category">
+                                <input type="checkbox" name="prcid" value="1" id="nikkei" />
+                                <label for="nikkei" class="checkbox">日経</label>
+                                <input type="checkbox" name="prcid" value="2" id="fashion" />
+                                <label for="fashion" class="checkbox">ファッション</label>
+                                <input type="checkbox" name="prcid" value="3" id="politics" />
+                                <label for="politics" class="checkbox">政治</label>
+                            </form>
+                        </div>
+                        <div id="cont2" class="panel active">
+                            <form id="sort" role="sort">
+                                <input type="radio" name="sort" value="0" id="date" />
+                                <label for="date">最新順</label>
+                                <input type="radio" name="sort" value="1" id="clap" />
+                                <label for="clap">clap順</label>
+                                <input type="radio" name="sort" value="2" id="scrap" />
+                                <label for="scrap">scrap順</label>
+                                <input type="radio" name="sort" value="3" id="comment" />
+                                <label for="comment">コメント数順</label>
+                            </form>
+                        </div>
+                    </div>
 
+                    <h2 class="newrelease">新着リリース <?php if ( isset($cname)) { h($cname); } ?></h2>
                     <div id ="release_body">
                     <!-- 繰り返しスタート -->
                     <?php foreach ($release_data as $release) { ?>
                         <div class="post-area clear-after">
                             <section role="main" class="release">
-                                <h3 class="release-title">
+                                <h3 class="release-title <?php h( $source[$release['rid']] );?>">
                                 <a href="?route=pages/release_detail/<?php h( $release["rid"] ); ?>">
                                     <?php h( $release["title"] ); ?>
                                 </a></h3>
@@ -119,6 +142,84 @@ else{
     <script src="application/public/js/loadrelease.js"></script>
 <?php endif ?>
 <script>
+// 以下のように$(function () { ... }); と書くとDOM構築が終わってから実行されるので
+// 記述位置を気にする必要がなくなります。
+// また、こうすることで関数で包み込んで無駄にグローバル変数を作ってしまわないようにする効果もあります。
+$(function () {
+  // .click(function (){}) と .on('click', function (){}) は同じですが
+  // 後者のほうが拡張性が高いので、僕は基本的に後者を使います。ここは好みで。
+  $(".tabs a").on('click', function(e) {
+    // 勝手にスクロール位置変わらないように a のclickイベントをキャンセルします。
+    e.preventDefault();
+
+    // 一応、表示するパネルの存在判定をしておきます。
+    var target = $(this).attr('href');
+    if (! $(target).length) return false;
+
+    // クリックされた要素の属する.tabs以下の.tabすべてからactiveクラスを削除します。
+    // ちょっとややこしいですが、
+    // $(this).closest('...') で'...'にマッチする一番近い先祖要素が選択できます。
+    // また $(A, B) で、Bの子孫要素の中からAにマッチするものだけを選択できます。
+    // ここではその両者を組み合わせて使っています。
+    $('.tab', $(this).closest('.tabs')).removeClass('active');
+
+    // クリックされた要素の親である.tabにactiveクラスを付与します。
+    // .show(), hide() ではなく addClass('active'), removeClass('active') を使うことで
+    // 状態に応じたデザイン変更をCSSでまとめてやりやすかったりします。
+    // これも好みの問題かもしれません。
+    $(this).closest('.tab').addClass('active');
+
+    // パネルの表示切り替えをします。
+    // タブの表示切り替えとやっていることは同じです。
+    $('.panel', $(target).closest('.panels')).removeClass('active');
+    $(target).addClass('active');
+  });
+});
+
+$('#category').change(function(){
+    var prcid = $('[name="prcid"]:checked').map(function(){
+        return $(this).val();
+    }).get();
+    console.log(prcid);
+    var data = {
+        'count': 0,
+        'prcid': prcid
+    };
+    // Ajax処理
+    $.ajax({
+        url: "?route=pages/loadrelease",
+        type:"POST",
+        data : data,
+        success: function(html) {
+            $("#release_body").html(html);
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+            alert("error");
+        }
+    });
+});
+
+$('#sort').change(function(){
+    var sort = $("input[name='radio_test']:checked").val();
+    }).get();
+    console.log(prcid);
+    var data = {
+        'count': 0,
+        'sort': sort
+    };
+    // Ajax処理
+    $.ajax({
+        url: "?route=pages/loadrelease",
+        type:"POST",
+        data : data,
+        success: function(html) {
+            $("#release_body").html(html);
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+            alert("error");
+        }
+    });
+});
 
 //検索
 $('#search').submit(function(event) {

@@ -416,6 +416,9 @@ COMMENT;
 
 	function myfeed()
 	{
+		if( ! isset( $_SESSION["user"] ) ){
+			$this->redirect( "users/login" );
+		}
 		$paper_data = array();
 		$release_comment_data = array();
 		$follow_data = array();
@@ -429,9 +432,7 @@ COMMENT;
 		$paper_data = $release->find_publish_by_follow( $_SESSION["user"] );
 		$user_authentication = $authentication->find_by_user_id( $_SESSION["user"] );
 
-		if( ! isset( $_SESSION["user"] ) ){
-			$this->redirect( "users/login" );
-		}
+
 
 		if ( $user_data["follow"] == 0 ) {
 			$users = $user->get_latest_users( $_SESSION["user"] );

@@ -1,10 +1,16 @@
+
 var count = 1;
+
 jQuery(function() {
     jQuery(window).bottom({proximity: 0.05});
     jQuery(window).on('bottom', function() {
     var obj = jQuery(this);
+        var prcid = $('[name="prcid"]:checked').map(function(){
+        return $(this).val();
+    }).get();
     var data = {
-        'count': count
+        'count': count,
+        'prcid': prcid
     };
     if (!obj.data('loading')) {
         obj.data('loading', true);

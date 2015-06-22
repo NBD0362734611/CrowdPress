@@ -34,25 +34,42 @@ class pages extends controller {
         $user = $this->loadModel( "user" );
         $release = $this->loadModel( "release" );
 
+        $prcid = 0;
+        if ( isset($_GET["prcid"]) ) {
+            $prcid = escape( $_GET["prcid"] );
+        }
+
         // get the user data from database
         if ( isset($_SESSION["user"]) ){
             $user_data = $user->find_by_id( $_SESSION["user"] );
         }
 
-        $release_data = $release->get_new_release();
+        $release_data = $release->get_new_release(0,$prcid);
         $release_comment_data = array();
+        $source = array();
 
         if ( isset($release_data) ) {
             foreach ($release_data as $release) {
                 $row = $user->release_comment_select($release["rid"]);
                 $release_comment_data[$release["rid"]] = $row;
+                switch ( $release["prcid"] ){
+                case 1:
+                    $source[$release["rid"]] = "nikkei";
+                    break;
+                case 2:
+                    $source[$release["rid"]] = "fashion";
+                    break;
+                case 3:
+                    $source[$release["rid"]]  = "politics";
+                    break;
+                }
             }
         } else {
             $release_data = array();
         }
 
         // load profile view
-        $data = array( "user_data" => $user_data, "release_data" => $release_data, "release_comment_data" => $release_comment_data);
+        $data = array( "user_data" => $user_data, "release_data" => $release_data, "release_comment_data" => $release_comment_data, "source" => $source);
         $this->loadView( "pages/newrelease", $data );
     }
 
@@ -70,13 +87,34 @@ class pages extends controller {
         }
 
         $start = escape( $_POST["count"] ) * 50;
-        $release_data = $release->get_new_release( $start );
+        $prcid = 0;
+        $sort  = 0;
+        if ( isset($_POST["prcid"]) ) {
+            $prcid = escape( $_POST["prcid"]);
+        }
+        if ( isset($_POST["sort"]) ) {
+            $sort = escape( $_POST["sort"]);
+        }
+
+        $release_data = $release->get_new_release( $start, $prcid, $sort );
         $release_comment_data = array();
+        $source = array();
 
         if ( isset($release_data) ) {
             foreach ($release_data as $release) {
                 $row = $user->release_comment_select($release["rid"]);
                 $release_comment_data[$release["rid"]] = $row;
+               switch ( $release["prcid"] ){
+                case 1:
+                    $source[$release["rid"]] = "nikkei";
+                    break;
+                case 2:
+                    $source[$release["rid"]] = "fashion";
+                    break;
+                case 3:
+                    $source[$release["rid"]]  = "politics";
+                    break;
+                }
             }
         } else {
             $release_data = array();
@@ -86,7 +124,9 @@ class pages extends controller {
             foreach ($release_data as $release) {
                 $html .= '<div class="post-area clear-after">';
                 $html .= '<section role="main" class="release">';
-                $html .= '<h3 class="release-title">';
+                $html .= '<h3 class="release-title ';
+                $html .= $source[$release["rid"]];
+                $html .= '">';
                 $html .= '<a href="?route=pages/release_detail/';
                 $html .= $release["rid"];
                 $html .= '">';
@@ -497,9 +537,10 @@ class pages extends controller {
         $release_detail_data = $release->get_release_detail( $rid );
         $release_comment_data = $release->release_comment_ridselect($rid);
         $release_comment_number = $release->get_release_comment_number($rid);
+        $prev_next_rid = $release->prev_next_rid($rid);
 
         // load profile view
-        $data = array( "user_data" => $user_data, "release_detail_data" => $release_detail_data, "release_comment_data" => $release_comment_data, "release_comment_number" => $release_comment_number );
+        $data = array( "user_data" => $user_data, "release_detail_data" => $release_detail_data, "release_comment_data" => $release_comment_data, "release_comment_number" => $release_comment_number, "prev_next_rid" => $prev_next_rid );
         $this->loadView( "pages/release", $data );
     }
 
@@ -562,8 +603,11 @@ class pages extends controller {
         if( count( $_POST ) ){
             $user_id = $_SESSION["user"];
             $pid     = escape( $_POST["pid"] );
+            $notice_user_id = $user->paperid_to_userid($pid);
         }
-        echo json_encode( $release->paper_clap_insert($user_id, $pid) );
+        list ($count, $kind_id, $flag) = $release->paper_clap_insert($user_id, $pid);
+        echo json_encode( $count );
+        $user->paper_comment_notice($pid, $notice_user_id, $user_id, 1, $kind_id, $flag);
     }
 
     function paper_scrap_insert()
@@ -583,9 +627,11 @@ class pages extends controller {
         if( count( $_POST ) ){
             $user_id = $_SESSION["user"];
             $pid     = escape( $_POST["pid"] );
+            $notice_user_id = $user->paperid_to_userid($pid);
         }
-
-        echo json_encode( $release->paper_scrap_insert($user_id, $pid) );
+        list ($count, $kind_id, $flag) = $release->paper_scrap_insert($user_id, $pid);
+        echo json_encode( $count );
+        $user->paper_comment_notice($pid, $notice_user_id, $user_id, 2, $kind_id, $flag);
         $user->paper_scrap_number_update($user_id);
     }
 
@@ -678,8 +724,9 @@ class pages extends controller {
             $user_id   = $_SESSION["user"];
             $paper_id  = escape( $_POST["paper_id"] );
             $comment   = escape( $_POST["comment"] );
-
-            $user->paper_comment_insert(null, $paper_id, $user_id, $comment);
+            $notice_user_id = $user->paperid_to_userid($paper_id);
+            $kind_id = $user->paper_comment_insert(null, $paper_id, $user_id, $comment);
+            $user->paper_comment_notice($paper_id, $notice_user_id, $user_id, 3, $kind_id, 1);
         }
         //post元に戻る
         header("Location: ".$uri);
@@ -704,6 +751,7 @@ class pages extends controller {
             $pid       = escape( $_POST["pid"] );
 
             $user->paper_comment_remove( $commentid, $pid, $user_id );
+            $user->paper_comment_notice( 0,0,0,3,$commentid,0);
         }
         echo json_encode ( $release->get_paper_comment_number( $pid ) );
     }

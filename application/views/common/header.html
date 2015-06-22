@@ -27,10 +27,30 @@
                                 </ul>
                             </li>
                             <li class="menu-item">
-                                <a><i class="fa fa-bell"></i></a>
-                                <ul class="sub-menu">
-                                    <li><a>通知はありません</a></li>
-                                </ul>
+                                <?php if (!$notifications): ?>
+                                <a id="notice"><i class="fa fa-bell-slash"></i></a>
+                                    <ul class="sub-menu">
+                                        <li><a>通知はありません</a></li>
+                                    </ul>
+                                <?php endif; ?>
+                                <?php if ($notifications): ?>
+                                <a id="notice"><i class="fa fa-bell-o"></i></a>
+                                    <ul class="sub-menu">
+                                        <li><a href="?route=notice/already_read">既読にする</a></li>
+                                    <?php foreach ($notifications as $notification) { ?>
+                                        <li><a href="?route=pages/display_paper/<?php h($notification[3]);?>">
+                                            <?php
+                                                h($notification[1]);
+                                                echo "が";
+                                                h($notification[0]);
+                                                echo "号に";
+                                                h($notification[2]);
+                                                echo "しました";
+                                            ?>
+                                        </a></li>
+                                    <?php } ?><!-- 繰り返し終わり -->
+                                    </ul>
+                                <?php endif; ?>
                             </li>
                             <li class="menu-item">
                                 <div class="widget widget_search">

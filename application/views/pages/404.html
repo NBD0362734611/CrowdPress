@@ -16,12 +16,7 @@
 <body class="blog masonry-style">
 <?php if( isset( $error_message ) ) echo $error_message; ?>
 
-<?php if( isset( $_SESSION["user"]  ) ){
-  include("application/views/common/header.html");
-}
-else{
-  include("application/views/common/header_before_login.html");
-} ?>
+<?php include("application/controllers/home.php"); $home = new home; $home->get_header();?>
 
         <main>
             <div id="main" class="row">
