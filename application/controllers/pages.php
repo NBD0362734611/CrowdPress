@@ -25,6 +25,18 @@ class pages extends controller {
         $this->loadView( "pages/privacy" );
     }
 
+    function commentNumUpdate(){
+        $release = $this->loadModel( "release" );
+        for ($i=813523; $i < 816235; $i++){
+            $isReleae = $release->isRlease($i);
+            if ( $isReleae ) {
+                $release->release_comment_number_update($i);
+            }else{
+                continue;
+            }
+        }
+    }
+
     function newrelease()
     {
         $data = array();
@@ -45,6 +57,7 @@ class pages extends controller {
         }
 
         $release_data = $release->get_new_release(0,$prcid);
+        $tags = $release->get_tagcloud();
         $release_comment_data = array();
         $source = array();
 
@@ -69,7 +82,7 @@ class pages extends controller {
         }
 
         // load profile view
-        $data = array( "user_data" => $user_data, "release_data" => $release_data, "release_comment_data" => $release_comment_data, "source" => $source);
+        $data = array( "user_data" => $user_data, "release_data" => $release_data, "release_comment_data" => $release_comment_data, "source" => $source, "tags" => $tags);
         $this->loadView( "pages/newrelease", $data );
     }
 
@@ -89,14 +102,22 @@ class pages extends controller {
         $start = escape( $_POST["count"] ) * 50;
         $prcid = 0;
         $sort  = 0;
+        $words = 0;
         if ( isset($_POST["prcid"]) ) {
             $prcid = escape( $_POST["prcid"]);
         }
         if ( isset($_POST["sort"]) ) {
             $sort = escape( $_POST["sort"]);
         }
+        if ( isset($_POST["keyword"]) ) {
+            $keyword = escape( $_POST["keyword"] );
+            $keyword = mb_convert_encoding($keyword,"UTF-8","UTF-8,EUC-JP,SJIS,Shift_JIS,ASCII");
+            //全角空白があったら半角空白にそろえる
+            $words = str_replace("　", " ", $keyword);
+            $words = trim($words);
+        }
 
-        $release_data = $release->get_new_release( $start, $prcid, $sort );
+        $release_data = $release->get_new_release( $start, $prcid, $sort, $words );
         $release_comment_data = array();
         $source = array();
 
@@ -272,7 +293,21 @@ class pages extends controller {
             $user_data = $user->find_by_id( $_SESSION["user"] );
         }
 
-        $release_data = $release->find_release_by_title( $words );
+        $tags = $release->get_tagcloud();
+
+        $start = 0;
+        $prcid = 0;
+        $sort  = 0;
+        if (isset($_POST["count"])) {
+            $start = $_POST["count"];
+        }
+        if (isset($_POST["prcid"])) {
+            $prcid = $_POST["prcid"];
+        }
+        if (isset($_POST["sort"])) {
+            $sort = $_POST["sort"];
+        }
+        $release_data = $release->find_release_by_title( $words, $start, $prcid, $sort );
         $release_comment_data = array();
 
         if (isset($release_data)) {
@@ -289,7 +324,56 @@ class pages extends controller {
         }
 
         // load profile view
-        $data = array( "user_data" => $user_data, "release_data" => $release_data, "release_comment_data" => $release_comment_data, "title" => $title);
+        $data = array( "user_data" => $user_data, "release_data" => $release_data, "release_comment_data" => $release_comment_data, "title" => $title, "tags" => $tags);
+        $this->loadView( "pages/newrelease", $data );
+    }
+
+    function release_by_tag( $tag )
+    {
+        $data = array();
+        $user_data = array();
+
+        // error_reporting(E_ALL ^ E_NOTICE);
+        $user = $this->loadModel( "user" );
+        $release = $this->loadModel( "release" );
+        $tags = $release->get_tagcloud();
+
+        // get the user data from database
+        if ( isset($_SESSION["user"]) ){
+            $user_data = $user->find_by_id( $_SESSION["user"] );
+        }
+
+        $start = 0;
+        $prcid = 0;
+        $sort  = 0;
+        if (isset($_POST["count"])) {
+            $start = $_POST["count"];
+        }
+        if (isset($_POST["prcid"])) {
+            $prcid = $_POST["prcid"];
+        }
+        if (isset($_POST["sort"])) {
+            $sort = $_POST["sort"];
+        }
+
+        $release_data = $release->find_release_by_tag( $tag, $start, $prcid, $sort );
+        $release_comment_data = array();
+
+        if (isset($release_data)) {
+            foreach ($release_data as $release) {
+                if ( isset($_SESSION["user"]) ) {
+                    $row = $user->release_comment_select($release["rid"], $_SESSION["user"]);
+                }else{
+                    $row = $user->release_comment_select($release["rid"]);
+                }
+            $release_comment_data[$release["rid"]] = $row;
+            }
+        } else {
+            $release_data = array();
+        }
+
+        // load profile view
+        $data = array( "user_data" => $user_data, "release_data" => $release_data, "release_comment_data" => $release_comment_data, "tag" => $tag, "tags" =>$tags);
         $this->loadView( "pages/newrelease", $data );
     }
 
@@ -309,6 +393,7 @@ class pages extends controller {
         $release_data = $release->get_user_scrap( $_SESSION["user"] );
         $release_comment_data = array();
         $publish_comment_data = array();
+        $source = array();
 
         if (isset($release_data)){
             foreach ($release_data as $release) {
@@ -316,13 +401,24 @@ class pages extends controller {
             $release_comment_data[$release["rid"]] = $row;
             $row = $user->latest_publish_comment_select($release["rid"], $_SESSION["user"]);
             $publish_comment_data[$release["rid"]] = $row;
+            switch ( $release["prcid"] ){
+                case 1:
+                    $source[$release["rid"]] = "nikkei";
+                    break;
+                case 2:
+                    $source[$release["rid"]] = "fashion";
+                    break;
+                case 3:
+                    $source[$release["rid"]]  = "politics";
+                    break;
+                }
             }
         } else {   // １件もない場合のエラー対策
             $release_data = array();
         }
 
         // load profile view
-        $data = array( "user_data" => $user_data, "release_data" => $release_data, "release_comment_data" => $release_comment_data, "publish_comment_data" => $publish_comment_data);
+        $data = array( "user_data" => $user_data, "release_data" => $release_data, "release_comment_data" => $release_comment_data, "publish_comment_data" => $publish_comment_data, "source" => $source);
         $this->loadView( "pages/scrap", $data );
     }
 
@@ -538,9 +634,10 @@ class pages extends controller {
         $release_comment_data = $release->release_comment_ridselect($rid);
         $release_comment_number = $release->get_release_comment_number($rid);
         $prev_next_rid = $release->prev_next_rid($rid);
+        $tags = $release->get_release_tags($rid);
 
         // load profile view
-        $data = array( "user_data" => $user_data, "release_detail_data" => $release_detail_data, "release_comment_data" => $release_comment_data, "release_comment_number" => $release_comment_number, "prev_next_rid" => $prev_next_rid );
+        $data = array( "user_data" => $user_data, "release_detail_data" => $release_detail_data, "release_comment_data" => $release_comment_data, "release_comment_number" => $release_comment_number, "prev_next_rid" => $prev_next_rid, "tags" => $tags );
         $this->loadView( "pages/release", $data );
     }
 
@@ -675,8 +772,8 @@ class pages extends controller {
             $user_id   = $_SESSION["user"];
             $rid       = escape( $_POST["rid"] );
             $comment   = escape( $_POST["comment"] );
-
             $user->release_comment_insert(null, $rid, $user_id, $comment);
+            $release->release_comment_number_update($rid);
         }
         // echo json_encode( $release->release_comment_ridselect( $rid ) );
         //post元に戻る
@@ -700,8 +797,8 @@ class pages extends controller {
             $user_id   = $_SESSION["user"];
             $commentid = escape ( $_POST["commentid"] );
             $rid       = escape( $_POST["rid"] );
-
             $user->release_comment_remove( $commentid, $rid, $user_id );
+            $release->release_comment_number_update($rid);
         }
         echo json_encode ( $release->get_release_comment_number( $rid ) );
     }
@@ -841,5 +938,28 @@ class pages extends controller {
 
         // load view
         $this->loadView( "pages/contact", $data );
+    }
+
+    function release_tag_insert()
+    {
+        if( !isset($_SESSION["user"])){
+            echo "ログインしてください！";
+            return false;
+        }
+        // load user model
+        $uri = $_SERVER['HTTP_REFERER'];
+        $release = $this->loadModel( "release" );
+
+        // トークンチェック
+        checkToken();
+
+        if( count( $_POST ) ){
+            $rid   = escape( $_POST["rid"] );
+            $tag   = escape( $_POST["tag"] );
+            $release->release_to_tag($rid, $tag);
+        }
+        // echo json_encode( $release->release_comment_ridselect( $rid ) );
+        //post元に戻る
+        header("Location: ".$uri);
     }
 }

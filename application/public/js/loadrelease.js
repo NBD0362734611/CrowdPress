@@ -5,12 +5,16 @@ jQuery(function() {
     jQuery(window).bottom({proximity: 0.05});
     jQuery(window).on('bottom', function() {
     var obj = jQuery(this);
-        var prcid = $('[name="prcid"]:checked').map(function(){
+    var sort = $("input[name='sort']:checked").val();
+    var prcid = $('[name="prcid"]:checked').map(function(){
         return $(this).val();
     }).get();
+    var keyword = $('#search [name=keyword]').val();
     var data = {
         'count': count,
-        'prcid': prcid
+        'prcid': prcid,
+        'sort' : sort,
+        'keyword' : keyword
     };
     if (!obj.data('loading')) {
         obj.data('loading', true);

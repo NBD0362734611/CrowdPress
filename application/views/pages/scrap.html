@@ -42,7 +42,7 @@
                     <?php $scrap_number = $scrap_number + 1; ?>
                         <div class="post-area clear-after">
                             <section role="main" class="release1">
-                                <h3 class="release-title">
+                                <h3 class="release-title <?php h( $source[$release['rid']] );?>">
                                     <a href="?route=pages/release_detail/<?php h( $release["rid"] ); ?>">
                                         <?php echo $release["title"]; ?>
                                     </a>

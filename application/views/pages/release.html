@@ -58,7 +58,7 @@
                                             echo '</figure>';
                                 ?>
                             </div><!-- gallery -->
-                            <p><?php htag ( $release_detail_data["body"] ) ; ?></p>
+                            <p><?php echo ( $release_detail_data["body"] ) ; ?></p>
                         </article>
 
                         <aside role="complementary" class="sidebar column three last">
@@ -69,6 +69,19 @@
                             <div class="widget">
                                 <h4>発行日時</h4>
                                 <p><?php h( $release_detail_data["time"] ); ?></p>
+                            </div>
+                            <div class="widget">
+                                <h4>タグ</h4>
+                                <?php if ($tags): ?>
+                                <?php foreach ($tags as $tag) { ?>
+                                    <a href="?route=pages/release_by_tag/<?php h( $tag["tag"] ); ?>"><?php h( $tag["tag"] ); ?></a>/
+                                <?php } ?>
+                                <?php endif; ?>
+                                <form class="tag-post" action="?route=pages/release_tag_insert" method="post">
+                                    <input type="hidden" name="token" value="<?php h($_SESSION['token']); ?>">
+                                    <input type="hidden" name="rid" value="<?php h( $release_detail_data["rid"] ); ?>" />
+                                    <input type="text" name="tag" value="タグ" />
+                                </form><!-- post-comment -->
                             </div>
                         </aside>
 

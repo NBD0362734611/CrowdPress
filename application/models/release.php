@@ -1,7 +1,20 @@
 <?php
 class release extends model {
 
-    function get_new_release ( $start=0, $prcid=0, $sort=0){
+    function get_new_release ( $start=0, $prcid=0, $sort=0, $words=0){
+        if ($words) {
+            $word_array = preg_split("/[ ]+/",$words);
+            $keyword = "";
+
+            for( $i = 0; $i <count($word_array); $i++ ){
+                $keyword .= "`title` LIKE '%$word_array[$i]%'";
+
+                if ($i < count($word_array) - 1){
+                    $keyword .= " AND ";
+                }
+            }
+        }
+
         if ($prcid) {
             $source = "";
             for ($i=0; $i < count($prcid) ; $i++) {
@@ -13,31 +26,63 @@ class release extends model {
             }
             switch ($sort) {
                 case 1:
-                    $sql = "SELECT * FROM `release` WHERE $source ORDER BY `clap` DESC LIMIT $start, 50";
+                    if (isset($keyword)) {
+                        $sql = "SELECT * FROM `release` WHERE ($keyword) AND ($source) ORDER BY `clap` DESC, `time` DESC LIMIT $start, 50";
+                    } else {
+                        $sql = "SELECT * FROM `release` WHERE $source ORDER BY `clap` DESC, `time` DESC LIMIT $start, 50";
+                    }
                     break;
                 case 2:
-                    $sql = "SELECT * FROM `release` WHERE $source ORDER BY `scrap` DESC LIMIT $start, 50";
+                    if (isset($keyword)) {
+                        $sql = "SELECT * FROM `release` WHERE ($keyword) AND ($source) ORDER BY `scrap` DESC, `time` DESC LIMIT $start, 50";
+                    } else {
+                        $sql = "SELECT * FROM `release` WHERE $source ORDER BY `scrap` DESC, `time` DESC LIMIT $start, 50";
+                    }
                     break;
                 case 3:
-                    $sql = "SELECT * FROM `release` WHERE $source ORDER BY `comment` DESC LIMIT $start, 50";
+                    if (isset($keyword)) {
+                        $sql = "SELECT * FROM `release` WHERE ($keyword) AND ($source) ORDER BY `comment` DESC, `time` DESC LIMIT $start, 50";
+                    } else {
+                        $sql = "SELECT * FROM `release` WHERE $source ORDER BY `comment` DESC, `time` DESC LIMIT $start, 50";
+                    }
                     break;
                 default:
-                    $sql = "SELECT * FROM `release` WHERE $source ORDER BY `time` DESC LIMIT $start, 50";
+                    if (isset($keyword)) {
+                        $sql = "SELECT * FROM `release` WHERE ($keyword) AND ($source) ORDER BY `time` DESC, `time` DESC LIMIT $start, 50";
+                    } else {
+                        $sql = "SELECT * FROM `release` WHERE $source ORDER BY `time` DESC, `time` DESC LIMIT $start, 50";
+                    }
                     break;
             }
         } else {
             switch ($sort) {
                 case 1:
-                    $sql = "SELECT * FROM `release` ORDER BY `clap` DESC LIMIT $start, 50";
+                    if (isset($keyword)) {
+                        $sql = "SELECT * FROM `release` WHERE $keyword ORDER BY `clap` DESC, `time` DESC LIMIT $start, 50";
+                    } else {
+                        $sql = "SELECT * FROM `release` ORDER BY `clap` DESC, `time` DESC LIMIT $start, 50";
+                    }
                     break;
                 case 2:
-                    $sql = "SELECT * FROM `release` ORDER BY `scrap` DESC LIMIT $start, 50";
+                    if (isset($keyword)) {
+                        $sql = "SELECT * FROM `release` WHERE $keyword ORDER BY `scrap` DESC, `time` DESC LIMIT $start, 50";
+                    } else {
+                        $sql = "SELECT * FROM `release` ORDER BY `scrap` DESC, `time` DESC LIMIT $start, 50";
+                    }
                     break;
                 case 3:
-                    $sql = "SELECT * FROM `release` ORDER BY `comment` DESC LIMIT $start, 50";
+                    if (isset($keyword)) {
+                        $sql = "SELECT * FROM `release` WHERE $keyword ORDER BY `comment` DESC, `time` DESC LIMIT $start, 50";
+                    } else {
+                        $sql = "SELECT * FROM `release` ORDER BY `comment` DESC, `time` DESC LIMIT $start, 50";
+                    }
                     break;
                 default:
-                    $sql = "SELECT * FROM `release` ORDER BY `time` DESC LIMIT $start, 50";
+                    if (isset($keyword)) {
+                        $sql = "SELECT * FROM `release` WHERE $keyword ORDER BY `time` DESC, `time` DESC LIMIT $start, 50";
+                    } else {
+                        $sql = "SELECT * FROM `release` ORDER BY `time` DESC, `time` DESC LIMIT $start, 50";
+                    }
                     break;
             }
         }
@@ -77,14 +122,14 @@ class release extends model {
             return array();
         }    }
 
-    function find_release_by_title( $words ){
+    function find_release_by_title( $words, $start=0, $prcid=0, $sort=0 ){
         //空白文字で検索ワードを分割
         $word_array = preg_split("/[ ]+/",$words);
         $select ="SELECT * FROM `release`";
         $where = " WHERE ";
 
         for( $i = 0; $i <count($word_array); $i++ ){
-            $where .= "(`title` LIKE '%$word_array[$i]%')";
+            $where .= "`title` LIKE '%$word_array[$i]%'";
 
             if ($i < count($word_array) - 1){
                 $where .= " AND ";
@@ -94,6 +139,22 @@ class release extends model {
         $sql = $select.$where;
         $sql .= " ORDER BY `time` DESC LIMIT 50";
 
+        $result = mysql_query_excute($sql);
+        while ($row = mysql_fetch_assoc($result)) {
+            $release_data[] = $row;
+        }
+        if (isset($release_data)) {
+            return $release_data;
+        } else {
+            return array();
+        }
+    }
+
+    function find_release_by_tag( $tag, $start=0, $prcid=0, $sort=0 ){
+        $sql = "SELECT `id` FROM `tags` WHERE `tag` = '$tag'";
+        $result = mysql_query_excute($sql);
+        $tag_id = mysql_fetch_assoc($result)["id"];
+        $sql = "SELECT * FROM `release` WHERE `rid` in (SELECT `rid` FROM `release_tags` WHERE `tag_id` = '$tag_id' AND `delete` = 0) ORDER BY `time` DESC";
         $result = mysql_query_excute($sql);
         while ($row = mysql_fetch_assoc($result)) {
             $release_data[] = $row;
@@ -116,7 +177,7 @@ class release extends model {
     }
 
     function get_user_scrap ($user_id, $start=0){
-        $sql = "SELECT `release`.`title`, `release`.`rid`,`release`.`cname`, `release`.`img1`, `release`.`img2`, `release`.`img3`, `release`.`clap`, `release`.`scrap`, `release`.`time` FROM `release` INNER JOIN `r_scrap` ON `release`.`rid` = `r_scrap`.`rid` WHERE `r_scrap`.`user_id` = $user_id ORDER BY `r_scrap`.`time` DESC LIMIT $start, 50";
+        $sql = "SELECT `release`.`prcid`, `release`.`title`, `release`.`rid`,`release`.`cname`, `release`.`img1`, `release`.`img2`, `release`.`img3`, `release`.`clap`, `release`.`scrap`, `release`.`time` FROM `release` INNER JOIN `r_scrap` ON `release`.`rid` = `r_scrap`.`rid` WHERE `r_scrap`.`user_id` = $user_id ORDER BY `r_scrap`.`time` DESC LIMIT $start, 50";
         $result = mysql_query_excute($sql);
         while ($row = mysql_fetch_assoc($result)) {
             $scrap_data[] = $row;
@@ -173,8 +234,8 @@ class release extends model {
         $exsist = mysql_query("SELECT * FROM `r_clap` WHERE `user_id` = $user_id AND `rid` = $rid");
         $row = mysql_num_rows($exsist);
         if ($row){
-            $deleate = "DELETE FROM `r_clap` WHERE `user_id` = $user_id and `rid` = $rid";
-            mysql_query_excute($deleate);
+            $delete = "DELETE FROM `r_clap` WHERE `user_id` = $user_id and `rid` = $rid";
+            mysql_query_excute($delete);
             // $sql = "UPDATE `release` SET `clap` = `clap` - 1 WHERE `rid` = $rid";
             // mysql_query_excute($sql);
         } else {
@@ -195,8 +256,8 @@ class release extends model {
         $exsist = mysql_query("SELECT * FROM `r_scrap` WHERE `user_id` = $user_id AND `rid` = $rid");
         $row = mysql_num_rows($exsist);
         if ($row){
-            $deleate = "DELETE FROM `r_scrap` WHERE `user_id` = $user_id and `rid` = $rid";
-            mysql_query_excute($deleate);
+            $delete = "DELETE FROM `r_scrap` WHERE `user_id` = $user_id and `rid` = $rid";
+            mysql_query_excute($delete);
             // $sql = "UPDATE `release` SET `scrap` = `scrap` - 1 WHERE `rid` = $rid";
             // mysql_query_excute($sql);
         } else {
@@ -220,8 +281,8 @@ class release extends model {
         $row = mysql_num_rows($exsist);
         if ($row){
             $flag = 0;
-            $deleate = "DELETE FROM `p_clap` WHERE `user_id` = $user_id and `paper_id` = $pid";
-            mysql_query_excute($deleate);
+            $delete = "DELETE FROM `p_clap` WHERE `user_id` = $user_id and `paper_id` = $pid";
+            mysql_query_excute($delete);
             // $sql = "UPDATE `release` SET `clap` = `clap` - 1 WHERE `rid` = $rid";
             // mysql_query_excute($sql);
         } else {
@@ -247,8 +308,8 @@ class release extends model {
         $row = mysql_num_rows($exsist);
         if ($row){
             $flag = 0;
-            $deleate = "DELETE FROM `p_scrap` WHERE `user_id` = '$user_id' and `paper_id` = '$pid'";
-            mysql_query_excute($deleate);
+            $delete = "DELETE FROM `p_scrap` WHERE `user_id` = '$user_id' and `paper_id` = '$pid'";
+            mysql_query_excute($delete);
             // $sql = "UPDATE `release` SET `scrap` = `scrap` - 1 WHERE `rid` = $rid";
             // mysql_query_excute($sql);
         } else {
@@ -300,10 +361,26 @@ class release extends model {
         return $release_comment_data;
     }
 
+    function isRlease($rid){
+        $sql= "SELECT `rid` FROM `release` WHERE `rid` = '$rid'";
+        $result = mysql_query_excute($sql);
+        if (mysql_num_rows($result)) {
+            return 1;
+        }else{
+            return 0;
+        }
+    }
+
     function get_release_comment_number($rid){
         $sql = "SELECT COUNT(`comment`) AS `number` FROM `r_comment` WHERE `rid` = $rid";
         $result = mysql_query_excute($sql);
         return mysql_fetch_assoc($result);
+    }
+
+    function release_comment_number_update($rid){
+        $number = $this->get_release_comment_number($rid)["number"];
+        $sql = "UPDATE `release` SET `comment` = '$number' WHERE `rid` = '$rid'";
+        mysql_query_excute($sql);
     }
 
     function get_paper_comment_number($paper_id){
@@ -392,7 +469,7 @@ class release extends model {
 
 //ひとつだけ
     function find_publish_by_id( $id ){
-        $sql = "SELECT `headline`, `comment`, `title`, `release`.`rid`, `img1` FROM `publish` INNER JOIN `release` ON `publish`.`rid` = `release`.`rid` WHERE `id` = '$id' LIMIT 1";
+        $sql = "SELECT `headline`, `publish`.`comment`, `title`, `release`.`rid`, `img1` FROM `publish` INNER JOIN `release` ON `publish`.`rid` = `release`.`rid` WHERE `id` = '$id' LIMIT 1";
         $result = mysql_query_excute($sql);
         return mysql_fetch_assoc($result);
     }
@@ -513,6 +590,78 @@ class release extends model {
             $publish_info_data = array();
         }
         return $publish_info_data;
+    }
+
+    function insert_tag($tag){
+        $sql = "INSERT INTO `tags`(`tag`) VALUES('$tag')";
+        mysql_query_excute($sql);
+        return mysql_insert_id();
+    }
+
+    function release_to_tag($rid, $tag){
+        //tagsにそのタグがあるかどうかcheck
+        $sql = "SELECT * FROM `tags` WHERE `tag` = '$tag'";
+        $result = mysql_query_excute($sql);
+        if (mysql_num_rows($result)) {
+            $tag_id = mysql_fetch_assoc($result)["id"];
+        }else{
+            $tag_id = $this->insert_tag($tag);
+        }
+        $sql = "SELECT * FROM `release_tags` WHERE `rid`='$rid' AND `tag_id`='$tag_id' AND `delete` = 0";
+        $result = mysql_query_excute($sql);
+        if (mysql_num_rows($result)) {
+            //すでに追加されている
+            return 0;
+        }else{
+                $sql = "SELECT * FROM `release_tags` WHERE `rid`='$rid' AND `tag_id`='$tag_id' AND `delete` = 1";
+                $result = mysql_query_excute($sql);
+                if (mysql_num_rows($result)) {
+                    //delete = 1
+                    $sql = "SELECT * FROM `release_tags` WHERE `rid`='$rid' AND `delete` = 0";
+                    $result = mysql_query_excute($sql);
+                    if (mysql_num_rows($result) > 9) {
+                        //10個以上あるばあい
+                        $sql = "UPDATE `release_tags` SET `delete` = 1 WHERE `rid`='$rid' ORDER BY `id` ASC LIMIT 1";
+                        $result = mysql_query_excute($sql);
+                    }
+                    $sql = "UPDATE `release_tags` SET `delete` = 0 WHERE `rid`='$rid' AND `tag_id`='$tag_id'";
+                    $result = mysql_query_excute($sql);
+                    return 1;
+                }else{
+                    $sql = "SELECT * FROM `release_tags` WHERE `rid`='$rid' AND `delete` = 0";
+                    $result = mysql_query_excute($sql);
+                    //delete = 0
+                    if (mysql_num_rows($result) > 9) {
+                        //10個以上あるばあい
+                        $sql = "UPDATE `release_tags` SET `delete` = 1 WHERE `rid`='$rid' ORDER BY `id` ASC LIMIT 1";
+                        $result = mysql_query_excute($sql);
+                    }
+                    $sql = "INSERT INTO `release_tags`(`rid`, `tag_id`) VALUES('$rid', '$tag_id')";
+                    $result = mysql_query_excute($sql);
+                    return 1;
+                }
+        }
+    }
+
+    //そのリリースのタグを取得(name)
+    function get_release_tags($rid){
+        $sql = "SELECT `tag` FROM `release_tags` INNER JOIN `tags` ON `release_tags`.`tag_id` = `tags`.`id` WHERE `rid` = '$rid' AND `delete` = 0";
+        $result = mysql_query_excute($sql);
+        $tags = array();
+        while ($row = mysql_fetch_assoc($result)) {
+            $tags[] = $row;
+        }
+        return $tags;
+    }
+
+    function get_tagcloud(){
+        $sql = "SELECT * FROM `tags`";
+        $result = mysql_query_excute($sql);
+        $tags = array();
+        while ($row = mysql_fetch_assoc($result)) {
+            $tags[] = $row["tag"];
+        }
+        return $tags;
     }
 
 }

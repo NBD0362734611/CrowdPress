@@ -54,8 +54,8 @@ for ($page = 1; $result; $page++) {
             $flg++;
           }
         }
-        $sql = "INSERT INTO `release`(`prcid`,`prrid`,`url`,`sid`,`cname`,`title`,`img1`,`img2`,`img3`,`img4`,`img5`,`flg`,`clap`,`favorite`,`body`) ";
-        $sql .= "VALUES (1,".$relID[$i].",'".$prurl."',".$cid.",'".$cname."','".$titlename."','".$img[1]."','".$img[2]."','".$img[3]."','".$img[4]."','".$img[5]."',1,0,0,'".$body."');";
+        $sql = "INSERT INTO `release`(`prcid`,`prrid`,`url`,`sid`,`cname`,`title`,`img1`,`img2`,`img3`,`img4`,`img5`,`body`) ";
+        $sql .= "VALUES (1,".$relID[$i].",'".$prurl."',".$cid.",'".$cname."','".$titlename."','".$img[1]."','".$img[2]."','".$img[3]."','".$img[4]."','".$img[5]."', '".$body."');";
         echo $sql;
         echo "<br>";
         $result = mysql_db_query($db_name, $sql);

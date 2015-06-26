@@ -32,7 +32,8 @@
 
                     <ul class="tabs">
                       <li id="tab1" class="tab"><a href="#cont1">カテゴリー</a></li>
-                      <li id="tab2" class="tab active"><a href="#cont2">ソート</a></li>
+                      <li id="tab2" class="tab"><a href="#cont2">ソート</a></li>
+                      <li id="tab3" class="tab"><a href="#cont3">タグ</a></li>
                     </ul>
                     <div class="panels">
                         <div id="cont1" class="panel">
@@ -45,9 +46,9 @@
                                 <label for="politics" class="checkbox">政治</label>
                             </form>
                         </div>
-                        <div id="cont2" class="panel active">
+                        <div id="cont2" class="panel">
                             <form id="sort" role="sort">
-                                <input type="radio" name="sort" value="0" id="date" />
+                                <input type="radio" name="sort" value="0" id="date" checked="checked" />
                                 <label for="date">最新順</label>
                                 <input type="radio" name="sort" value="1" id="clap" />
                                 <label for="clap">clap順</label>
@@ -56,6 +57,13 @@
                                 <input type="radio" name="sort" value="3" id="comment" />
                                 <label for="comment">コメント数順</label>
                             </form>
+                        </div>
+                        <div id="cont3" class="panel">
+                            <ul class="tagcloud">
+                            <?php foreach ($tags as $tag): ?>
+                                <li><a href="?route=pages/release_by_tag/<?php h($tag); ?>"><?php h($tag); ?></a></li>
+                            <?php endforeach ?>
+                            </ul>
                         </div>
                     </div>
 
@@ -138,7 +146,7 @@
 <script src="application/public/js/beetle.js"></script>
 <script src="application/public/js/jquery.bottom-1.0.js"></script>
 <script src="application/public/js/analyticstracking.js"></script>
-<?php if ( !isset($cname) and !isset($title) ): ?>
+<?php if ( !isset($cname) and !isset($title) and !isset($tag) ): ?>
     <script src="application/public/js/loadrelease.js"></script>
 <?php endif ?>
 <script>
@@ -180,10 +188,13 @@ $('#category').change(function(){
     var prcid = $('[name="prcid"]:checked').map(function(){
         return $(this).val();
     }).get();
-    console.log(prcid);
+    var sort = $("input[name='sort']:checked").val();
+    var keyword = $("#search [name='keyword']").val();
     var data = {
         'count': 0,
-        'prcid': prcid
+        'prcid': prcid,
+        'sort' : sort,
+        'keyword':keyword
     };
     // Ajax処理
     $.ajax({
@@ -200,12 +211,16 @@ $('#category').change(function(){
 });
 
 $('#sort').change(function(){
-    var sort = $("input[name='radio_test']:checked").val();
+    var prcid = $('[name="prcid"]:checked').map(function(){
+        return $(this).val();
     }).get();
-    console.log(prcid);
+    var sort = $("input[name='sort']:checked").val();
+    var keyword = $("#search [name='keyword']").val();
     var data = {
         'count': 0,
-        'sort': sort
+        'prcid': prcid,
+        'sort' : sort,
+        'keyword':keyword
     };
     // Ajax処理
     $.ajax({
@@ -227,11 +242,19 @@ $('#search').submit(function(event) {
     event.preventDefault();
     var keyword = $('#search [name=keyword]').val();
     var URI = "?route=pages/release_search_by_title/" + keyword;
+    var prcid = $('[name="prcid"]:checked').map(function(){
+        return $(this).val();
+    }).get();
+    var sort = $("input[name='sort']:checked").val();
     var data = {
+        'count': 0,
+        'prcid': prcid,
+        'sort' : sort,
         'title': keyword
     };
     // Ajax処理
     $.ajax({
+      type:"POST",
       url: URI,
       data : data,
       success: function(data) {
