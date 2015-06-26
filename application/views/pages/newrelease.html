@@ -19,6 +19,7 @@
 <?php include("application/controllers/home.php"); $home = new home; $home->get_header();?>
 
         <main role="main">
+        <attr cname="<?php if ( isset($cname)) { h($cname); } ?>" tag="<?php if ( isset($tag)) { h($tag); } ?>">
 
             <div id="main" class="row">
                 <div class="row-content buffer">
@@ -60,14 +61,14 @@
                         </div>
                         <div id="cont3" class="panel">
                             <ul class="tagcloud">
-                            <?php foreach ($tags as $tag): ?>
-                                <li><a href="?route=pages/release_by_tag/<?php h($tag); ?>"><?php h($tag); ?></a></li>
-                            <?php endforeach ?>
+                            <?php foreach ($tags as $tag1): ?>
+                                <li><a href="?route=pages/release_by_tag/<?php h($tag1); ?>"><?php h($tag1); ?></a></li>
+                            <?php endforeach; ?>
                             </ul>
                         </div>
                     </div>
 
-                    <h2 class="newrelease">新着リリース <?php if ( isset($cname)) { h($cname); } ?></h2>
+                    <h2 class="newrelease">新着リリース <?php if ( isset($cname)) { h(": ".$cname); } ?><?php if ( isset($tag)) { h(": ".$tag); } ?></h2>
                     <div id ="release_body">
                     <!-- 繰り返しスタート -->
                     <?php foreach ($release_data as $release) { ?>
@@ -146,7 +147,7 @@
 <script src="application/public/js/beetle.js"></script>
 <script src="application/public/js/jquery.bottom-1.0.js"></script>
 <script src="application/public/js/analyticstracking.js"></script>
-<?php if ( !isset($cname) and !isset($title) and !isset($tag) ): ?>
+<?php if ( isset($newrelease) ): ?>
     <script src="application/public/js/loadrelease.js"></script>
 <?php endif ?>
 <script>
@@ -190,11 +191,15 @@ $('#category').change(function(){
     }).get();
     var sort = $("input[name='sort']:checked").val();
     var keyword = $("#search [name='keyword']").val();
+    var cname = $('attr').attr('cname');
+    var tag = $('attr').attr('tag');
     var data = {
         'count': 0,
         'prcid': prcid,
         'sort' : sort,
-        'keyword':keyword
+        'keyword':keyword,
+        'cname':cname,
+        'tag':tag
     };
     // Ajax処理
     $.ajax({
@@ -216,11 +221,15 @@ $('#sort').change(function(){
     }).get();
     var sort = $("input[name='sort']:checked").val();
     var keyword = $("#search [name='keyword']").val();
+    var cname = $('attr').attr('cname');
+    var tag = $('attr').attr('tag');
     var data = {
         'count': 0,
         'prcid': prcid,
         'sort' : sort,
-        'keyword':keyword
+        'keyword':keyword,
+        'cname':cname,
+        'tag':tag
     };
     // Ajax処理
     $.ajax({

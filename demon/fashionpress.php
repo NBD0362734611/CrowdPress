@@ -66,6 +66,7 @@ foreach ($entries as $entry) {
     $body = substr($body, $pos+23);
     $body = str_replace('<p style="text-align: center;">', "" , $body);
     $body = strip_tags($body, '<p><br>');
+    $body = mysql_real_escape_string($body);
     if (!mysql_num_rows($result)) {
         $sql = "INSERT INTO `release`(`prcid`, `prrid`, `url`, `cname`, `title`, `img1`, `img2`, `img3`, `img4`, `img5`, `time`, `body`) VALUES ('$prcid', '$prrid', '$url', 'ファッション', '$title', '$img[0]' ,'$img[1]', '$img[2]', '$img[3]', '$img[4]', '$time', '$body')";
         $result = mysql_db_query($db_name, $sql);

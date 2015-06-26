@@ -1,7 +1,10 @@
 <?php
 class release extends model {
 
-    function get_new_release ( $start=0, $prcid=0, $sort=0, $words=0){
+    function get_new_release ( $start=0, $prcid=0, $sort=0, $words=0, $cname=0, $tag=0){
+        if ($tag) {
+            return $this->find_release_by_tag( $tag, $start, $prcid, $sort );
+        }
         if ($words) {
             $word_array = preg_split("/[ ]+/",$words);
             $keyword = "";
@@ -28,6 +31,8 @@ class release extends model {
                 case 1:
                     if (isset($keyword)) {
                         $sql = "SELECT * FROM `release` WHERE ($keyword) AND ($source) ORDER BY `clap` DESC, `time` DESC LIMIT $start, 50";
+                    } elseif ($cname) {
+                        $sql = "SELECT * FROM `release` WHERE (`cname` LIKE '%$cname%') AND ($source) ORDER BY `clap` DESC, `time` DESC LIMIT $start, 50";
                     } else {
                         $sql = "SELECT * FROM `release` WHERE $source ORDER BY `clap` DESC, `time` DESC LIMIT $start, 50";
                     }
@@ -35,6 +40,8 @@ class release extends model {
                 case 2:
                     if (isset($keyword)) {
                         $sql = "SELECT * FROM `release` WHERE ($keyword) AND ($source) ORDER BY `scrap` DESC, `time` DESC LIMIT $start, 50";
+                    } elseif ($cname) {
+                        $sql = "SELECT * FROM `release` WHERE (`cname` LIKE '%$cname%') AND ($source) ORDER BY `scrap` DESC, `time` DESC LIMIT $start, 50";
                     } else {
                         $sql = "SELECT * FROM `release` WHERE $source ORDER BY `scrap` DESC, `time` DESC LIMIT $start, 50";
                     }
@@ -42,15 +49,19 @@ class release extends model {
                 case 3:
                     if (isset($keyword)) {
                         $sql = "SELECT * FROM `release` WHERE ($keyword) AND ($source) ORDER BY `comment` DESC, `time` DESC LIMIT $start, 50";
+                    } elseif ($cname) {
+                        $sql = "SELECT * FROM `release` WHERE (`cname` LIKE '%$cname%') AND ($source) ORDER BY `comment` DESC, `time` DESC LIMIT $start, 50";
                     } else {
                         $sql = "SELECT * FROM `release` WHERE $source ORDER BY `comment` DESC, `time` DESC LIMIT $start, 50";
                     }
                     break;
                 default:
                     if (isset($keyword)) {
-                        $sql = "SELECT * FROM `release` WHERE ($keyword) AND ($source) ORDER BY `time` DESC, `time` DESC LIMIT $start, 50";
+                        $sql = "SELECT * FROM `release` WHERE ($keyword) AND ($source) ORDER BY `time` DESC LIMIT $start, 50";
+                    } elseif ($cname) {
+                        $sql = "SELECT * FROM `release` WHERE (`cname` LIKE '%$cname%') AND ($source) ORDER BY `time` DESC LIMIT $start, 50";
                     } else {
-                        $sql = "SELECT * FROM `release` WHERE $source ORDER BY `time` DESC, `time` DESC LIMIT $start, 50";
+                        $sql = "SELECT * FROM `release` WHERE $source ORDER BY `time` DESC LIMIT $start, 50";
                     }
                     break;
             }
@@ -59,6 +70,8 @@ class release extends model {
                 case 1:
                     if (isset($keyword)) {
                         $sql = "SELECT * FROM `release` WHERE $keyword ORDER BY `clap` DESC, `time` DESC LIMIT $start, 50";
+                    } elseif ($cname) {
+                        $sql = "SELECT * FROM `release` WHERE (`cname` LIKE '%$cname%') ORDER BY `clap` DESC, `time` DESC LIMIT $start, 50";
                     } else {
                         $sql = "SELECT * FROM `release` ORDER BY `clap` DESC, `time` DESC LIMIT $start, 50";
                     }
@@ -66,6 +79,8 @@ class release extends model {
                 case 2:
                     if (isset($keyword)) {
                         $sql = "SELECT * FROM `release` WHERE $keyword ORDER BY `scrap` DESC, `time` DESC LIMIT $start, 50";
+                    } elseif ($cname) {
+                        $sql = "SELECT * FROM `release` WHERE (`cname` LIKE '%$cname%') ORDER BY `scrap` DESC, `time` DESC LIMIT $start, 50";
                     } else {
                         $sql = "SELECT * FROM `release` ORDER BY `scrap` DESC, `time` DESC LIMIT $start, 50";
                     }
@@ -73,15 +88,19 @@ class release extends model {
                 case 3:
                     if (isset($keyword)) {
                         $sql = "SELECT * FROM `release` WHERE $keyword ORDER BY `comment` DESC, `time` DESC LIMIT $start, 50";
+                    } elseif ($cname) {
+                        $sql = "SELECT * FROM `release` WHERE (`cname` LIKE '%$cname%') ORDER BY `comment` DESC, `time` DESC LIMIT $start, 50";
                     } else {
                         $sql = "SELECT * FROM `release` ORDER BY `comment` DESC, `time` DESC LIMIT $start, 50";
                     }
                     break;
                 default:
                     if (isset($keyword)) {
-                        $sql = "SELECT * FROM `release` WHERE $keyword ORDER BY `time` DESC, `time` DESC LIMIT $start, 50";
+                        $sql = "SELECT * FROM `release` WHERE $keyword ORDER BY `time` DESC LIMIT $start, 50";
+                    } elseif ($cname) {
+                        $sql = "SELECT * FROM `release` WHERE (`cname` LIKE '%$cname%') ORDER BY `time` DESC LIMIT $start, 50";
                     } else {
-                        $sql = "SELECT * FROM `release` ORDER BY `time` DESC, `time` DESC LIMIT $start, 50";
+                        $sql = "SELECT * FROM `release` ORDER BY `time` DESC LIMIT $start, 50";
                     }
                     break;
             }
@@ -151,10 +170,51 @@ class release extends model {
     }
 
     function find_release_by_tag( $tag, $start=0, $prcid=0, $sort=0 ){
+
         $sql = "SELECT `id` FROM `tags` WHERE `tag` = '$tag'";
         $result = mysql_query_excute($sql);
         $tag_id = mysql_fetch_assoc($result)["id"];
-        $sql = "SELECT * FROM `release` WHERE `rid` in (SELECT `rid` FROM `release_tags` WHERE `tag_id` = '$tag_id' AND `delete` = 0) ORDER BY `time` DESC";
+
+        if ($prcid) {
+            $source = "";
+            for ($i=0; $i < count($prcid) ; $i++) {
+                $source .= "prcid =";
+                $source .=  $prcid[$i];
+                if ($i < count($prcid) - 1) {
+                    $source .= " OR ";
+                }
+            }
+            switch ($sort) {
+                case 1:
+                    $sql = "SELECT * FROM `release` WHERE `rid` in (SELECT `rid` FROM `release_tags` WHERE `tag_id` = '$tag_id' AND `delete` = 0) AND ($source) ORDER BY `clap` DESC, `time` DESC LIMIT $start, 50";
+                    break;
+                case 2:
+                    $sql = "SELECT * FROM `release` WHERE `rid` in (SELECT `rid` FROM `release_tags` WHERE `tag_id` = '$tag_id' AND `delete` = 0) AND ($source) ORDER BY `scrap` DESC, `time` DESC LIMIT $start, 50";
+                    break;
+                case 3:
+                    $sql = "SELECT * FROM `release` WHERE `rid` in (SELECT `rid` FROM `release_tags` WHERE `tag_id` = '$tag_id' AND `delete` = 0) AND ($source) ORDER BY `comment` DESC, `time` DESC LIMIT $start, 50";
+                    break;
+                default:
+                    $sql = "SELECT * FROM `release` WHERE `rid` in (SELECT `rid` FROM `release_tags` WHERE `tag_id` = '$tag_id' AND `delete` = 0) AND ($source) ORDER BY `time` DESC LIMIT $start, 50";
+                    break;
+            }
+        } else {
+            switch ($sort) {
+                case 1:
+                    $sql = "SELECT * FROM `release` WHERE `rid` in (SELECT `rid` FROM `release_tags` WHERE `tag_id` = '$tag_id' AND `delete` = 0) ORDER BY `clap` DESC, `time` DESC LIMIT $start, 50";
+                    break;
+                case 2:
+                    $sql = "SELECT * FROM `release` WHERE `rid` in (SELECT `rid` FROM `release_tags` WHERE `tag_id` = '$tag_id' AND `delete` = 0) ORDER BY `scrap` DESC, `time` DESC LIMIT $start, 50";
+                    break;
+                case 3:
+                    $sql = "SELECT * FROM `release` WHERE `rid` in (SELECT `rid` FROM `release_tags` WHERE `tag_id` = '$tag_id' AND `delete` = 0) ORDER BY `comment` DESC, `time` DESC LIMIT $start, 50";
+                    break;
+                default:
+                    $sql = "SELECT * FROM `release` WHERE `rid` in (SELECT `rid` FROM `release_tags` WHERE `tag_id` = '$tag_id' AND `delete` = 0) ORDER BY `time` DESC LIMIT $start, 50";
+                    break;
+            }
+        }
+
         $result = mysql_query_excute($sql);
         while ($row = mysql_fetch_assoc($result)) {
             $release_data[] = $row;

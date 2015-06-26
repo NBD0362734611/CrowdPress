@@ -10,11 +10,15 @@ jQuery(function() {
         return $(this).val();
     }).get();
     var keyword = $('#search [name=keyword]').val();
+    var cname = $('attr').attr('cname');
+    var tag = $('attr').attr('tag');
     var data = {
         'count': count,
         'prcid': prcid,
         'sort' : sort,
-        'keyword' : keyword
+        'keyword' : keyword,
+        'cname':cname,
+        'tag':tag
     };
     if (!obj.data('loading')) {
         obj.data('loading', true);

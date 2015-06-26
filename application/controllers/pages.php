@@ -39,6 +39,7 @@ class pages extends controller {
 
     function newrelease()
     {
+        $newrelease = 1;
         $data = array();
         $user_data = array();
         $release_comment_data = array();
@@ -82,7 +83,7 @@ class pages extends controller {
         }
 
         // load profile view
-        $data = array( "user_data" => $user_data, "release_data" => $release_data, "release_comment_data" => $release_comment_data, "source" => $source, "tags" => $tags);
+        $data = array( "user_data" => $user_data, "release_data" => $release_data, "release_comment_data" => $release_comment_data, "source" => $source, "tags" => $tags, "newrelease" => $newrelease);
         $this->loadView( "pages/newrelease", $data );
     }
 
@@ -103,6 +104,8 @@ class pages extends controller {
         $prcid = 0;
         $sort  = 0;
         $words = 0;
+        $cname = 0;
+        $tag = 0;
         if ( isset($_POST["prcid"]) ) {
             $prcid = escape( $_POST["prcid"]);
         }
@@ -116,8 +119,14 @@ class pages extends controller {
             $words = str_replace("　", " ", $keyword);
             $words = trim($words);
         }
+        if ( isset($_POST["cname"]) ) {
+            $cname = escape( $_POST["cname"]);
+        }
+        if ( isset($_POST["tag"]) ) {
+            $tag = escape( $_POST["tag"]);
+        }
 
-        $release_data = $release->get_new_release( $start, $prcid, $sort, $words );
+        $release_data = $release->get_new_release( $start, $prcid, $sort, $words, $cname, $tag );
         $release_comment_data = array();
         $source = array();
 
@@ -244,6 +253,7 @@ class pages extends controller {
         // error_reporting(E_ALL ^ E_NOTICE);
         $user = $this->loadModel( "user" );
         $release = $this->loadModel( "release" );
+        $tags = $release->get_tagcloud();
 
         // get the user data from database
         if ( isset($_SESSION["user"]) ){
@@ -252,6 +262,7 @@ class pages extends controller {
 
         $release_data = $release->find_release_by_cname( $cname );
         $release_comment_data = array();
+        $source = array();
 
         if (isset($release_data)) {
             foreach ($release_data as $release) {
@@ -260,7 +271,18 @@ class pages extends controller {
                 }else{
                     $row = $user->release_comment_select($release["rid"]);
                 }
-            $release_comment_data[$release["rid"]] = $row;
+                $release_comment_data[$release["rid"]] = $row;
+                switch ( $release["prcid"] ){
+                case 1:
+                    $source[$release["rid"]] = "nikkei";
+                    break;
+                case 2:
+                    $source[$release["rid"]] = "fashion";
+                    break;
+                case 3:
+                    $source[$release["rid"]]  = "politics";
+                    break;
+                }
             }
         } else {
             $release_data = array();
@@ -269,7 +291,7 @@ class pages extends controller {
         // $release_comment_data = $user->release_comment_select($rid, $_SESSION["user"]);
 
         // load profile view
-        $data = array( "user_data" => $user_data, "release_data" => $release_data, "release_comment_data" => $release_comment_data, "cname" => $cname);
+        $data = array( "user_data" => $user_data, "release_data" => $release_data, "release_comment_data" => $release_comment_data, "cname" => $cname, "tags" => $tags, "source" => $source);
         $this->loadView( "pages/newrelease", $data );
     }
 
@@ -309,6 +331,7 @@ class pages extends controller {
         }
         $release_data = $release->find_release_by_title( $words, $start, $prcid, $sort );
         $release_comment_data = array();
+        $source = array();
 
         if (isset($release_data)) {
             foreach ($release_data as $release) {
@@ -317,14 +340,25 @@ class pages extends controller {
                 }else{
                     $row = $user->release_comment_select($release["rid"]);
                 }
-            $release_comment_data[$release["rid"]] = $row;
+                $release_comment_data[$release["rid"]] = $row;
+                switch ( $release["prcid"] ){
+                case 1:
+                    $source[$release["rid"]] = "nikkei";
+                    break;
+                case 2:
+                    $source[$release["rid"]] = "fashion";
+                    break;
+                case 3:
+                    $source[$release["rid"]]  = "politics";
+                    break;
+                }
             }
         } else {
             $release_data = array();
         }
 
         // load profile view
-        $data = array( "user_data" => $user_data, "release_data" => $release_data, "release_comment_data" => $release_comment_data, "title" => $title, "tags" => $tags);
+        $data = array( "user_data" => $user_data, "release_data" => $release_data, "release_comment_data" => $release_comment_data, "title" => $title, "tags" => $tags, "source" => $source);
         $this->loadView( "pages/newrelease", $data );
     }
 
@@ -358,6 +392,7 @@ class pages extends controller {
 
         $release_data = $release->find_release_by_tag( $tag, $start, $prcid, $sort );
         $release_comment_data = array();
+        $source = array();
 
         if (isset($release_data)) {
             foreach ($release_data as $release) {
@@ -366,14 +401,25 @@ class pages extends controller {
                 }else{
                     $row = $user->release_comment_select($release["rid"]);
                 }
-            $release_comment_data[$release["rid"]] = $row;
+                $release_comment_data[$release["rid"]] = $row;
+                switch ( $release["prcid"] ){
+                case 1:
+                    $source[$release["rid"]] = "nikkei";
+                    break;
+                case 2:
+                    $source[$release["rid"]] = "fashion";
+                    break;
+                case 3:
+                    $source[$release["rid"]]  = "politics";
+                    break;
+                }
             }
         } else {
             $release_data = array();
         }
 
         // load profile view
-        $data = array( "user_data" => $user_data, "release_data" => $release_data, "release_comment_data" => $release_comment_data, "tag" => $tag, "tags" =>$tags);
+        $data = array( "user_data" => $user_data, "release_data" => $release_data, "release_comment_data" => $release_comment_data, "tag" => $tag, "tags" =>$tags, "source" => $source);
         $this->loadView( "pages/newrelease", $data );
     }
 
