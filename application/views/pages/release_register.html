@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="description" content="CrowdPressとは">
+<style type="text/css">@-ms-viewport{width: device-width;}</style>
+<link rel="stylesheet" href="application/public/css/layers.min.css" media="screen">
+<link rel="stylesheet" href="application/public/css/style.css" media="screen">
+<link rel="stylesheet" href="application/public/css/magnific-popup.css" media="screen">
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700|Open+Sans:400italic,700italic,400,700' rel='stylesheet' type='text/css'>
+<link rel="icon" href="application/public/img/favicon.ico">
+<title>新規リリース登録ページ - CrowdPress</title>
+</head>
+
+<body class="single single-post">
+<?php if( isset( $error_message ) ) h ($error_message);?>
+
+<?php include("application/controllers/home.php"); $home = new home; $home->get_header();?>
+
+        <main role="main">
+
+            <div id="main" class="row">
+                <div class="row-content buffer">
+                    <form id="release_register" action="?route=pages/release_register" method="POST" enctype="multipart/form-data">
+                        <input type="text" name="title" value="" placeholder="タイトル" required aria-required="true" />
+                        <textarea name="body" placeholder="本文" required aria-required="true" /></textarea>
+                        <input type="text" name="cname" value="" placeholder="会社名" required aria-required="true" />
+                        <input type="text" name="url" value="" placeholder="URL" required aria-required="true" />
+                        <select name="prcid">
+                            <option value="0">未分類</option>
+                            <option value="1">企業</option>
+                            <option value="2">ファッション</option>
+                            <option value="3">政治</option>
+                        </select>
+                        <ul>
+                            <li><input type="file" id="uploadimg1" class="file" name="upfile[]" accept="image/*"></li>
+                            <li><input type="file" id="uploadimg2" class="file" name="upfile[]" accept="image/*"></li>
+                            <li><input type="file" id="uploadimg3" class="file" name="upfile[]" accept="image/*"></li>
+                        </ul>
+                        <input type="hidden" name="token" value="<?php h($_SESSION['token']); ?>">
+                        <a href="#release_preview" class="open-popup-link"><button id="preview" class="button transparent">プレビュー</button></a>
+                        <button id="register" class="button transparent">登録する</button>
+                        <div id="sending"></div>
+                    </form>
+
+                    <div id="release_preview" class="white-popup mfp-hide">
+
+                        <div class="post-area clear-after">
+                            <article role="main" class="column nine">
+                                <a id="preview_url" href="" target="_blank"><h1 id="preview_title"></h1></a>
+                                <div class="gallery slider" data-autoplay="false" data-autoheight="true">
+                                    <figure>
+                                        <div id="preview_img1"></div>
+                                        <div id="preview_img2"></div>
+                                        <div id="preview_img3"></div>
+                                    </figure>
+                                </div><!-- gallery -->
+                                <span id="preview_body"></span>
+                            </article>
+
+                            <aside role="complementary" class="sidebar column three last">
+                                <div class="widget">
+                                    <h4>会社名</h4>
+                                    <p id="preview_cname"></p>
+                                </div>
+                            </aside>
+
+                        </div><!-- post-area -->
+
+                    </div><!-- release_preview -->
+                </div><!-- row-content -->
+            </div><!-- row -->
+        </main><!-- main -->
+<?php include("application/views/common/footer.html");?>
+
+<script src="https://code.jquery.com/jquery.js"></script>
+<script src="application/public/js/plugins.js"></script>
+<script src="application/public/js/beetle.js"></script>
+<script src="application/public/js/analyticstracking.js"></script>
+<script src="application/public/js/jquery.magnific-popup.js"></script>
+<script src="application/public/js/jquery.uploadThumbs.js"></script>
+<script>
+
+$(function() {
+    $('#uploadimg1').uploadThumbs({
+        position : '#preview_img1',   // any: arbitrarily jquery selector
+    });
+    $('#uploadimg2').uploadThumbs({
+        position : '#preview_img2',   // any: arbitrarily jquery selector
+    });
+    $('#uploadimg3').uploadThumbs({
+        position : '#preview_img3',   // any: arbitrarily jquery selector
+    });
+});
+
+$('#release_register').submit(function(event) {
+    // HTMLでの送信をキャンセル
+    event.preventDefault();
+});
+
+$('#release_register [name=title]').change(function(event) {
+    $('#preview_title').html($(this).val());
+});
+$('#release_register [name=body]').change(function(event) {
+    $('#preview_body').html($(this).val());
+});
+$('#release_register [name=url]').change(function(event) {
+    $('#preview_url').attr('href', $(this).val());
+});
+$('#release_register [name=cname]').change(function(event) {
+    $('#preview_cname').html($(this).val());
+});
+
+$(function(){
+    // var data = {
+    //     'title':$('#release_register [name=title]').val(),
+    //     'body':$('#release_register [name=body]').val(),
+    //     'cname':$('#release_register [name=cname]').val(),
+    //     'url':$('#release_register [name=url]').val(),
+    //     'token':$('#release_register [name=token]').val()
+    // };
+    $('#register').on('click', function(){
+        // 操作対象のフォーム要素を取得
+        var $form = $('#release_register');
+        // 送信ボタンを取得
+        var $button = $('#register');
+        var fd = new FormData($form[0]);
+        // 送信
+        $.ajax({
+            processData: false,
+            contentType: false,
+            url: $form.attr('action'),
+            type: $form.attr('method'),
+            data: fd,
+            // dataType: 'json',
+            // timeout: 10000,  // 単位はミリ秒
+
+            // 送信前
+            beforeSend: function(xhr, settings) {
+                // ボタンを無効化し、二重送信を防止
+                $button.attr('disabled', true);
+                $('#sending').html('送信中…');
+
+            },
+            // 応答後
+            complete: function(xhr, textStatus) {
+                // ボタンを有効化し、再送信を許可
+                $button.attr('disabled', false);
+                $('#sending').html('送信完了');
+            },
+
+            // 通信成功時の処理
+            success: function(result, textStatus, xhr) {
+                // 入力値を初期化
+                $form[0].reset();
+                alert("登録が完了しました");
+            },
+
+            // 通信失敗時の処理
+            error: function(xhr, textStatus, error) {
+                alert('登録が失敗しました');
+            }
+        });
+    });
+
+    $('.open-popup-link').magnificPopup({
+      type:'inline',
+      midClick: true // allow opening popup on middle mouse click. Always set it to true if you don't provide alternative source.
+    });
+
+});
+
+</script>
+</body>
+</html>
+

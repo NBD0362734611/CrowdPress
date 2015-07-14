@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="description" content="CrowdPressとは">
+<style type="text/css">@-ms-viewport{width: device-width;}</style>
+<link rel="stylesheet" href="application/public/css/layers.min.css" media="screen">
+<link rel="stylesheet" href="application/public/css/style.css" media="screen">
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700|Open+Sans:400italic,700italic,400,700' rel='stylesheet' type='text/css'>
+<link rel="icon" href="application/public/img/favicon.ico">
+<title><?php h( $user_data["upapername"] ); ?> - CrowdPress</title>
+</head>
+
+<body class="blog masonry-style">
+<?php if( isset( $error_message ) ) h( $error_message ); ?>
+
+<?php include("application/controllers/home.php"); $home = new home; $home->get_header();?>
+
+			<div id="intro-wrap">
+				<div id="intro" class="preload darken" data-autoplay="5000" data-navigation="true" data-pagination="true" data-transition="fadeUp">
+					<div class="intro-item" style="background-image: url(<?php h( $user_data["cover_url"] ); ?>);">
+						<div class="caption">
+                            <div class="user-thumb">
+							<img src="<?php h( $user_data["photo_url"] ); ?>">
+                            </div>
+							<h2 id="paper_name"><?php h( $user_data["upapername"] ); ?></h2>
+                            <h5 class="user_name">
+                                <?php h( $user_data["display_name"] ); ?>
+                            </h5>
+							<p id="paper_explain"><?php h( $user_data["paper_explain"] ); ?></p>
+                            <?php if( isset( $_SESSION["user"] ) ): ?>
+                            <?php if( $_SESSION["user"] == $user_data["id"] ){
+                                //自分見た時
+                                echo "<button id=\"user_info_change_top\" class=\"button white transparent\"onClick=\"location.href='?route=users/setting'\" >編集する</button>";
+                            }
+                            else{
+                                //他人が見た時→更に状態によって購読解除になるようにする
+                                echo "<button id=\"user_follow\" class=\"button white transparent\" user_id =\"";
+                                h ( $user_data["id"] );
+                                echo "\">";
+                                h ( $follow_status );
+                                echo "</button>";
+                            } ?>
+                            <?php endif; ?>
+							<div class="widget meta-social text-light">
+								<ul class="inline">
+									<li><a href="<?php h( $user_data["facebook_url"] ); ?>" class="facebook-share border-box"><i class="fa fa-facebook fa-lg"></i></a></li>
+									<li><a href="<?php h( $user_data["twitter_url"] ); ?>" class="twitter-share border-box"><i class="fa fa-twitter fa-lg"></i></a></li>
+									<li><a href="<?php h( $user_data["website_url"] ); ?>" class="flickr-share border-box"><i class="fa fa-home fa-lg"></i></a></li>
+									<li><a href="mailto:<?php h( $user_data["email"] ); ?>?subject=CrowdPressから送信" class="gplus-share border-box"><i class="fa fa-envelope-o fa-lg"></i></a></li>
+								</ul>
+							</div>
+
+							<div class="column fourth">
+									<div class="count"><a href="?route=users/profile_comment/<?php h( $user_data["id"] ); ?>"><span class="publish_paper_number"><?php h( $user_data["rcomment_number"] ); ?></span></a></div>
+									<div class="txt">コメント数</div>
+							</div>
+							<div class="column fourth">
+									<div class="count"><a href="?route=users/profile_user_scrap/<?php h( $user_data["id"] ); ?>"><?php h( $user_data["scrap"] ); ?></a></div>
+									<div class="txt">スクラップ</div>
+							</div>
+							<div class="column fourth">
+									<div class="count follow"><a href="?route=users/profile_user_following/<?php h( $user_data["id"] ); ?>"><?php h( $user_data["follow"] ); ?></a></div>
+									<div class="txt">購読数</div>
+							</div>
+							<div class="column fourth last">
+									<div class="count"><a href="?route=users/profile_user_follower/<?php h( $user_data["id"] ); ?>"><span class="follower"><?php h( $user_data["follower"] ); ?></span></a></div>
+									<div class="txt">購読者数</div>
+							</div>
+
+						</div><!-- caption -->
+					</div>
+				</div><!-- intro -->
+			</div><!-- intro-wrap -->
+
+        <main role="main">
+            <attr cname="<?php if ( isset($cname)) { h($cname); } ?>" tag="<?php if ( isset($tag)) { h($tag); } ?>">
+
+            <div id="main" class="row">
+                <div class="row-content buffer">
+
+                    <h2 class="newrelease">コメントしてるリリース <?php if ( isset($cname)) { h(": ".$cname); } ?><?php if ( isset($tag)) { h(": ".$tag); } ?></h2>
+                    <div id ="release_body">
+                    <!-- 繰り返しスタート -->
+                    <?php foreach ($release_data as $release) { ?>
+                        <div class="post-area clear-after">
+                            <section role="main" class="release">
+                                <h3 class="release-title <?php h( $source[$release['rid']] );?>">
+                                <a href="?route=pages/release_detail/<?php h( $release["rid"] ); ?>">
+                                    <?php h( $release["title"] ); ?>
+                                </a></h3>
+                                    <div class="portfolio-section preload">
+                                        <?php
+                                            if( !empty($release["img1"]) ) {
+                                                echo '<span class="item column fourth"><figure><img src=';
+                                                h( $release["img1"] );
+                                                echo '></figure></span>';
+                                            }
+                                            if( !empty($release["img2"]) ) {
+                                                echo '<span class="item column fourth"><figure><img src=';
+                                                h( $release["img2"] );
+                                                echo '></figure></span>';
+                                            }
+                                             if( !empty($release["img3"]) ) {
+                                                echo '<span class="item column fourth"><figure><img src=';
+                                                h( $release["img3"] );
+                                                echo '></figure></span>';
+                                            }
+                                        ?>
+                                    </div>
+                            </section>
+                            <div class="widget meta-social column half">
+                                <ul class="inline">
+                                    <li><a class="release-comment-toggle border-box"><i class="fa fa-comment-o fa-lg"></i></a></li>
+                                    <li><a class="clap border-box" rid="<?php h( $release["rid"] ); ?>"><i class="fa fa-heart-o fa-lg"></i></a><span class="arrow_box"><?php h( $release["clap"] ); ?></span></li>
+                                    <li><a class="scrap border-box" rid="<?php h( $release["rid"] ); ?>"><i class="fa fa-paperclip fa-lg"></i></a><span class="arrow_box"><?php h( $release["scrap"] ); ?></span></li>
+                                </ul>
+                            </div>
+                            <div class="column half right last">
+                                <h5 class="meta-post"><a class="company-name" href="?route=pages/release_sort_by_cname/<?php h( $release["cname"] ); ?>"><?php h( $release["cname"] ); ?></a> - <time datetime><?php h( $release["time"] ); ?></time></h5>
+                            </div>
+                            <div class="clear"></div>
+                            <!-- 自分のコメントここから -->
+                            <form class="release-comment" style="display: none" action="?route=pages/release_comment_insert" method="post" >
+                                <input type="hidden" name="rid" value="<?php h( $release["rid"] ); ?>" />
+                                <input type="hidden" name="user_id" value="<?php h( $_SESSION["user"] ); ?>" />
+                                <input type="hidden" name="token" value="<?php h($_SESSION['token']); ?>">
+                                <input type="text" name="comment" value="リリースにコメントする" />
+                            </form>
+                            <div class="comment-area">
+                            <?php if(is_array($release_comment_data[$release["rid"]])){ ; ?>
+                            <?php foreach ($release_comment_data[$release["rid"]] as $release_comment) { ?>
+                            <section class="line_wrapper">
+                                <div class="question_Box inline">
+                                    <div class="question_image column inline-block">
+                                        <img src="<?php h( $release_comment["photo_url"] ); ?>" alt="ユーザーの写真"/>
+                                        <h5 class="username"><a href="?route=users/profile_user/<?php h( $release_comment["id"] ); ?>"><?php h( $release_comment["display_name"] ); ?></a></h5>
+                                    </div>
+                                    <p class="arrow_question column nine reset inline-block">
+                                    <?php h( $release_comment["comment"] ) ; ?>
+                                    </p><!-- /.arrow_question -->
+                                </div><!-- /.question_Box -->
+                                <div class="clear"></div>
+                            </section><!-- /.line_wrappaer -->
+                            <?php } ?>
+                            <?php } ?>
+                            </div>
+                            <!-- 自分のコメントここまで -->
+                        </div><!-- post-area -->
+                    <?php } ?><!-- 繰り返し終わり -->
+                    </div><!-- release_body -->
+                    <div id="loading"></div>
+                </div><!-- row-content -->
+            </div><!-- row -->
+        </main><!-- main -->
+<?php include("application/views/common/footer.html");?>
+
+<script src="https://code.jquery.com/jquery.js"></script>
+<script src="application/public/js/plugins.js"></script>
+<script src="application/public/js/beetle.js"></script>
+<script src="application/public/js/analyticstracking.js"></script>
+<!-- <script src="application/public/js/jquery.editable.min.js"></script>
+<script src="application/public/js/jquery.bottom-1.0.js"></script>
+<script src="application/public/js/loaduserprofile.js"></script> -->
+<script src="application/public/js/notification.js"></script>
+
+
+<script>
+//コメント
+jQuery('#release_body').on('submit', '.release-comment',  function(event) {
+    // ここでsubmitをキャンセル。
+    event.preventDefault();
+    // var rid = jQuery(':hidden[name="rid"]').val();
+    // var token = jQuery(':hidden[name="token"]').val();
+    // var comment = jQuery(':text[name="comment"]').val();
+    var $form = $(this);
+    var url = jQuery(this).attr("action");
+    var method = jQuery(this).attr("method");
+    var data = jQuery(this).serialize();
+    var comsec = jQuery(this).nextAll('.comment-area');
+
+    jQuery.ajax({
+        type:method,
+        url: url,
+        data: data,
+        success: function(source) {
+            comsec.html(source);
+            console.log(source);
+            $form[0].reset();
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+            alert("通信エラー");
+      }
+    });
+});
+
+$(function () {
+  $(".tabs a").on('click', function(e) {
+    e.preventDefault();
+
+    var target = $(this).attr('href');
+    if (! $(target).length) return false;
+
+    $('.tab', $(this).closest('.tabs')).removeClass('active');
+
+    $(this).closest('.tab').addClass('active');
+
+    $('.panel', $(target).closest('.panels')).removeClass('active');
+    $(target).addClass('active');
+  });
+});
+
+$('#category').change(function(){
+    var prcid = $('[name="prcid"]:checked').map(function(){
+        return $(this).val();
+    }).get();
+    var sort = $("input[name='sort']:checked").val();
+    var keyword = $("#search [name='keyword']").val();
+    var cname = $('attr').attr('cname');
+    var tag = $('attr').attr('tag');
+    var data = {
+        'count': 0,
+        'prcid': prcid,
+        'sort' : sort,
+        'keyword':keyword,
+        'cname':cname,
+        'tag':tag
+    };
+    // Ajax処理
+    $.ajax({
+        url: "?route=pages/loadrelease",
+        type:"POST",
+        data : data,
+        success: function(html) {
+            $("#release_body").html(html);
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+            alert("error");
+        }
+    });
+});
+
+$('#sort').change(function(){
+    var prcid = $('[name="prcid"]:checked').map(function(){
+        return $(this).val();
+    }).get();
+    var sort = $("input[name='sort']:checked").val();
+    var keyword = $("#search [name='keyword']").val();
+    var cname = $('attr').attr('cname');
+    var tag = $('attr').attr('tag');
+    var data = {
+        'count': 0,
+        'prcid': prcid,
+        'sort' : sort,
+        'keyword':keyword,
+        'cname':cname,
+        'tag':tag
+    };
+    // Ajax処理
+    $.ajax({
+        url: "?route=pages/loadrelease",
+        type:"POST",
+        data : data,
+        success: function(html) {
+            $("#release_body").html(html);
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+            alert("error");
+        }
+    });
+});
+
+//検索
+$('#search').submit(function(event) {
+    // ここでsubmitをキャンセル。
+    event.preventDefault();
+    var keyword = $('#search [name=keyword]').val();
+    var URI = "?route=pages/release_search_by_title/" + keyword;
+    var prcid = $('[name="prcid"]:checked').map(function(){
+        return $(this).val();
+    }).get();
+    var sort = $("input[name='sort']:checked").val();
+    var data = {
+        'count': 0,
+        'prcid': prcid,
+        'sort' : sort,
+        'title': keyword
+    };
+    // Ajax処理
+    $.ajax({
+      type:"POST",
+      url: URI,
+      data : data,
+      success: function(data) {
+        window.location.href = URI;
+      },
+      error: function(XMLHttpRequest, textStatus, errorThrown) {
+        alert("error");
+      }
+    });
+});
+
+//コメント表示切り替え
+$('#release_body').on('click', '.release-comment-toggle', function(){
+    $(this).parent().parent().parent().nextAll('.release-comment').toggle(300);
+});
+var long = '90%';
+var short = '50%';
+//フォーカス時にアニメーションエフェクトでサイズを広げる
+$('#release_body').on('focus', '.release-comment input', function(){
+    if($(this).val()==='リリースにコメントする'){
+        $(this).val('');
+    }
+    //animate the box
+    $(this).animate({
+        width: long},400);
+});
+//外れたときはサイズを縮める
+$('#release_body').on('blur', '.release-comment input', function(){
+    if($(this).val()===''){
+        $(this).val('リリースにコメントする');
+    }
+    $(this).animate({
+        width: short},500);
+});
+
+$('#release_body').on('click', '.clap', function() {
+    var rid = $(this).attr("rid");
+    var clap = $(this).next();
+    var data = {
+        'user_id' : 0,
+        'rid': rid
+    };
+
+    jQuery.ajax({
+        type:"POST",
+        url: "?route=pages/clap_insert",
+        dataType: "json",
+        data: data,
+        success: function(data, dataType) {   // OK時
+            // JSON Arrayの先頭が成功フラグ、失敗の場合2番目がエラーメッセージ
+            // if (!json_data[0]) {    // サーバが失敗を返した場合
+            //     console.log(json_data);
+            //     alert("Transaction error. " + json_data[1]);
+            //     return;
+            // }
+            // 成功時処理
+            clap.html(data[0]);
+        },
+        error: function() {         // HTTPエラー時
+            alert("ログインしてください！");
+        },
+        complete: function() {      // 成功・失敗に関わらず通信が終了した際の処理
+        }
+    });
+});
+
+$('#release_body').on('click', '.scrap', function() {
+    var rid = $(this).attr("rid");
+    var scrap = $(this).next();
+    var data = {
+        'user_id' : 0,
+        'rid': rid
+    };
+
+    jQuery.ajax({
+        type:"POST",
+        url: "?route=pages/scrap_insert",
+        dataType: "json",
+        data: data,
+        success: function(data, dataType) {   // OK時
+            // JSON Arrayの先頭が成功フラグ、失敗の場合2番目がエラーメッセージ
+            // if (!json_data[0]) {    // サーバが失敗を返した場合
+            //     console.log(json_data);
+            //     alert("Transaction error. " + json_data[1]);
+            //     return;
+            // }
+            // 成功時処理
+            // alert(data);
+            scrap.html(data[0]);
+        },
+        error: function() {         // HTTPエラー時
+            alert("ログインしてください！");
+        },
+        complete: function() {      // 成功・失敗に関わらず通信が終了した際の処理
+        }
+    });
+});
+</script>
+
+</body>
+</html>

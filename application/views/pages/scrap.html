@@ -87,6 +87,7 @@
                                 <input type="hidden" name="token" value="<?php h($_SESSION['token']); ?>">
                                 <input type="text" name="comment" value="リリースにコメントする" />
                             </form>
+                            <div class="comment-area">
                             <?php if(is_array($release_comment_data[$release["rid"]])){ ; ?>
                             <?php foreach ($release_comment_data[$release["rid"]] as $release_comment) { ?>
                             <section class="line_wrapper">
@@ -103,6 +104,7 @@
                             </section><!-- /.line_wrappaer -->
                             <?php } ?>
                             <?php } ?>
+                            </div>
                             <!-- 自分のコメントここまで -->
 
                             <form class="paper_edit" id="paper_edit<?php h( $scrap_number ); ?>" rid="<?php h( $release["rid"] ); ?>" style="display:none">
@@ -131,6 +133,33 @@
     <script src="application/public/js/loadscrap.js"></script>
 <?php endif ?>
 <script>
+//コメント
+jQuery('#release_body').on('submit', '.release-comment',  function(event) {
+    // ここでsubmitをキャンセル。
+    event.preventDefault();
+    // var rid = jQuery(':hidden[name="rid"]').val();
+    // var token = jQuery(':hidden[name="token"]').val();
+    // var comment = jQuery(':text[name="comment"]').val();
+    var $form = $(this);
+    var url = jQuery(this).attr("action");
+    var method = jQuery(this).attr("method");
+    var data = jQuery(this).serialize();
+    var comsec = jQuery(this).nextAll('.comment-area');
+
+    jQuery.ajax({
+        type:method,
+        url: url,
+        data: data,
+        success: function(source) {
+            comsec.html(source);
+            $form[0].reset();
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+            alert("通信エラー");
+      }
+    });
+});
+
 //無限スクロール
 var count = 1;
 

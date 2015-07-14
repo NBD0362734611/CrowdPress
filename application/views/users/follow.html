@@ -52,8 +52,8 @@
 							</div>
 
 							<div class="column fourth">
-									<div class="count"><a href="?route=users/profile/<?php h( $user_data["id"] ); ?>"><?php h( $user_data["publish_paper"] ); ?></a></div>
-									<div class="txt">新聞発行数</div>
+									<div class="count"><a href="?route=users/profile_comment/<?php h( $user_data["id"] ); ?>"><?php h( $user_data["rcomment_number"] ); ?></a></div>
+									<div class="txt">コメント数</div>
 							</div>
 							<div class="column fourth">
 									<div class="count"><a href="?route=users/profile_user_scrap/<?php h( $user_data["id"] ); ?>"><?php h( $user_data["scrap"] ); ?></a></div>
@@ -73,6 +73,7 @@
 				</div><!-- intro -->
 			</div><!-- intro-wrap -->
 
+        <main>
 			<div id="main" class="row">
                 <div class="row-content buffer-left buffer-right buffer-bottom clear-after">
                 <h3 style="text-align: center"><?php h( $user_data["display_name"] ); ?> の <?php h( $followorfollower ) ;?> 一覧</h3>

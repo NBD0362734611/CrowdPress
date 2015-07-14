@@ -28,9 +28,7 @@ class user extends model {
 
 	function find_by_id( $id ){
 		$sql = "SELECT * FROM users WHERE id = '$id' LIMIT 1";
-
 		$result = mysql_query_excute($sql);
-
 		return mysql_fetch_assoc($result);
 	}
 
@@ -101,6 +99,18 @@ class user extends model {
 		return mysql_insert_id();
 	}
 
+    function request_comment_insert( $user_id, $comment ){
+        $sql = "INSERT INTO `request`(`user_id`, `comment`) VALUES ('$user_id', '$comment')";
+
+        return mysql_query_excute($sql);
+    }
+
+    function request_comment_remove( $request_id ,$user_id ){
+        $sql = "DELETE FROM `request` WHERE ( `id` = '$request_id' ) AND ( `user_id` = '$user_id' )";
+
+        return mysql_query_excute($sql);
+    }
+
     function paperid_to_userid( $paper_id ){
         $sql = "SELECT `user_id` FROM `paper` WHERE `id` = '$paper_id' LIMIT 1";
         $result = mysql_query_excute($sql);
@@ -132,7 +142,7 @@ class user extends model {
 
 	function release_comment_select($rid, $user_id=0){
 		$release_comment_data = array();
-		$sql = "SELECT `users`.`id`, `comment`, `display_name`, `photo_url` FROM `r_comment` INNER JOIN `users` ON `r_comment`.`user_id` = `users`.`id` WHERE `rid` = $rid ORDER BY `time`";
+		$sql = "SELECT `users`.`id`, `comment`, `display_name`, `photo_url` FROM `r_comment` INNER JOIN `users` ON `r_comment`.`user_id` = `users`.`id` WHERE `rid` = $rid ORDER BY `time` ASC";
 		$result = mysql_query_excute($sql);
 		while ( $row = mysql_fetch_assoc($result) ) {
 			$release_comment_data[] = $row;
@@ -323,4 +333,41 @@ class user extends model {
         $result = mysql_query_excute($sql);
     }
 
+    function insert_request_like( $request_id ){
+        $sql = "UPDATE `request` SET `like` = `like` + 1 WHERE `id` = '$request_id'";
+        $result = mysql_query_excute($sql);
+        $sql = "SELECT `like` FROM `request` WHERE `id` = '$request_id'";
+        $result = mysql_query_excute($sql);
+        return mysql_fetch_assoc($result);
+    }
+
+    function get_request_data(){
+        $request_data = array();
+        $sql = "SELECT * FROM `users` INNER JOIN `request` ON `users`.id = `request`.`user_id` ORDER BY `request`.`id` DESC";
+        $result = mysql_query_excute($sql);
+        while ($row = mysql_fetch_assoc($result)) {
+            $request_data[] = $row;
+        }
+        return $request_data;
+    }
+
+   function get_clap_user_list($rid){
+        $clap_user_list = array();
+        $sql = "SELECT * FROM `r_clap` WHERE `rid` = '$rid'";
+        $result = mysql_query_excute($sql);
+        while ( $row = mysql_fetch_object($result) ) {
+            array_push($clap_user_list, $this->find_by_id($row->user_id));
+        }
+        return $clap_user_list;
+    }
+
+    function get_scrap_user_list($rid){
+        $scrap_user_list = array();
+        $sql = "SELECT * FROM `r_scrap` WHERE `rid` = '$rid'";
+        $result = mysql_query_excute($sql);
+        while ( $row = mysql_fetch_object($result) ) {
+            $scrap_user_list[] = $this->find_by_id($row->user_id);
+        }
+        return $scrap_user_list;
+    }
 }

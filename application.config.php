@@ -5,7 +5,7 @@
 	require_once( "hybridauth/Hybrid/Auth.php" );
 
 	// database config
-	$database_host = "localhost";
+	$database_host = "localhost:8888";
 	$database_user = "root";
 	$database_pass = "alue1029";
 	$database_name = "CrowdPress";

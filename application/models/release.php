@@ -403,7 +403,7 @@ class release extends model {
 
     function release_comment_ridselect($rid){
         $release_comment_data = array();
-        $sql = "SELECT `r_comment`.`commentid`, `r_comment`.`reply`, `r_comment`.`comment`, `users`.`id`, `users`.`display_name`, `users`.`photo_url`, `r_comment`.`time` FROM `r_comment` INNER JOIN `users` ON `r_comment`.`user_id` = `users`.`id` WHERE `rid` = $rid";
+        $sql = "SELECT `r_comment`.`commentid`, `r_comment`.`reply`, `r_comment`.`comment`, `users`.`id`, `users`.`display_name`, `users`.`photo_url`, `r_comment`.`time` FROM `r_comment` INNER JOIN `users` ON `r_comment`.`user_id` = `users`.`id` WHERE `rid` = $rid ORDER BY `r_comment`.`time` ASC";
         $result = mysql_query_excute($sql);
         while ($row = mysql_fetch_assoc($result)) {
             $release_comment_data[] = $row;
@@ -441,6 +441,18 @@ class release extends model {
         $number = $this->get_release_comment_number($rid)["number"];
         $sql = "UPDATE `release` SET `comment` = '$number' WHERE `rid` = '$rid'";
         mysql_query_excute($sql);
+    }
+
+    function release_comment_number_byuser_update($user_id){
+        $number = $this->get_release_comment_number_byuser($user_id)["number"];
+        $sql = "UPDATE `users` SET `rcomment_number` = '$number' WHERE `id` = '$user_id'";
+        mysql_query_excute($sql);
+    }
+
+    function get_release_comment_number_byuser($user_id){
+        $sql = "SELECT COUNT(`commentid`) AS `number` FROM `r_comment` WHERE `user_id` = '$user_id'";
+        $result = mysql_query_excute($sql);
+        return mysql_fetch_assoc($result);
     }
 
     function get_paper_comment_number($paper_id){
@@ -722,6 +734,52 @@ class release extends model {
             $tags[] = $row["tag"];
         }
         return $tags;
+    }
+
+    function get_autocomplete($term){
+        $return_arr = array();
+        $sql = "SELECT `tag` FROM `tags` WHERE `tag` LIKE '$term%'";
+        $result = mysql_query_excute($sql);
+        while ($row = mysql_fetch_assoc($result)) {
+            $return_arr[] = $row["tag"];
+        }
+        return $return_arr;
+    }
+
+    function release_register($prcid,$url,$cname,$title,$body,$img=0){
+        if (is_array($img)) {
+            switch (count($img)) {
+                case '1':
+                    $sql = "INSERT INTO `release`(`prcid`, `url`, `cname`, `title`, `img1`, `body`) VALUES ($prcid,'$url','$cname','$title','$img[0]','$body')";
+                    break;
+                case '2':
+                    $sql = "INSERT INTO `release`(`prcid`, `url`, `cname`, `title`, `img1`, `img2`, `body`) VALUES ($prcid,'$url','$cname','$title','$img[0]','$img[1]','$body')";
+                    break;
+                case '3':
+                    $sql = "INSERT INTO `release`(`prcid`, `url`, `cname`, `title`, `img1`, `img2`, `img3`, `body`) VALUES ($prcid,'$url','$cname','$title','$img[0]','$img[1]','$img[2]','$body')";
+                    break;
+                case '4':
+                    $sql = "INSERT INTO `release`(`prcid`, `url`, `cname`, `title`, `img1`,  `img2`, `img3`, `img4`, `body`) VALUES ($prcid,'$url','$cname','$title','$img[0]','$img[1]','$img[2]','$img[3]','$body')";
+                    break;
+                case '5':
+                    $sql = "INSERT INTO `release`(`prcid`, `url`, `cname`, `title`, `img1`, `img2`, `img3`, `img4`, `img5`, `body`) VALUES ($prcid,'$url','$cname','$title','$img[0]','$img[1]','$img[2]','$img[3]','$img[4]','$body')";
+                    break;
+            }
+        } else {
+        $sql = "INSERT INTO `release`(`prcid`, `url`, `cname`, `title`, `body`) VALUES ($prcid,'$url','$cname','$title','$body')";
+        }
+        $result = mysql_query_excute($sql);
+        return $result;
+    }
+
+    function comment_release_data( $user_id ){
+        $comment_release_data = array();
+        $sql = "SELECT * FROM `release` INNER JOIN `r_comment` ON `release`.`rid` = `r_comment`.`rid` WHERE `r_comment`.`user_id` = '$user_id'";
+        $result = mysql_query_excute($sql);
+        while ($row = mysql_fetch_assoc($result)) {
+            $comment_release_data[] = $row;
+        }
+        return $comment_release_data;
     }
 
 }

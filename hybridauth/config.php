@@ -11,7 +11,7 @@
 
 return
 	array(
-		"base_url" => "http://localhost/crowdpress/hybridauth/",
+		"base_url" => "http://localhost:8888/crowdpress/hybridauth/",
 
 		"providers" => array (
 			// openid providers

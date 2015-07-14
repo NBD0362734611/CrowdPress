@@ -43,22 +43,63 @@ foreach ($entries as $entry) {
 
     $crawler = $client->request('GET',$url);
     $img = $crawler->filter('.g-i')->each(function ($node) {
-        $imgurl = str_replace("https", "http" , $node->filter('img')->attr('data-original') );
-        $imgurl = str_replace("125x125_", "" , $imgurl );
-        return $imgurl;
+        if ($imgurl = $node->filter('img')->attr('data-original') ) {
+            $imgurl = str_replace("https", "http" , $imgurl );
+            $imgurl = str_replace("125x125_", "" , $imgurl );
+            if (!strpos($imgurl, 'http')) {
+                $imgurl = "http://www.fashion-press.net/".$imgurl;
+                $imgurl = str_replace("//img", "/img" , $imgurl );
+            }
+            return $imgurl;
+        }
     });
     if (!$img[0]) {
         $img = $crawler->filter('.g-i')->each(function ($node) {
-            $imgurl = str_replace("125x125_", "" , $node->filter('img')->attr('src') );
-            $imgurl = "http://www.fashion-press.net/".$imgurl;
-            return $imgurl;
+            // $imgurl = str_replace("125x125_", "" , $node->filter('img')->attr('src') );
+            if ($imgurl = $node->filter('img')->attr('src')) {
+                $imgurl = str_replace("125x125_", "" , $imgurl );
+                $imgurl = "http://www.fashion-press.net/".$imgurl;
+                $imgurl = str_replace("//img", "/img" , $imgurl );
+                return $imgurl;
+            }
         });
     }
     if (!$img[0]) {
         $img = $crawler->filter('.g-i-collection')->each(function ($node) {
-            $imgurl = str_replace("100x150_", "" , $node->filter('img')->attr('src') );
-            $imgurl = "http://www.fashion-press.net/".$imgurl;
-            return $imgurl;
+            // $imgurl = str_replace("100x150_", "" , $node->filter('img')->attr('src') );
+           if ($imgurl = $node->filter('img')->attr('src')) {
+                $imgurl = str_replace("https", "http" , $imgurl );
+                $imgurl = str_replace("100x150_", "" , $imgurl );
+                if (!strpos($imgurl, 'http')) {
+                    $imgurl = "http://www.fashion-press.net/".$imgurl;
+                    $imgurl = str_replace("//img", "/img" , $imgurl );
+                }
+                return $imgurl;
+            }
+        });
+    }
+    if (!$img[0]) {
+        $img = $crawler->filter('.g-i-collection')->each(function ($node) {
+           if ($imgurl = $node->filter('img')->attr('data-original')) {
+                $imgurl = str_replace("https", "http" , $imgurl );
+                $imgurl = str_replace("100x150_", "" , $imgurl );
+                if (!strpos($imgurl, 'http')) {
+                    $imgurl = "http://www.fashion-press.net/".$imgurl;
+                    $imgurl = str_replace("//img", "/img" , $imgurl );
+                }
+                return $imgurl;
+            }
+        });
+    }
+    if (!$img[0]) {
+        $img = $crawler->filter('.calendar-img')->each(function ($node) {
+            // $imgurl = str_replace("100x150_", "" , $node->filter('img')->attr('src') );
+           if ($imgurl = $node->filter('img')->attr('src')) {
+                $imgurl = substr($imgurl, strpos("_")+1);
+                $imgurl = "http://www.fashion-press.net/".$imgurl;
+                $imgurl = str_replace("//img", "/img" , $imgurl );
+                return $imgurl;
+            }
         });
     }
     $body = $crawler->filter('#entry-news')->html();

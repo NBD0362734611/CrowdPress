@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="description" content="CrowdPressとは">
+<style type="text/css">@-ms-viewport{width: device-width;}</style>
+<link rel="stylesheet" href="application/public/css/layers.min.css" media="screen">
+<link rel="stylesheet" href="application/public/css/style.css" media="screen">
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700|Open+Sans:400italic,700italic,400,700' rel='stylesheet' type='text/css'>
+<link rel="icon" href="application/public/img/favicon.ico">
+<title>Request - CrowdPress</title>
+</head>
+
+<body class="blog masonry-style">
+<?php if( isset( $error_message ) ) h( $error_message ); ?>
+
+<?php include("application/controllers/home.php"); $home = new home; $home->get_header();?>
+
+        <main role="main">
+            <div id="main" class="row">
+                <div class="row-content buffer clear-after">
+                <form action="?route=pages/request_comment_insert" method="post">
+                    <textarea name="comment" placeholder="リクエストを入力" maxlength="200"></textarea>
+                    <input type="hidden" name="token" value="<?php h($_SESSION['token']); ?>">
+                    <input type="submit">
+                </form>
+                    <div id ="release_body">
+                    <!-- 繰り返しスタート-->
+                    <?php foreach ($request_data as $request) { ?>
+                    <div class="myfeed-wrapper <?php h( $request["id"] ); ?>">
+                        <article role="main">
+                            <div class="question_image column inline-block"><a href="?route=users/profile_user/<?php h( $request["user_id"] ); ?>"><img src="<?php h( $request["photo_url"] ); ?>" alt="プロフィール画像"/></a></div>
+                            <div class="colmn inline-block">
+                                <h5 class="meta-post">リクエスト内容 - <time datetime="<?php h( $request["created_at"] ); ?>"><?php h( $request["created_at"] ); ?></time></h5>
+                            </div>
+                            <section class="myfeed row section">
+                                <div class="release-article">
+                                    <p class="release">
+                                    <?php hbr( $request["comment"] ); ?>
+                                    </p>
+                                </div>
+                                <div class="widget meta-social column half">
+                                    <ul class="inline">
+                                        <li><a class="like border-box" requestid="<?php h( $request["id"] ); ?>"><i class="fa fa-heart-o fa-lg"></i></a><span class="arrow_box"><?php h( $request["like"] ); ?></span></li>
+                                        <?php if (isset($_SESSION["user"])):?>
+                                        <?php if( $_SESSION["user"] == $request["user_id"] ): ?>
+                                        <li><a class="remove" requestid="<?php h( $request["id"] ); ?>" token="<?php h($_SESSION['token']); ?>"><i class="fa fa-times fa-lg"></i></a></li>
+                                        <?php endif; ?>
+                                        <?php endif; ?>
+                                    </ul>
+                                </div>
+                            </section>
+                        </article>
+                    </div><!-- post-area -->
+                    <?php } ?><!-- 繰り返し終わり -->
+                    </div><!-- release_body -->
+                    <div id="loading"></div>
+                </div><!-- row-content -->
+            </div><!-- row -->
+        </main><!-- main -->
+
+<?php include("application/views/common/footer.html");?>
+
+<script src="https://code.jquery.com/jquery.js"></script>
+<script src="application/public/js/plugins.js"></script>
+<script src="application/public/js/beetle.js"></script>
+<script src="application/public/js/analyticstracking.js"></script>
+<script src="application/public/js/jquery.bottom-1.0.js"></script>
+<script src="application/public/js/notification.js"></script>
+
+<script>
+
+//リクエスト削除
+$('#release_body').on('click', '.remove', function() {
+    var request_id = $(this).attr("requestid");
+    var token = $(this).attr("token");
+    var data = {
+        'user_id': 0,
+        'request_id': request_id,
+        'token': token
+    };
+    ret = confirm("削除します。よろしいですか？");
+    if (ret === true){
+    jQuery.ajax({
+        type:"POST",
+        url: "?route=pages/request_comment_remove",
+        data: data,
+        success: function(data, dataType) {   // OK時
+            $("." + request_id).remove();
+        },
+        error: function() {         // HTTPエラー時
+            alert("エラー");
+        },
+        complete: function() {      // 成功・失敗に関わらず通信が終了した際の処理
+        }
+    });
+    }
+});
+
+$('#release_body').on('click', '.like', function() {
+    var request_id = $(this).attr("requestid");
+    var request = $(this).next();
+    var data = {
+        'user_id' : 0,
+        'request_id': request_id
+    };
+
+    jQuery.ajax({
+        type:"POST",
+        url: "?route=pages/insert_request_like",
+        dataType: "json",
+        data: data,
+        success: function(data, dataType) {
+            // 成功時処理
+            request.html(data);
+        },
+        error: function() {         // HTTPエラー時
+            alert("ログインしてください！");
+        },
+        complete: function() {      // 成功・失敗に関わらず通信が終了した際の処理
+        }
+    });
+});
+</script>
+
+</body>
+</html>

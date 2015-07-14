@@ -13,6 +13,15 @@
     General Rules
 ----------------------------------------------------------------*/
 
+.white-popup {
+  position: relative;
+  background: #FFF;
+  padding: 20px;
+  width:auto;
+  max-width: 500px;
+  margin: 20px auto;
+}
+
 /*----------------------------------------------------------------
     MY FEED
 ----------------------------------------------------------------*/
@@ -188,6 +197,13 @@ input[type=checkbox] + label:before {
 
 /* NewRelease */
 
+img.minithumb {
+    border-radius: 20px;
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    height: 30px;
+}
+
 ul.tagcloud {
     margin: 0;
     padding: 0;
@@ -238,20 +254,20 @@ ul.tagcloud li a:hover {
 }
 
 h3.politics{
-    margin: 0 0 1.5em;
-    padding: 0.8em;
+/*    margin: 0 0 1.5em;
+    padding: 0.8em;*/
     border-left: 7px solid #B92A2C;
     font-weight: bold;
 }
 h3.nikkei{
-    margin: 0 0 1.5em;
-    padding: 0.8em;
+/*    margin: 0 0 1.5em;
+    padding: 0.8em;*/
     border-left: 7px solid #003399;
     font-weight: bold;
 }
 h3.fashion{
-    margin: 0 0 1.5em;
-    padding: 0.8em;
+/*    margin: 0 0 1.5em;
+    padding: 0.8em;*/
     border-left: 7px solid #000000;
     font-weight: bold;
 }

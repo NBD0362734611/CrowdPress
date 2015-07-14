@@ -40,7 +40,7 @@
                         <div id="cont1" class="panel">
                             <form id="category" role="category">
                                 <input type="checkbox" name="prcid" value="1" id="nikkei" />
-                                <label for="nikkei" class="checkbox">日経</label>
+                                <label for="nikkei" class="checkbox">企業</label>
                                 <input type="checkbox" name="prcid" value="2" id="fashion" />
                                 <label for="fashion" class="checkbox">ファッション</label>
                                 <input type="checkbox" name="prcid" value="3" id="politics" />
@@ -116,6 +116,7 @@
                                 <input type="hidden" name="token" value="<?php h($_SESSION['token']); ?>">
                                 <input type="text" name="comment" value="リリースにコメントする" />
                             </form>
+                            <div class="comment-area">
                             <?php if(is_array($release_comment_data[$release["rid"]])){ ; ?>
                             <?php foreach ($release_comment_data[$release["rid"]] as $release_comment) { ?>
                             <section class="line_wrapper">
@@ -132,6 +133,7 @@
                             </section><!-- /.line_wrappaer -->
                             <?php } ?>
                             <?php } ?>
+                            </div>
                             <!-- 自分のコメントここまで -->
                         </div><!-- post-area -->
                     <?php } ?><!-- 繰り返し終わり -->
@@ -151,35 +153,75 @@
     <script src="application/public/js/loadrelease.js"></script>
 <?php endif ?>
 <script>
-// 以下のように$(function () { ... }); と書くとDOM構築が終わってから実行されるので
-// 記述位置を気にする必要がなくなります。
-// また、こうすることで関数で包み込んで無駄にグローバル変数を作ってしまわないようにする効果もあります。
+//コメント
+jQuery('#release_body').on('submit', '.release-comment',  function(event) {
+    // ここでsubmitをキャンセル。
+    event.preventDefault();
+    // var rid = jQuery(':hidden[name="rid"]').val();
+    // var token = jQuery(':hidden[name="token"]').val();
+    // var comment = jQuery(':text[name="comment"]').val();
+    var $form = $(this);
+    var url = jQuery(this).attr("action");
+    var method = jQuery(this).attr("method");
+    var data = jQuery(this).serialize();
+    var comsec = jQuery(this).nextAll('.comment-area');
+
+    jQuery.ajax({
+        type:method,
+        url: url,
+        data: data,
+        success: function(source) {
+            comsec.html(source);
+            console.log(source);
+            $form[0].reset();
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+            alert("通信エラー");
+      }
+    });
+});
+
 $(function () {
-  // .click(function (){}) と .on('click', function (){}) は同じですが
-  // 後者のほうが拡張性が高いので、僕は基本的に後者を使います。ここは好みで。
+    var prcid = $('[name="prcid"]:checked').map(function(){
+        return $(this).val();
+    }).get();
+    var sort = $("input[name='sort']:checked").val();
+    var keyword = $("#search [name='keyword']").val();
+    var cname = $('attr').attr('cname');
+    var tag = $('attr').attr('tag');
+    var data = {
+        'count': 0,
+        'prcid': prcid,
+        'sort' : sort,
+        'keyword':keyword,
+        'cname':cname,
+        'tag':tag
+    };
+    // Ajax処理
+    $.ajax({
+        url: "?route=pages/loadrelease",
+        type:"POST",
+        data : data,
+        success: function(html) {
+            $("#release_body").html(html);
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+            //alert("error");
+        }
+    });
+});
+
+$(function () {
   $(".tabs a").on('click', function(e) {
-    // 勝手にスクロール位置変わらないように a のclickイベントをキャンセルします。
     e.preventDefault();
 
-    // 一応、表示するパネルの存在判定をしておきます。
     var target = $(this).attr('href');
     if (! $(target).length) return false;
 
-    // クリックされた要素の属する.tabs以下の.tabすべてからactiveクラスを削除します。
-    // ちょっとややこしいですが、
-    // $(this).closest('...') で'...'にマッチする一番近い先祖要素が選択できます。
-    // また $(A, B) で、Bの子孫要素の中からAにマッチするものだけを選択できます。
-    // ここではその両者を組み合わせて使っています。
     $('.tab', $(this).closest('.tabs')).removeClass('active');
 
-    // クリックされた要素の親である.tabにactiveクラスを付与します。
-    // .show(), hide() ではなく addClass('active'), removeClass('active') を使うことで
-    // 状態に応じたデザイン変更をCSSでまとめてやりやすかったりします。
-    // これも好みの問題かもしれません。
     $(this).closest('.tab').addClass('active');
 
-    // パネルの表示切り替えをします。
-    // タブの表示切り替えとやっていることは同じです。
     $('.panel', $(target).closest('.panels')).removeClass('active');
     $(target).addClass('active');
   });
@@ -210,7 +252,7 @@ $('#category').change(function(){
             $("#release_body").html(html);
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) {
-            alert("error");
+            //alert("error");
         }
     });
 });
@@ -240,7 +282,7 @@ $('#sort').change(function(){
             $("#release_body").html(html);
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) {
-            alert("error");
+            //alert("error");
         }
     });
 });
@@ -270,7 +312,7 @@ $('#search').submit(function(event) {
         window.location.href = URI;
       },
       error: function(XMLHttpRequest, textStatus, errorThrown) {
-        alert("error");
+        //alert("error");
       }
     });
 });
@@ -298,33 +340,6 @@ $('#release_body').on('blur', '.release-comment input', function(){
     $(this).animate({
         width: short},500);
 });
-
-// //コメント
-// jQuery('.release-comment').on('submit', function(event) {
-//     // ここでsubmitをキャンセル。
-//     event.preventDefault();
-//     // var rid = jQuery(':hidden[name="rid"]').val();
-//     // var token = jQuery(':hidden[name="token"]').val();
-//     // var comment = jQuery(':text[name="comment"]').val();
-//     var url = jQuery(this).attr("action");
-//     var data = jQuery(this).serialize();
-//     // alert(rid);
-//     // alert(token);
-//     // alert(comment);
-
-//     jQuery.ajax({
-//         type:"POST",
-//         url: url,
-//         dataType: "json",
-//         data: data,
-//         success: function(json) {
-//             alert(json);
-//         },
-//         error: function(XMLHttpRequest, textStatus, errorThrown) {
-//             alert("通信エラー");
-//       }
-//     });
-// });
 
 $('#release_body').on('click', '.clap', function() {
     var rid = $(this).attr("rid");

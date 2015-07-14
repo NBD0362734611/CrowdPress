@@ -167,7 +167,7 @@ class users extends controller {
 			$this->redirect( "users/login" );
 		}
 
-		// load user and authentication models
+		// load user and authentication modelsj]
 		$user = $this->loadModel( "user" );
 		$authentication = $this->loadModel( "authentication" );
 		$release = $this->loadModel( "release" );
@@ -226,6 +226,37 @@ class users extends controller {
 		// load profile view
 		$data = array( "user_data" => $user_data, "user_authentication" => $user_authentication, "paper_data" => $paper_data, "release_comment_data" => $release_comment_data, "follow_status" => $follow_status);
 		$this->loadView( "users/profile", $data );
+	}
+
+	function profile_comment($user_id)
+	{
+		$data = array();
+		$comment_release_data = array();
+		$release_comment_data = array();
+
+		// load user and authentication models
+		$user = $this->loadModel( "user" );
+		$authentication = $this->loadModel( "authentication" );
+		$release = $this->loadModel( "release" );
+		$user_authentication = $authentication->find_by_user_id( $user_id );
+
+		// get the user data from database
+		$user_data = $user->find_by_id( $user_id );
+		$comment_release_data = $release->comment_release_data( $user_id );
+		if ( isset( $_SESSION["user"] ) ) {
+			$follow_status = $user->follow ( $user_id, $_SESSION["user"] );
+		}else{
+			$follow_status = "購読する";
+		}
+
+		foreach ($comment_release_data as $release) {
+            $row = $user->release_comment_select($release["rid"]);
+            $release_comment_data[$release["rid"]] = $row;
+         }
+
+		// load profile view
+		$data = array( "user_data" => $user_data, "user_authentication" => $user_authentication, "release_data" => $comment_release_data, "release_comment_data" => $release_comment_data, "follow_status" => $follow_status);
+		$this->loadView( "users/profile_comment", $data );
 	}
 
 	function loaduserprofile()

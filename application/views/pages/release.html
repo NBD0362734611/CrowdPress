@@ -77,11 +77,23 @@
                                     <a href="?route=pages/release_by_tag/<?php h( $tag["tag"] ); ?>"><?php h( $tag["tag"] ); ?></a>/
                                 <?php } ?>
                                 <?php endif; ?>
-                                <form class="tag-post" action="?route=pages/release_tag_insert" method="post">
+                                <form id="tag-post" action="?route=pages/release_tag_insert" method="post">
                                     <input type="hidden" name="token" value="<?php h($_SESSION['token']); ?>">
                                     <input type="hidden" name="rid" value="<?php h( $release_detail_data["rid"] ); ?>" />
-                                    <input type="text" name="tag" value="タグ" />
-                                </form><!-- post-comment -->
+                                    <input id="autocomplete" type="text" name="tag" placeholder="タグ" />
+                                </form>
+                            </div>
+                            <div class="widget">
+                                <h4>クラップしてる人</h4>
+                                <?php foreach ($clap_user_list as $clap): ?>
+                                    <a href="?route=users/profile_user/<?php h($clap["id"]);?>"><img class="minithumb inline" src="<?php h($clap["photo_url"]);?>" alt="<?php h($clap["display_name"]);?>" title="<?php h($clap["display_name"]);?>"></a>
+                                <?php endforeach; ?>
+                            </div>
+                            <div class="widget">
+                                <h4>スクラップしてる人</h4>
+                                <?php foreach ($scrap_user_list as $scrap): ?>
+                                    <a href="?route=users/profile_user/<?php h($scrap["id"]);?>"><img class="minithumb inline" src="<?php h($scrap["photo_url"]);?>" alt="<?php h($scrap["display_name"]);?>" title="<?php h($scrap["display_name"]);?>"></a>
+                                <?php endforeach; ?>
                             </div>
                         </aside>
 
@@ -121,7 +133,7 @@
                         <?php } ?>
                         </ul>
                     </div><!-- comment-section -->
-                    <form class="release-comment" action="?route=pages/release_comment_insert" method="post">
+                    <form class="release-comment" action="?route=pages/release_comment_insert_release" method="post">
                         <input type="hidden" name="token" value="<?php h($_SESSION['token']); ?>">
                         <input type="hidden" name="rid" value="<?php h( $release_detail_data["rid"] ); ?>" />
                         <input type="hidden" name="user_id" value="<?php h( $_SESSION["user"] ); ?>" />
@@ -134,12 +146,39 @@
 
 <?php include("application/views/common/footer.html");?>
 
-<script src="https://code.jquery.com/jquery.js"></script>
+<script src="http://code.jquery.com/jquery-1.11.3.js"></script>
+<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+<link type="text/css" rel="stylesheet"
+  href="http://code.jquery.com/ui/1.11.4/themes/cupertino/jquery-ui.min.css" />
 <script src="application/public/js/plugins.js"></script>
 <script src="application/public/js/beetle.js"></script>
 <script src="application/public/js/analyticstracking.js"></script>
 <script src="application/public/js/notification.js"></script>
 <script>
+
+$(document).ready( function() {
+$("#autocomplete").autocomplete({
+    source: function(req, resp){
+        $.ajax({
+            url: "?route=pages/autocomplete",
+            type: "POST",
+            cache: false,
+            dataType: "json",
+            data: {
+              param1: req.term
+            },
+            success: function(o){
+                resp(o);
+            },
+            error: function(xhr, ts, err){
+                resp(['']);
+            }
+          });
+    },
+    minLength: 2
+});
+});
+
 var long = '90%';
 var short = '50%';
 //フォーカス時にアニメーションエフェクトでサイズを広げる
